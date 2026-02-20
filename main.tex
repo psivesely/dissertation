@@ -1,34 +1,110 @@
 \documentclass[12pt]{report}
-\usepackage[letterpaper,margin=1.0in,left=1.5in]{geometry}
+\usepackage[
+  paper=letterpaper,
+  left=1in, right=1in, top=1in, bottom=1in,
+  includefoot,
+  footskip=0.5in
+]{geometry}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{} % clear header/footer
+\fancyfoot[C]{\thepage} % centered footer page number
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Make chapter-opening pages ("plain") match
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
 
 % for double table of contents: https://tex.stackexchange.com/questions/260445/separate-table-of-contents-for-appendix
 \usepackage{etoc}
 
 % packages used
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+% \usepackage[T1]{fontenc}
+% \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-
-\usepackage[format=plain,font=small,labelfont=bf,textfont=up]{caption}
-\usepackage{graphicx}
-
-\usepackage{natbib}
-\usepackage{setspace}
-\setstretch{1.05}
+\usepackage{microtype}
 
 \usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{bbm}
 \usepackage{mathtools}
-\mathtoolsset{showonlyrefs,showmanualtags}
-\usepackage{xcolor}
+% \mathtoolsset{showonlyrefs,showmanualtags}
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\usepackage{xspace}
 
-\usepackage{blindtext} % used only for generating fake text
+\setmainfont{STIX Two Text}[
+  Ligatures=TeX,
+  Scale=MatchLowercase
+]
+\setmathfont{STIX Two Math}[
+  Scale=MatchLowercase
+]
+\AtBeginDocument{\setoperatorfont\symup}
 
-\usepackage[hidelinks]{hyperref} % this should go last apparently?
+\usepackage{caption}
+\captionsetup{
+  font={stretch=1,normalsize},  % single-spaced + same size
+  labelfont=bf
+}
+\makeatletter
+% Force footnote text to be normal size + single-spaced
+\renewcommand\@makefntext[1]{%
+  \parindent 1em%
+  \noindent
+  \hb@xt@1.8em{\hss\@makefnmark}%
+  \begingroup
+    \normalfont\normalsize
+    \setstretch{1}%
+    #1%
+  \endgroup
+}
+\makeatother
+% Double-space between *separate footnotes* on the same page:
+\setlength{\footnotesep}{\baselineskip}
+\usepackage{graphicx}
 
-\input{content/commands}
+\usepackage[backend=biber,giveninits,style=alphabetic,maxalphanames=9,maxnames=9,backref]{biblatex}
+\DefineBibliographyStrings{english}{%
+  backrefpage = {cited on p.},% originally "cited on page"
+  backrefpages = {cited on pp.},% originally "cited on pages"
+}
+\renewcommand*{\bibfont}{\normalfont\normalsize}
+\AtBeginBibliography{%
+  \singlespacing
+  \setlength{\bibitemsep}{\baselineskip} % space between entries (one “blank line”)
+  \setlength{\bibparsep}{0pt}            % space within an entry (keep tight)
+}
+\addbibresource{references.bib} 
+\addbibresource{cryptobib/abbrev3.bib} 
+\addbibresource{cryptobib/crypto_crossref.bib}
+\usepackage{csquotes}
+
+\usepackage{setspace}
+% \doublespacing
+
+\usepackage{bbm}
+\usepackage{enumitem}
+\usepackage[dvipsnames]{xcolor}
+
+
+\PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=CadetBlue,
+    breaklinks=true,
+    citecolor=Periwinkle,      
+    urlcolor=Emerald,
+    pdftitle={Practical Hash- and Lattice-Based SNARKs},
+    pdfpagemode=FullScreen,
+}
+
+\input{macros}
+\RenewDocumentCommand{\log}{}{\operatorname{log}}
 
 \begin{document}
 	
@@ -44,18 +120,17 @@
 
 \input{content/copyright}
 
-\input{content/dedication}
-
 \pagenumbering{roman}
 \setcounter{page}{3}
 
-\input{content/acknowledgment}
 
 % set up main table of contents
 \etocdepthtag.toc{mtchapter}
 \etocsettagdepth{mtchapter}{subsection}
 \etocsettagdepth{mtappendix}{none}
 \tableofcontents
+
+\input{content/acknowledgment}
 
 \newpage
 \pagenumbering{arabic}
@@ -64,21 +139,25 @@
 % Main Body of Dissertation
 %%%%%%%%%%%%%%%%%
 
-\input{content/intro}
+\chapter{Introduction}
+\label{ch:intro}
 
-\input{content/chapter-1}
+\chapter{Zinc+: SNARKs for Polynomial Rings}
+\label{ch:zinc}
 
-\input{content/chapter-2}
+\chapter{Microlotus: Faster Proving Over Small Fields and Cyclotomic Rings}
+\label{ch:microlotus}
+
+\chapter{Orbweaver: Succinct Linear Functional Commitments from Lattices}
+\label{ch:orbweaver}
+
+\input{orbweaver/macros}
+\input{orbweaver/intro}
 
 %%%%%%%%%%%%%%%%%
 % Bibliography
 %%%%%%%%%%%%%%%%%
-
-\bibliographystyle{apalike}
-
-\begin{singlespace}
-	\bibliography{main.bib}
-\end{singlespace}
+\printbibliography
 
 %%%%%%%%%%%%%%%%%
 % Appendices
@@ -86,12 +165,6 @@
 
 \newpage
 \appendix
-
-% set up appendix table of contents
-\etocdepthtag.toc{mtappendix}
-\etocsettagdepth{mtchapter}{none}
-\etocsettagdepth{mtappendix}{subsection}
-\tableofcontents
 
 \include{content/appendix}
 

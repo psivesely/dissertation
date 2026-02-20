@@ -1,23 +1,13 @@
 \begin{center}
 	Abstract\\
-	Algorithmic Advances for the  \\ Design and Analysis of Being a Good Boy \\
-	Handsome Dan \\
-	20XX
+	Practical Hash- and Lattice-based SNARKs \\
+	Psi Vesely \\
+	2026
 \end{center}
 
 \begin{spacing}{2}
-	
-Since the beginning of recorded history, being a good boy is one of the most fundamental societal problems facing all canines.
-In this dissertation, we develop a mathematical framework for being a good boy and provide algorithms for optimal good boy behavior.
+Succinct, Non-interactive Arguments of Knowledge (SNARKs) produce small proofs that can be verified quickly while attesting to the correctness of arbitrary computations. First deployed in 2016, SNARKs have enabled private transactions, decentralized storage, anonymous credentials (e.g., private age verification), proofs about network sessions (e.g., email and TLS session contents), and more. This dissertation advances SNARKs in two ways: (1) it develops arithmetization techniques and interactive oracle proofs (IOPs) for mixed- and small-domain computations, enabling constraints to be written over their natural domains and reducing non-native overhead; and (2) it gives efficient post-quantum (hash- and lattice-based) polynomial commitments (PCs) for these specialized domains.
 
-In the first chapter, we present a decision theoretic framework for modeling standard good boy tricks, including ``sit'', ``stay'', ``paw'', and ``down''.
-We show our framework is flexible enough to incorporate Bayesian priors based on standard exponential families.
-As an application of our framework, we demonstrate that the problem of learning to optimally walk your human is polynomial time solvable.
-
-In the second chapter, we present a suite of algorithms for computing optimal good boy behavior.
-We show that, perhaps surprisingly, greedy algorithms fail to provide even a constant factor approximation.
-On the other hand, we develop a class of semidefinite programming based algorithms which allow for approximately optimal good boy behavior in polynomial time.
-	 
-
+\emph{Zinc+} is a framework for proving computations specified across multiple rings and ideals simultaneously. We define the Universal Constraint System (UCS), capturing constraints over $\ZZ,\QQ,$ finite fields, and polynomial rings together with ideal-membership predicates. The Zinc+ compiler lifts finite-field (FF) polynomial IOPs (PIOPs) into round-by-round knowledge-sound PIOPs for UCS. We instantiate it with a new IOP of proximity, Zip+, that supports mixed-domain coefficients. \emph{Microlotus} accelerates SNARKs in small-modulus fields and cyclotomic rings. We introduces a packed variant of sumcheck for small fields and a FF IOP for cyclotomic ring multiplication that, unlike previous results, has native prover complexity. We also study extensions of linear codes and proximity testing from fields to rings. Finally, \emph{Orbweaver} gives a lattice-based functional commitment for linear relations over cyclotomic rings and the integers, achieving $\tilde{O}(\log n)$ verification time, and supporting public aggregation. We show it yields univariate and multilinear PCs, and a SNARK directly.
 \end{spacing}
 

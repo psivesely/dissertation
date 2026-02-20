@@ -1,0 +1,236 @@
+\newenvironment{blockquotation}
+  {\begin{quote}\begin{singlespace}}
+  {\end{singlespace}\end{quote}}
+\newcommand{\bq}[1]{\begin{blockquotation}#1\end{blockquotation}}
+
+
+% Make \emph meaningful in italic environments (e.g., when using \theoremstyle{plain})
+\renewcommand\eminnershape{\itshape\sffamily}
+
+\newcommand{\emath}[1]{\ensuremath{#1}}
+\newcommand{\newc}[2]{\newcommand{#1}{\ensuremath{#2}\xspace}}
+\newcommand{\renewc}[2]{\renewcommand{#1}{\ensuremath{#2}\xspace}}
+
+
+\renewc{\AA}{\mathbb{A}}
+\newc{\CC}{\mathbb{C}}
+\newc{\DD}{\mathbb{D}}
+\newc{\EE}{\mathbb{E}}
+\newc{\FF}{\mathbb{F}}
+\newc{\HH}{\mathbb{H}}
+\newc{\NN}{\mathbb{N}}
+\newc{\PP}{\mathbb{P}}
+\newc{\QQ}{\mathbb{Q}}
+\newc{\RR}{\mathbb{R}}
+\renewc{\SS}{\mathbb{S}}
+\newc{\ZZ}{\mathbb{Z}}
+\DeclareSymbolFont{bbold}{U}{bbold}{m}{n}
+\DeclareSymbolFontAlphabet{\mathbbold}{bbold}
+\newc{\One}{\mathbbold{1}}
+
+\newc{\ba}{\bm a}
+\newc{\bb}{\bm b}
+\newc{\bc}{\bm c}
+\newc{\bd}{\bm d}
+\newc{\be}{\bm e}
+\newc{\bg}{\bm g}
+\newc{\bh}{\bm h}
+\newc{\bi}{\bm i}
+\newc{\bj}{\bm j}
+\newc{\bk}{\bm k}
+\newc{\bbm}{\bm m}
+\newc{\bp}{\bm p}
+% \newc{\bq}{\bm q}
+\newc{\br}{\bm r}
+\newc{\bs}{\bm s}
+\newc{\bt}{\bm t}
+\newc{\bu}{\bm u}
+\newc{\bv}{\bm v}
+\newc{\bw}{\bm w}
+\newc{\bx}{\bm x}
+\newc{\by}{\bm y}
+\newc{\bz}{\bm z}
+
+\newc{\bA}{\bm A}
+\newc{\bB}{\bm B}
+\newc{\bC}{\bm C}
+\newc{\bD}{\bm D}
+\newc{\bE}{\bm E}
+\newc{\bF}{\bm F}
+\newc{\bG}{\bm G}
+\newc{\bH}{\bm H}
+\newc{\bI}{\bm I}
+\newc{\bL}{\bm L}
+\newc{\bM}{\bm M}
+\newc{\bN}{\bm N}
+\newc{\bP}{\bm P}
+\newc{\bQ}{\bm Q}
+\newc{\bR}{\bm R}
+\newc{\bS}{\bm S}
+\newc{\bT}{\bm T}
+\newc{\bU}{\bm U}
+\newc{\bV}{\bm V}
+\newc{\bW}{\bm W}
+\newc{\bX}{\bm X}
+\newc{\bY}{\bm Y}
+\newc{\bZ}{\bm Z}
+
+\newc{\zero}{\bm{0}}
+\newc{\one}{\bm{1}}
+
+\newc{\sA}{\mathcal{A}}
+\newc{\sB}{\mathcal{B}}
+\newc{\sC}{\mathcal{C}}
+\newc{\sD}{\mathcal{D}}
+\newc{\sE}{\mathcal{E}}
+\newc{\sF}{\mathcal{F}}
+\newc{\sG}{\mathcal{G}}
+\newc{\sH}{\mathcal{H}}
+\newc{\sI}{\mathcal{I}}
+\newc{\sJ}{\mathcal{J}}
+\newc{\sK}{\mathcal{K}}
+\newc{\sL}{\mathcal{L}}
+\newc{\sM}{\mathcal{M}}
+\newc{\sN}{\mathcal{N}}
+\newc{\sO}{\mathcal{O}}
+\newc{\sP}{\mathcal{P}}
+\newc{\sQ}{\mathcal{Q}}
+\newc{\sR}{\mathcal{R}}
+\newc{\sS}{\mathcal{S}}
+\newc{\sT}{\mathcal{T}}
+\newc{\sU}{\mathcal{U}}
+\newc{\sV}{\mathcal{V}}
+\newc{\sX}{\mathcal{X}}
+\newc{\sY}{\mathcal{Y}}
+
+\newc{\fB}{\mathscr{B}}
+\newc{\fC}{\mathscr{C}}
+\newc{\fE}{\mathscr{E}}
+\newc{\fH}{\mathscr{H}}
+\newc{\fI}{\mathscr{I}}
+\newc{\fP}{\mathscr{P}}
+\newc{\fV}{\mathscr{V}}
+
+\DeclareSymbolFont{sfoperators}{OT1}{cmss}{m}{n}
+% don't waste a math group
+\DeclareSymbolFontAlphabet{\mathsf}{sfoperators}
+% tell LaTeX to use sfoperators for names of operators
+\makeatletter
+\renewc{\operator@font}{\mathgroup\symsfoperators}
+\makeatother
+
+\DeclareMathOperator{\GOE}{GOE}
+\DeclareMathOperator{\sym}{sym}
+\DeclareMathOperator{\Part}{Part}
+\DeclareMathOperator{\poly}{poly}
+\DeclareMathOperator{\Unif}{Unif}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\obj}{obj}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\sgn}{sgn}
+
+\renewc\Re{\operatorname{Re}}
+\renewc\Im{\operatorname{Im}}
+% These put symbols below.
+\newc{\Px}{\mathop{\mathbb{P}}}
+\newc{\Ex}{\mathop{\mathbb{E}}}
+\newc{\Varx}{\mathop{\mathsf{Var}}}
+
+\newc\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+
+% allow in-line math breaks
+\newc{\CB}{\allowbreak}
+
+% such that in probability statements
+\newc{\pST}{\; \middle| \;}
+\DeclareMathOperator{\Concat}{\; || \; }
+% \DeclareMathOperator{\max}{max}
+\newc{\Or}{\vee}
+\renewc{\And}{\wedge}
+\newc{\Not}{\neg}
+\newc{\defeq}{\triangleq}
+\newc{\union}{\cup}
+
+% some math macros
+\newcommand{\smalllist}[1]{[#1]}
+\newcommand{\set}[1]{\ensuremath{\mleft\{#1\mright\}}}
+\newcommand{\range}[2]{\set{#1, \dotsc, #2}}
+\newcommand{\openopen}[2]{\left[#1, #2\right]}
+\newcommand{\openclosed}[2]{\left[#1, #2\right)}
+\newcommand{\closedopen}[2]{\left(#1, #2\right]}
+\newcommand{\closedclosed}[2]{\left(#1, #2\right)}
+
+\newcommand{\element}[3]{#1_{#2,#3}}
+
+% tuples with in-line math breaks
+\newcommand{\tuple}[2]{(#1 ,\CB \dots,\CB #2)}
+\newcommand{\pair}[2]{(#1 ,\CB #2)}
+\newcommand{\ppair}[2]{\left(#1 ,\CB #2\right)}
+\newcommand{\triple}[3]{(#1 ,\CB #2,\CB #3)}
+\newcommand{\ptriple}[3]{\left(#1 ,\CB #2,\CB #3\right)}
+\newcommand{\quadruple}[4]{(#1 ,\CB #2,\CB #3,\CB #4)}
+\newcommand{\pquadruple}[4]{\left(#1 ,\CB #2,\CB #3,\CB #4\right)}
+\newcommand{\quintuple}[5]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5)}
+\newcommand{\quintuplenp}[5]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5}
+\newcommand{\sextuple}[6]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6)}
+\newcommand{\sextuplenp}[6]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6}
+\newcommand{\septuple}[7]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7)}
+\newcommand{\septuplenp}[7]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7}
+\newcommand{\octuple}[8]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7,\CB #8)}
+\newcommand{\octuplenp}[8]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7,\CB #8}
+\newcommand{\nonuple}[9]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7,\CB #8,\CB #9)}
+\newcommand{\nonuplenp}[9]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7,\CB #8,\CB #9}
+
+% expectation
+\newcommand{\prob}[1]{\Pr\left[ #1 \right]}
+\newc{\Expectation}{\mathbb{E}}
+
+% random variable
+\newc{\randomvariable}{X}
+
+% complexity classes
+\newcommand{\class}[1]{\mathsf{#1}}
+\newc{\np}{\Class{NP}}
+\newcommand{\dtime}[1]{\Class{DTIME}(#1)}
+
+% types
+\newc{\bits}{\{0,1\}}
+\newc{\strings}{\bits^{*}}
+\newc{\ZZq}{\ZZ_{q}}
+\newc{\ZZp}{\ZZ_{p}}
+\newc{\FFq}{\FF_{q}}
+\newc{\FFp}{\FF_{p}}
+\newc{\field}{\mathbb{F}}
+\newc{\ring}{\sR}
+\newc{\ideal}{\mathfrak{n}}
+\newc{\idealb}{\mathfrak{b}}
+\newc{\idealc}{\mathfrak{c}}
+\newc{\primeideal}{\mathfrak{p}}
+\newc{\idealnorm}{N}
+\newcommand{\content}[1]{\mathsf{\mathsf{cont}\left(#1\right)}}
+
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}%
+\newcommand{\size}[1]{\abs{#1}}
+\newc{\Time}{t}
+
+\newc{\secparam}{\lambda}
+\newc{\knowledgeerror}{\kappa}
+\renewc{\poly}{\mathrm{poly}}
+\newc{\negl}{\mathrm{negl}}
+\renewc{\deg}{\mathrm{deg}}
+\newc{\view}{\mathrm{View}}
+
+% attackers
+\newc{\querysampler}{\mathcal{Q}}
+\newc{\adversary}{\mathcal{A}}
+\newc{\adversaryb}{\mathcal{B}}
+\newc{\adversaryd}{\mathcal{D}}
+\newc{\experiment}{\mathsf{Exp}}
+\newc{\simulator}{\mathcal{S}}
+\newc{\real}{\mathsf{Real}}
+\newc{\extractor}{\mathcal{E}}
+\newc{\extractoradversary}{\mathcal{E}_{\adversary}}
+\newc{\challenger}{\mathcal{C}}
