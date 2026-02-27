@@ -25,17 +25,17 @@
 \usepackage{etoc}
 
 % packages used
-% \usepackage[T1]{fontenc}
-% \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{microtype}
 
-\usepackage{amsmath}
 \usepackage{mathtools}
-% \mathtoolsset{showonlyrefs,showmanualtags}
-\usepackage{fontspec}
 \usepackage{unicode-math}
+\usepackage{amsthm}
 \usepackage{xspace}
+\usepackage{makecell}
+\usepackage{mdframed}
+\usepackage{booktabs}
+\usepackage{algorithmic}
 
 \setmainfont{STIX Two Text}[
   Ligatures=TeX,
@@ -44,7 +44,7 @@
 \setmathfont{STIX Two Math}[
   Scale=MatchLowercase
 ]
-\AtBeginDocument{\setoperatorfont\symup}
+% \AtBeginDocument{\setoperatorfont\symup}
 
 \usepackage{caption}
 \captionsetup{
@@ -68,6 +68,7 @@
 \setlength{\footnotesep}{\baselineskip}
 \usepackage{graphicx}
 
+\usepackage{csquotes}
 \usepackage[backend=biber,giveninits,style=alphabetic,maxalphanames=9,maxnames=9,backref]{biblatex}
 \DefineBibliographyStrings{english}{%
   backrefpage = {cited on p.},% originally "cited on page"
@@ -82,15 +83,16 @@
 \addbibresource{references.bib} 
 \addbibresource{cryptobib/abbrev3.bib} 
 \addbibresource{cryptobib/crypto_crossref.bib}
-\usepackage{csquotes}
 
+\usepackage{etoolbox}
 \usepackage{setspace}
-% \doublespacing
+\doublespacing
 
-\usepackage{bbm}
 \usepackage{enumitem}
 \usepackage[dvipsnames]{xcolor}
-
+\usepackage{mleftright}
+\usepackage{float}
+\usepackage{wrapfig}
 
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
 \hypersetup{
@@ -102,9 +104,9 @@
     pdftitle={Practical Hash- and Lattice-Based SNARKs},
     pdfpagemode=FullScreen,
 }
+\usepackage{cleveref}
 
 \input{macros}
-\RenewDocumentCommand{\log}{}{\operatorname{log}}
 
 \begin{document}
 	
@@ -115,14 +117,11 @@
 \pagenumbering{gobble}
 
 \input{content/abstract}
-
 \input{content/title-page}
-
 \input{content/copyright}
 
 \pagenumbering{roman}
 \setcounter{page}{3}
-
 
 % set up main table of contents
 \etocdepthtag.toc{mtchapter}
@@ -144,15 +143,30 @@
 
 \chapter{Zinc+: SNARKs for Polynomial Rings}
 \label{ch:zinc}
+\input{zinc/macros}
+\input{zinc/introduction}
+\section{Technical Overview}
+We now provide an overview of the main contributions of this work.
+\input{zinc/crypto/crypto_ucs}
+\input{zinc/crypto/crypto_piop}
+% \input{zinc/crypto/crypto_iprs}
+% \input{zinc/crypto/crypto_iopp}
+\input{zinc/crypto/crypto_experiments}
 
 \chapter{Microlotus: Faster Proving Over Small Fields and Cyclotomic Rings}
 \label{ch:microlotus}
+\input{microlotus/macros}
+\input{microlotus/intro}
+\input{microlotus/tech-overview}
+\input{microlotus/preliminaries}
+\input{microlotus/ring-iop}
+\input{microlotus/ring-codes}
 
 \chapter{Orbweaver: Succinct Linear Functional Commitments from Lattices}
 \label{ch:orbweaver}
-
 \input{orbweaver/macros}
 \input{orbweaver/intro}
+\input{orbweaver/main-body}
 
 %%%%%%%%%%%%%%%%%
 % Bibliography
@@ -166,6 +180,6 @@
 \newpage
 \appendix
 
-\include{content/appendix}
+\input{appendix/sumcheck-algs}
 
 \end{document}

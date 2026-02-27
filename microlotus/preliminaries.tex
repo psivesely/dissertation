@@ -1,0 +1,210 @@
+\subsection{Multilinear polynomials}
+\label{sec:multilinear-polynomials}
+
+\begin{lemma}{Lagrange interpolation of multilinear polynomials}
+  \label{lemma:lagrange}
+  Let $f: \bits^v \to \field$ be any function. Then the following multilinear polynomial $\hat{f}$ extends $f$:
+  \[
+  \hat{f}(X_1,\dotsc,X_v) = \sum_{w \in \bits^v} f(w) \cdot \chi_{w}(X_1,\dotsc,X_v) 
+  \]
+  where, for any $w = (w_1,\dotsc,w_v)$
+  \[
+  \chi_{w}(X_1,\dotsc,X_v) := \prod_{i=1}^v (X_i w_i + (1-X_i)(1-w_i))
+  \]
+  \noindent The set $\{ \chi_{w} : w \in \bits^v \}$ is referred to as the set of multilinear Lagrange basis polynomials with interpolating set $\bits^v$.
+\end{lemma}
+
+We will also sometimes write $\eq(w,X)$ instead of $\chi_{w}(X)$ to denote the same polynomial.
+
+\begin{lemma}
+  \label{lemma:partial-sumcheck}
+Let $p : \field^\ell \to \field$ be a multilinear polynomial. Then for any $0 \le i \le \ell$, any $(\alpha_1, \dots, \alpha_i) \in \field^i$, and any $x' \in \{0,1\}^{\ell - i}$,
+\[
+p(\alpha_1, \dots, \alpha_i, x') = \sum_{y \in \{0,1\}^i} \eq((\alpha_1, \dots, \alpha_i), y) \cdot p(y, x')
+\]
+\end{lemma}
+Setting $i = 1$, Equation~(4) simplifies to
+\[
+p(\alpha_1, x') = (1 - \alpha_1) \cdot p(0, x') + \alpha_1 \cdot p(1, x')
+\]
+\noindent Setting $i = \ell$, we get the multilinear extension formula
+\[
+p(\alpha_1, \dots, \alpha_\ell) = \sum_{y \in \{0,1\}^\ell} \eq((\alpha_1, \dots, \alpha_\ell), y) \cdot p(y)
+\]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Rings}
+\label{sec:rings}
+
+In this work we will assume all rings $\ring$ to be unital and commutative. Though we will not cover ring theory in any depth, we briefly remind the reader of a few key concepts we make use of in this paper:
+\begin{itemize}[nosep]
+  \item \emph{Maximal ideal}: an ideal $\maximalideal$ that is maximal (with respect to set inclusion) amongst all proper ideals. In other words, no ideal $\ideal$ is contained between $\maximalideal$ and $\ring$.
+  \item \emph{Local ring}: a ring with a unique maximal ideal. Here the sum of any two non-units is a unit, for any $r \in \ring$ either $r$ or $1-r$ is a unit, and if any finite sum is a unit, then it has a term that is a unit.
+  \item \emph{Semilocal ring}: a ring with finitely many maximal ideals. 
+  \item \emph{Residue field}: for any maximal ideal $\maximalideal$, the residue field is the quotient ring $\ring/\maximalideal$, which is a field.
+  \item \emph{Reduced ring}: a ring with no non-zero nilpotent elements. Equivalently, if $r^2 = 0$, then we must have $r = 0 \in \ring$.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Cyclotomic rings}
+\label{sec:cyclotomic-rings}
+
+Let $\zeta = \zeta_m$ be a primitive $m$th root of unity (i.e., $\zeta^m = 1$, but $\zeta^i \neq 1$ for $i \in [m-1]$). The $m$th cyclotomic polynomial $\Phi_m$, for any positive integer $m$ is the minimal polynomial of $\zeta$ over the integers:
+% the unique, irreducible polynomial with integer coefficients that is a divisor of $X^{m}-1$ and not $X^{k}-1$ for any $1 \leq k < m$. It can be written
+\[
+  \Phi_m(X) = \prod_{\substack{k \in [m], \\ \gcd(k,m) = 1}} \left(X - \zeta^k\right)
+\]
+where we observe its conjugates are the other primitive $m$th roots of unity. There is a natural isomorphism between $\integers[\zeta]$ and $\ring = \integers[X]/\Phi_m(X)$ given by $\zeta \mapsto X$. Let $n = \phi(m)$. Then $\bm{p} = [\zeta]_{i=0}^{n-1}$ defines a $\integers$-basis for $\ring$, called the \emph{power basis}. We note that any $\integers$-basis for $\ring$ is a $\integers_q$-basis for $\ring_q = \integers_q[X]/\Phi_m(X)$.
+
+Another important $\integers_q$-basis for $\ring_q$ is the Chinese remainder transform basis, or \emph{CRT basis}, where ring multiplication simplifies to computing the Hadamard product of the $Z_{q}^n$ vectors. The Chinese remainder transform can be seen as a specialization of the discrete Fourier transform to cyclotomic rings, and is also called the number theoretic transform (NTT). By virtue of being the rings of integers of algebraic number fields, cyclotomic rings are Dedekind, which means ideals can be factored into a produce of prime ideals. A particular case of interest is $q \equiv 1\ \mod m$, which corresponds to the ``fully splitting'' case. Notice that $\integers_q$ contains a primitive root of unity $\omega_m$. Then the principal ideal $\langle q \rangle$ in $\ring$ can be written as the product of the prime ideals $\primeideal_{i} = \langle q \rangle + \langle \zeta_m - \omega_{m}^i \rangle$ for $i \in \integers_{m}^{*}$, i.e., it splits completely into $n$ ideals of norm $q$ each. Each quotient ring $\ring/\primeideal_{i}$ is isomorphic to the field $\integers_q$ via the map $\zeta_m \mapsto \omega_{m}^i$. Then by the Chinese remainder theorem
+\[
+\ring/\ideal \cong \prod_i \ring/\primeideal_{i} \cong (\integers_{q})^n
+\]
+The CRT basis $\bm{c}$ is then defined such that $c_i \equiv 1 \bmod \primeideal_{i}$ and $c_i \equiv 0 \bmod \primeideal_j$ for all $j \neq i$.
+
+The Chinese remainder transform and its inverse convert between the power and CRT bases. The linear transform, given as a matrix $\crt$ below, has the identity $\bm{p}^\intercal = \bm{c}^\intercal \cdot \crt$.
+
+\begin{definition}[\cite{EC:LyuPeiReg13}]
+  \label{def:crt}
+Let $m$ be a prime power and let $R$ denote any commutative ring containing some element $\omega_m$ of multiplicative order $m$, i.e., a primitive $m$th root of unity.
+\begin{itemize}[nosep]
+  \item The \emph{discrete Fourier transform} $\mathsf{DFT}_m$ over $R$ is the $\mathbb{Z}_m \times \mathbb{Z}_m$ matrix whose $(i,j)$th entry is $\omega_m^{ij}$.
+  \item The \emph{Chinese remainder transform} $\mathsf{CRT}_m$ over $R$ is the (square) submatrix of $\mathsf{DFT}_m$ obtained by restricting to the rows indexed by $\mathbb{Z}_m^*$ and the columns indexed by $[\varphi(m)]$.
+\end{itemize}
+\end{definition}
+
+Applying $\mathsf{DFT}_m$ corresponds to evaluating evaluating a polynomial of degree less than $m$ over $\ring[Y]$ (represented by the vector of coefficients in the natural order) at all the $m$th roots of unity. Similarly, $\mathsf{CRT}_m$ corresponds with evaluating a polynomial of degree less than $\phi(m)$ at the primitive $m$th roots of unity $\omega_{m}^i$ for $i \in \integers_{m}^{*}$.
+
+% \jnote{Add definition of Gram matrix and unimodular matrix.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Circulant matrices}
+\label{sec:circulant-matrices}
+
+Multiplication in the power basis of a power-of-two cyclotomic ring can be expressed as a negacyclic convolution or skew-circulant matrix-vector multiplication. We consider the following generalization of circulant matrices:
+
+\begin{definition}[$f$-circulant matrix]
+  \label{def:f-circulantmatrix}
+    Given a vector $a$, the $f$-circulant matrix $Z_f(a)$ is defined as
+    \[
+    Z_f(a) =
+    \begin{bmatrix*}
+        a_0 &  f\cdot a_{n-1}  & \dotsm & f\cdot a_1 \\
+        a_1 & a_0 & \ddots & \vdots \\
+        \vdots & \vdots & \ddots & f\cdot a_{n-1} \\
+        a_{n-1}  & a_{n-2} & \dotsm & a_0
+    \end{bmatrix*}
+    \]
+    For $f=1$ this corresponds to circulant matrices, and $f=-1$ corresponds to skew-circulant matrices.
+\end{definition}
+
+Since $Z_1(a) = F_{n}^{-1} \cdot \mathsf{diag}(F_n a) \cdot F_n$, where $F_n$ is the DFT matrix, circulant matrix-vector multiplication can be computed in $O(n \log n)$ time using $3$ FFTs. A method given in ~\cite{Rosowski20} runs in $O(n \log n)$ without FFTs, but still requires primitive $n$th roots of unity. In general,
+\begin{align*}
+Z_{f}(a) = \diag(\eta) \cdot F^{-1}_{n} \cdot \diag(F \cdot \diag(\eta) \cdot a) \cdot F \cdot \diag(\eta)
+\end{align*}
+for $\eta = [1, f^\frac{1}{n}, \dotsc, f^{\frac{n-1}{n}}]$~\cite{ClinePlemmonsWorm74}. In other words we compute can compute ring multiplication in the power basis as $Z_{-1}(a) \cdot b = \eta \circ F^{-1}_{n}(F_{n}(\eta \circ a) \circ F_{n}(\eta \circ b))$.
+
+For $n$ a power-of-two, this gives us another way to write the CRT matrix: $C_{2n} = F_n \cdot \diag(\eta)$. This can be confirmed by observing the $(i,j)$th entry of such a matrix is $\omega_{2n}^{2ij} \cdot \omega_{2n}^{j}$; for first term we use the fact a primitive $n$th root $\omega_n$ can be written as $\omega_{2n}^{2}$ for some primitive $2n$th root $\omega_{2n}$, and the second follows from the related fact the $n$th roots of $-1$ are the primitive $2n$th roots of unity. Simplifying, this gives $\omega_{2n}^{2ij+j} = \omega_{2n}^{(2i+1)\cdot j} = \omega_{2n}^{\integers_{2n}^{*}(i) \cdot j}$ as expected.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \subsection{Projective spaces}
+% \label{sec:projective-spaces}
+
+% \begin{definition}[Projective space]
+%   \label{def:projective-space}
+%   We define the projective space $\projective^{n-1}(V)$...
+% \end{definition}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sumcheck}
+\label{sec:sumcheck}
+
+Variations of the sumcheck protocol~\cite{JACM:LFKN92} have become central to construction of many of today's state-of-the-art IOPs. Here we consider sumcheck instances over a field $\field$ to be claims of the form $(\sigma, g, v, d)$, where $g$ is a $v$-variate polynomial of degree at most $d$ in each variable, and $\sigma$ is its claimed sum over the $v$-dimension hypercube:
+\[
+ \sigma = \sum_{x_1,\dotsc,x_v \in \bits^v} g(x_1,\dotsc,x_v)
+\]
+The sumcheck protocol gives a reduction of this claim to checking the evaluation of $g$ at a random point $g(\alpha_1,\dotsc,\alpha_v) = \sigma_v$. For self-containedness, we have included in~\cref{app:sumcheck} an optimized sumcheck protocol (\cref{fig:sumcheck}) and a linear time and space prover algorithm for it (\cref{fig:linear-sc}) from~\cite{BagadDaoDombThaler25}.
+
+% %-------------------------------------------------------------------------------
+% \subsubsection{Sumcheck in linear time}
+
+
+
+% \pnote{replace sumcheck for partial evaluation with lemma describing stepwise behavior}
+
+% \subsection{BaseFold and Random Foldable Codes}
+
+
+% \subsection{Binius}
+% \hnote{I will shorten this significantly }
+% Diamond and Posen introduce \textit{ring-switching} in [DP24], a sumcheck-based technique 
+% for reducing openings of tiny field multilinears at extension field points to openings of 
+% packed multilinears entirely over an extension field. Ring-switching is generic to 
+% power-of-two degree extension fields. [Check the wording on this... -Hunter].
+
+% The Binius family of SNARKs utilize ring-switching as a component of FRI-Binius,
+% a PCS for proving tiny field multilinear openings at large field points over binary fields. 
+% FRI-Binius combines ring-switching with a variant of Basefold over characteristic 2.
+% Instantiating Basefold in characteristic 2 is non-trivial because binary fields lack
+% the power-of-two order multiplicative subgroups necessary for standard FRI proofs in which 
+% folding is done over a multiplicative univariate monomial basis. The observation behind FRI-Binius
+% that makes binary basefold possible is that if codewords in FRI are folded over an additive basis, 
+% not a multiplicative one, it preserves the multilinear evaluation property 
+% necessary for Basefold in characteristic 2. This is why the Additive-NTT is chosen as 
+% the encoding scheme in FRI-Binius. [Check if this explanation makes sense to other 
+% people. This explanation is in reference to Section 1.4 of DP24 which discusses the issue
+% with the multiplicative NTT for Basefold in characteristic 2 ... -Hunter]
+
+% In characteristic $257$ this issue is not present, as $\mathbb{Z}_{257}$ is a smooth prime-field, 
+% containing the multiplicative subgroups necessary for running FRI with the multiplicative NTT or
+% Random Foldable Codes. This makes it more straightforward to apply ring switching to Basefold 
+% in characteristic $257$.
+
+% While the Binius techniques are often thought of as being exclusive to binary fields, protocols 
+% involving packing apply beyond this setting. Though, the choice of binary fields in Binius is 
+% not arbirary, and contains a certain advantage. Modern processors natively operate on 
+% binary data, usually in the form of $64$-bit processor words. Directly arithmetizing over binary 
+% fields can enable more efficient arithmetizations when the target application begins in this setting.
+% For example, when arithmetizing signed integer multiplication.
+
+% As well, converting CPU native data types to in-memory prime-field representations is often
+% wasteful, especially if those data types are small, such as bytes. A byte needs only $8$ bits
+% to represent in memory, where as the prime field may require $32$ or $64$ bits. This concept
+% of is refered to as \textit{embedding overhead} in the Binius termonology. Additionally, 
+% if those bytes refer to small prime-fields, non-native arithmetic of a small field will need
+% to be encoded into the arithmetization field. This has the consequence of adding extra gates
+% to the overall circuit than would be necessary if directly arithmetized over the target field.
+
+% Circuits of application defined over tiny fields benefit significantly from direct arithmetization 
+% over their target field for this reason. In our case, lattice-base cryptographic primitives are 
+% often defined over polynomial rings with coefficients in a tiny base field, such as 
+% $\mathbb{Z}_{257}$. This is true for the SWIFFT compresion function, and LM08 one-time signatures.
+% Our implementation \textit{microlotus} implements ring-switching for basefold in characteristic 
+% $257$, enabling circuits defined directly over $\mathbb{Z}_{257}$. More is discussed on the 
+% concrete performance gains of this technique in the implementation section.
+
+% For certain applications, such as primitives in lattice-based cryptography, we may be 
+% interested in arithmetizing circuits over a \textit{tiny field}. Diamond and Posen refer to 
+% \textit{tiny field polynomials} as those having more coefficients than elements in 
+% their defining field. Instantiating hash-based arguments regarding such polynomials 
+% will encounter the \textit{trace-length barrier}, which refers to when the witness of an 
+% argument is larger than the size of the field. This prevents the use of codes such as 
+% Reed Solomon, which require an alphabet at least as large as the block size of the code. 
+
+% The suite of protocols behind \textit{Binius} have emerged as feasible and performant 
+% solutions to this trace-length barrier. Such solutions make use of \textit{packing} and 
+% \textit{ring-switching}, which enable hash-based commitments of tiny-field 
+% polynomials that achieve significant performance gains by reducing prover work. 
+% Although Binius SNARKs are generally thought of as being specific to binary 
+% fields, many of the techniques, such as \textit{ring-switching} apply generally to 
+% tiny field polynomials. 
+% [How in depth should be describe the FRI-Binius protocol? Is it sufficient to explain the 
+% feasibility of our construction, or should we described the algorithm in depths? Also,
+% we should probably cite the additive NTT - Hunter].
+

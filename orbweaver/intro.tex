@@ -1,11 +1,11 @@
 \section{Overview}
 \label{sec:orbweaver-intro}
 
-% \begin{wrapfigure}{r}{0.5\textwidth}
-%         \includegraphics[width=0.48\textwidth]{spidey}
-%         \captionsetup{labelformat=empty}
-%         \caption{Lattice Orbweaver (Araneus thaddeus) by Jackie P (CC BY 4.0)}
-% \end{wrapfigure}
+\begin{wrapfigure}{r}{0.5\textwidth}
+        \includegraphics[width=0.48\textwidth]{orbweaver/spidey}
+        \captionsetup{labelformat=empty}
+        \caption{Lattice Orbweaver (Araneus thaddeus) by Jackie P (CC BY 4.0)}
+\end{wrapfigure}
 Over the last decade there has been tremendous progress 
 in the development succinct non-interactive argument of knowledge protocols,
 called SNARKs~\cite{ITCS:BCCT12}.
@@ -57,3 +57,104 @@ Polynomial commitment schemes are a special case of \emph{linear functional vect
 Polynomial commitment schemes based on codes and lattice assumptions are of particular importance due to their plausible post-quantum security. Constructions based on Reed-Solomon codes have quasilinear prover time and both polylogarithmic proof size and verifier time. So far they outperform any lattice-based construction not only asympotically, but also concretely by orders of magnitude in overall size and verification time, even when compared with recent lattice-based constructions that sacrifice prover performance for shorter proofs. Moreover, in the random oracle model, code-based constructions use weaker  assumptions than lattice-based constructions. Nonetheless, we are optimistic that the additional structure lattices provide vs. generic (i.e., hash and code-based) constructions can be exploited such that lattice SNARKs eventually surpass these results. As a point of reference, hash-based signatures were originally more efficient, but after over a decade of development lattice-based signatures are an order of magnitude smaller and two faster.
 
 A primary motivation of recent lattice-based constructions~\cite{C:ACLMT22,WW22} of vector commitments supporting higher degree polynomial map openings is that, unlike linear function commitments, they can be used to build SNARKs more directly (e.g., by opening an R1CS form) without invoking the Fiat-Shamir transform. Unfortunately, current approaches to supporting higher degree polynomial maps seem to fundamentally require a quadratic prover time. Given the additional structure of lattices compared with code-based proof systems that rely only on hash functions, one might expect that it would be possible to obtain smaller proof sizes and faster verification times. The recent work LaBRADOR~\cite{BS22} was the first lattice-based system to achieve proof sizes smaller (both concretely and asymptotically) than code-based systems, but this has not yet been done for combined proof size and verification time. The results of this paper make progress in this direction. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Our results}
+\label{sec:results}
+
+Building off of the techniques in~\cite{C:ACLMT22}, we present the first functional commitment for linear relations from lattices that asymptotically has quasilinear prover time, logarithmic proof size, and polylogarithmic verifier time. The scheme supports commitments to vectors $\mathbf{x} \in \mathcal{R}^w$ over a cyclotomic ring $\mathcal{R}$ of degree $n$ and openings of the form $\sum_{i = 1}^w x_i \cdot f_i$ for any $\mathbf{f} \in \mathcal{R}^w \bmod q$ for a prime $q  \gg \alpha$, where both $\mathbf{x}$ and $\mathbf{f}$ have norm bounded by $\alpha$. In particular, proofs are $O(\log w\alpha)$ and verification time is $O(\log w\alpha \cdot \log \log w\alpha \cdot \log \log \log w\alpha)$.
+
+We present several extensions to \sys and show how it can be used to build other primitives including:
+\begin{itemize}[noitemsep]
+        \item A public proof aggregation protocol achieving $O(\log t)$ size aggregate proofs for $t$ linear maps evaluations where each linear map being evaluated and committed input may be distinct.
+        \item An inner product argument.
+        \item A linear functional commitment for the non-cyclotomic ring $\mathcal{R} = \integers$ that combines ternary decomposition and proof aggregation to achieve sublogarithmic proofs in the input norm of size $O(\log w + \log \log \alpha)$.
+        \item Univariate and multilinear polynomial commitments. For degree $d$ univariate polynomials we achieve $O(\log d)$ openings and polylogarithmic verifier time.
+\end{itemize}
+
+We also provide concrete proof size comparisons to previous lattice-based proof systems. While succinct hash-based arguments provide better proof sizes for smaller statements, the most efficient of these systems still have $O(\log^2 n)$ proofs. Especially in settings where the input norm is small, \sys provides better proof sizes for larger-but-practical circuits than state-of-the-art hash-based arguments.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Related work}
+\label{sec:related-work}
+
+Efficient lattice-based proof systems have been constructed in the designated verifier setting \cite{GMNO18,ISW21}. In the publicly verifiable setting, there are many results that achieve succinct proof sizes but require linear verifier time \cite{BBCPGL18,C:BLNS20,C:AttCraKoh21,BCS21,BS22}. There are also works focusing on practical lattice-based ZK proofs, which have proof size linear in the witness size, but are concretely efficient for small statements \cite{ESLL19, ALS20, ENS20,ESLR22, LNP22}.
+
+Recently, Albrecht et al.~\cite{C:ACLMT22} constructed extractable lattice-based vector commitments supporting arbitrary degree polynomial maps. For degree $d$ maps their prover time and CRS length are $\tilde{O}(w^{2d})$, while proof size and verifier time are $O(d \log(w))$. Wee and Wu~\cite{WW22} construct non-extractable lattice-based vector commitments for linear functions including polynomial commitments with $\polylog(w)$ openings and $\tilde{O}(w^2)$ CRS size and prover time. Castro and Peikert~\cite{CP22} construct non-extractable vector commitments for functions of bounded complexity based on the standard SIS assumption. Their polynomial commitments achieve proof size $O(\log^4 w)$. Balb\'{a}s, Catalano, Fiore, and Lai construct extractable lattice-based vector commitments supporting arithmetic circuits of width $w$ and depth $d$ that achieve proof size $O(d \log^2 w)$, but have a CRS of size $O(w^5)$~\cite{EPRINT:BCFL22}. LaBRADOR~\cite{BS22} designs a SNARK for quadratic relations with quasilinear prover and verifier time, but via a complex recursive argument achieve $O(\log^2 w)$ proofs that concretely surpass the best results from hash-based proof systems.
+%\end{itemize}
+
+% Another line of work, instead, tries to accomplish succinct proofs with asymptotically efficient verifier.
+% The only work that achieves such construction is \cite{C:ACLMT22},
+% achieving both logarithmic verifier time and proof size (with correct parameters, and $\log^2$ in general).
+% Another recent work also achieves succinct proofs with asymptotically efficient verifier \cite{WW22},
+% where the verifier time and proof size are both poly-logrithmic in the input length.
+% The former scheme requires in the input to have some input norm bound $\alpha$, while the latter allows the input to have arbitrary norm 
+% (which also means that for mm22 the underlying $\log(q)$ does not scales linearly with the degree of the function to be opened, which is the case for aclmt22).
+% However, both them have quadratic CRS.
+
+There is a much longer history of succinct arguments constructed from Merkle hashes that begins with~\cite{Kilian92} and more recently includes FRI \cite{C:BBHR19}, Ligero \cite{Ligero}, Aurora \cite{Aurora}, Brakedown \cite{Brakedown}, and Orion \cite{XZS22} among others.
+
+% The achieve concretely better proof sizes compared to the state-of-the-art lattice-based proof system with sublinear verifier time \cite{C:ACLMT22} (but quadratic setup blablabla).
+
+% \parhead{Lattice problems} 
+% Lattice problems have been a well and widely studied source of hardness,
+% and are rising rapidly due to its plausible post-quantum security.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Technical overview}
+\label{sec:technical-overview}
+
+At a high level, our construction uses an assumption from the \krisis assumption family introduced in~\cite{C:ACLMT22} to translate the knowledge-of-exponent (\kea) based linear vector commitment scheme sketched in~\cite[section 9]{ac20} (which is in turn based on~\cite{AC:Groth10a}, and also independently similar to ideas in \cite{ICALP:LibRamYun16}) to the lattice setting. %We first present the mathematical ideas behind the scheme abstracted from any computational hardness setting, then show how we situate our scheme in the lattice setting using a lattice analogue of the \kea assumption.
+The construction should enable a prover to commit to a vector $\secretinputvector$ and later open any linear function $\function (\secretinputvector) = \innerproduct{[\function_i]_{i=1}^w}{[\secretinput{i}]_{i=1}^\secretinputdim}
+= \sum_{i=1}^w \function_i \secretinput{i}$.
+
+As observed in \cite{ac20}, given a function $\secretinput{}(\varv) = \sum_{i = 1}^{\secretinputdim} \secretinput{i} \varv^i$, and a function $f(\varv) = \sum_{i = 0}^{\secretinputdim - 1} \function_i \varv^{-i}$, then $h(\varv) = \secretinput{}(\varv) f(\varv) = \sum_{i = {-}\secretinputdim + 1}^{\secretinputdim - 1} a_i \varv^i$, where $a_0 = \sum_{i = 1}^{\secretinputdim} \function_i\secretinput{i}$. The idea is that the prover sends $c = x(v)$, $y = f(\secretinputvector)$, and $\pi = \sum_{i={-}\secretinputdim +1, i\neq 0}^{\secretinputdim - 1} a_i \varv^i$, and then the verifier computes $f(v) = \commitmentkey_f$ and checks $\commitment \cdot \commitmentkey_f - y = \pi$.
+
+In order to achieve both binding and succinctness, we situate this abstract protocol in lattice setting using the techniques of \cite{C:ACLMT22}. A trusted setup generates a universal (i.e., the same setup works for any linear function up to a given size) structured reference string (SRS) $(\publicsisvector, \varv, \preimage_{-\secretinputdim + 1}, \dots, \preimage_{-1}, \preimage_{1}, \dots, \preimage_{\secretinputdim - 1}) \in \fring^\numcols \times \fringmultgroup \times (\fring^\numcols)^{2w-2}$, where for each $\preimage_i$ it holds that $\innerproduct{\publicsisvector}{\preimage_i} \equiv \varv^i \modq$ and $\preimage_i$ is ``short'' relative to $q$. Note that no preimage $\preimage_0$ is given out such that $\innerproduct{\publicsisvector}{\preimage_0} \equiv 1 \modq$. Our \krisis assumption states that it should be hard to find short $(s,\preimage) \neq (0,\symbfup{0}) \in \ring \times \ring^{\numcols}$ such that $\innerproduct{\publicsisvector}{\preimage} \equiv s \modq$ even given these preimages for other powers of $v$. In general, it should be hard to find the preimage of any target not in the linear span of $[\varv_i]_{i={-w}+1,i\neq 0}^{w-1}$.
+
+Let $\normboundinput$ be a bound on the $\ell$-infinity norm of both the witness and function. The computation of commitment $\commitment$, commitment key $\commitmentkey_\function$, and $y$ are exactly as in the abstract protocol, but taken $\bmod\ \modulus$ for prime $\modulus \gg \normboundinput$. The prover now computes 
+\[
+\proofopening := \sum_{i={-}\secretinputdim +1, i\neq 0}^{\secretinputdim - 1} a_i \preimage_i \modq\enspace,
+\]
+and the verifier checks
+\begin{equation}
+\label{eq:verifier-check}
+\innerproduct{\publicsisvector}{\proofopening} \equiv \commitment \cdot \commitmentkey_{\function} - \output \modq
+\enspace,
+\end{equation}
+and that $\proofopening$ and $\output$ have small norm. When correctly executing the protocol it follows from the fact that $\normboundinput \ll \modulus$ and $\normboundpublicpreimages \ll \modulus$, where $\normboundpublicpreimages$ is a norm bound on the $\preimage_i$, that the proof and output will have small norm. Fixing $\fring$ with respect to the security parameter, one can see that the size of $\proofopening$ is of size $O(\log \secretinputdim + \log \normboundinput)$. We also achieve (almost) the same verifier time \footnote{Our verifier time is $O(\log(\secretinputdim\cdot\normboundinput)\log\log(\secretinputdim\cdot\normboundinput))$ in the preprocessing setting.} in the preprocessing setting: while computing the commitment key $\commitmentkey_\function = \sum_{i=1}^w \function_i \varv^{-i}$ takes linear time, it may be computed once in advance then subsequently used to verify openings with respect to any $\commitment$ and $y$.
+
+Our scheme thus far achieves evaluation binding: an adversary who can open a commitment $\commitment$ to two different outputs for the same function can be used to break \krisis. To see this, we subtract one verifying~\cref{eq:verifier-check} from the other to obtain
+\[
+\innerproduct{\publicsisvector}{\proofopening-\proofopening'} \equiv \output' - \output \modq
+\]
+Since both proofs and outputs are small, this gives \krisis solution $s=y'-y, \preimage=\proofopening-\proofopening'$.
+
+\parhead{Achieving extractability}
+While this construction is evaluation binding, this is insufficient to guarantee that the prover knows some witness consistent with the commitment. For example, the prover can randomly sample a short proof $\proofopening$, and compute the commitment $\commitment = \innerproduct{\publicsisvector}{\proofopening}/(\sum_{i = 1}^{\secretinputdim} \function_i\varv^{-i})$. In this case, the prover can pass the verifier checks without knowledge of the input.
+
+To achieve extractability we require an additional knowledge assumption from~\cite{C:ACLMT22}, one from the knowledge \krisis assumption family. Our knowledge \krisis assumption states that there is an extractor that extracts short $\symbfup{x}^{*}$ s.t. $c = \sum_{i=1}^w x^{*}_{i} v^i$ from any prover who, given $[\preimage'_i]_{i \in [w]}$ s.t. $\innerproduct{\publicsisvector}{\preimage'_i} \equiv \varv^i \cdot \vart \modq$ (for some $t$ drawn from a special subset of $\ring$), outputs commitment $\commitment$ and a short knowledge proof $\proofknowledge$ s.t. $\innerproduct{\publicsisvector}{\proofknowledge} \equiv \commitment \cdot \vart \modq$.
+
+Using this assumption, it suffices to include as part of the commitment an additional value $\proofknowledge = \sum_{i = 1}^{\secretinputdim} \secretinput{i}\preimage_i$ in order to achieve extractability. Observe that if for a verifying $(\commitment,\output,\proofopening,\proofknowledge)$ it held that $f(\symbfup{x}^*) \neq \output$, then $\symbfup{x}^*$ could be used to create verifying $(\commitment,\output'=f(\symbfup{x}^*),\proofopening',\proofknowledge')$, which violates binding and could be used to break plain \krisis as explained above. Therefore, the extracted witness must be consistent with the evaluation.
+
+Lastly, we note our extracted witness has ``stretch'', i.e., the best norm bound we can hope to enforce on $\symbfup{x}^*$ is the norm bound on $\proofknowledge$, which in order to achieve correctness is necessarily bigger than the norm bound we impose on $\symbfup{x}$.
+
+\parhead{Public proof aggregation}
+An untrusted prover, input $t$ verifying tuples $(\commitment_i,\pi_{0,i},\pi_{1,i},\output_i)$ tuples, can combine the evaluation proofs into a single proof $\proofopening := \sum_{i=1}^t h_i \pi{0_i}$ using some short challenges $h_i$. The verifier then checks
+\[
+\innerproduct{\publicsisvector}{\proofopening} \equiv \commitmentkey \cdot \sum_{i=1}^t (h_i \commitment_i) - \sum_{i=1}^t (h_i y_i) \modq
+\enspace.
+\]
+Since the $h_i$ and $\pi_{0,i}$ are short, $\proofopening$ will be as well. If we consider the norm bound on the $h_i$ to be dependent on the security parameter, then we can see the bit length $\vert \proofopening \vert$ is $\log t$ times the bit length of the original proofs $\vert \pi_{0,i} \vert$.
+
+Without modifying our knowledge assumption, we cannot take linear combinations of the knowledge proofs. So we only get partial aggregation.
+
+\parhead{Polynomial commitments for integers}
+Furthermore, for the special case of polynomial commitments, where $\function_i = z^{i - 1} \bmod p$ for $i \in [1, w]$ and $w$ is a power of $2$ and $q > p^{\log w}$, $\commitmentkey_\function =  \prod_{i = 0}^{\log w -1} (z_i + \varv^{-2^i}) \varv^{-(w+1)}  - z_{\log w} \bmod q$ where $z_i = z^{2^i} \bmod p$, which can be computed in time $O(\log w)$ operation over $\mathcal{R}_q$. 
+Given this value the verifier can compute $\commitment \cdot \commitmentkey_\function = (\sum_{i=1}^w \secretinput{i} \varv^i)(\sum_{i=1}^w \function_i \varv^{-i}) = \sum_{i=1}^w \function_i \secretinput{i} + \sum_{i = -\secretinputdim + 1}^{\secretinputdim - 1} a_i \varv^i = \function(\secretinputvector) + \sum_{i = -\secretinputdim + 1}^{\secretinputdim - 1} a_i \varv^i$, for some ring elements $a_i$. The opening proof will include information that allows the verifier to cancel out the term dependent on the $a_i$ values. %, they can simply confirm this equation: $\commitment \cdot \commitmentkey_\function = \output + \sum_{i = -\secretinputdim + 1}^{\secretinputdim - 1} a_i \varv^i$, where $\output = \function(\secretinputvector)$.
+To prevent the prover from cheating, we invoke the \krisis assumption by involving $\publicsisvector$ in the opening.  More specifically, the opening is computed as $\proofopening = \sum_{i \in \integerball{\secretinputdim} \setminus\set{0}} a_i \preimage_i$, where $a_i$'s can be computed by the prover. The verifier of the opening checks $\innerproduct{\publicsisvector}{\proofopening} = \commitment \cdot \commitmentkey_\function - \output$, and that $\function, \output, \proofopening$ are short (i.e., their norm is bounded).  The \krisis hardness assumption guarantees that the commitment is evaluation binding when $\function$ and $\secretinput{}$ are both short.

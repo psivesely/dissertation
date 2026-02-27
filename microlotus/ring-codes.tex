@@ -1,0 +1,208 @@
+\subsection{Linear codes over rings}
+\label{sec:ring-codes}
+
+In this section we assume all rings are unital and commutative.
+
+\pnote{Can generalize, but don't need to.}
+
+\begin{lemma}
+Any linear $[b,k,\lambda]$-code of block length $b$, message length $k$, and relative distance $\lambda$ over a $\integers^{b}_{q}$, gives a $\ring$-linear $[b,k,\lambda]$-code over the cyclotomic ring $\ring_{q}^{b}$.
+\end{lemma}
+
+\begin{proof}
+We simply lift the generator matrix $G' \in \integers_{q}^{b \times k}$ to the matrix $G \in \integers_{q}^{b \times k}$ of constant polynomials.
+\begin{itemize}[nosep]
+    \item \emph{Linearity}: it is easy to see for $r,s,m_1,m_2 \in \ring$ that $G(r m_1 + s m_2) = rGm_1 +sGm_2$.
+    \item \emph{Distance preservation}: assume by contradiction there is a $m \in \ring_{q}^{k}\setminus\set{0^n}$ such that $\Delta(Gm) \le \lambda$. By assumption there is some entry $m_{w} \in m$ whose power basis coefficient $c_w$ is nonzero. Let $w \in \ring_{q}^{k}\setminus\set{0^n}$ the vector of the $w$th coefficients in $m$. Then the $\Delta(G'w) \leq \lambda$.
+\end{itemize}
+\end{proof}
+
+\begin{definition}[Divergence~\cite{BKS18}]
+For subspaces (or affine spaces) $U, V \subseteq \mathbb{F}^n$, the divergence of $U$ from $V$ is defined as
+\[
+D(U, V) = \max_{u \in U} \delta(u, V)
+\]
+where $\delta(u, V)$ denotes the distance from point $u$ to the space $V$. Note that divergence is not a distance metric because it is not symmetric. Indeed, consider 
+\[
+U = \{0, 10^n - 1\},\quad V = \{0, 1^n\},
+\]
+then
+\[
+D(U, V) = \frac{1}{n} \neq \frac{n - 1}{n} = D(V, U).
+\]
+\end{definition}
+
+\begin{definition}[Exceptional set]
+  \label{def:exceptional-set}
+    For a ring $\ring$, we say $\challengeset \subseteq \ring$ is an \emph{exceptional set} if $(\challengeset-\challengeset){\setminus}\set{\bm{0}} \in \ring^{\times}$.
+\end{definition}
+
+\begin{definition}[Exceptional subgroup]
+  \label{def:exceptional-subgroup}
+  For a ring $\ring$, we say a multiplicative subgroup $G \trianglelefteq \ring^\times$ is an \emph{exceptional subgroup} if $(G-G){\setminus}\set{\bm{0}} \in \ring^{\times}$.
+\end{definition}
+
+\noindent The following is an adaptation of the result in~\cite{BKS18}. \pnote{I don't like how ~\cref{lemma:correlated-agreement} is written as a contradiction--just following~\cite{BKS18}, but going to express the lemma statement differently later.}
+
+\begin{lemma}[Correlated agreement for rings]
+\label{lemma:correlated-agreement}
+Let $C \subseteq \ring^b$ be a $\ring$-module over a ring $\ring$ with $\Delta(C) = \lambda$. Suppose $u^\ast \in \ring^b$ satisfies $\Delta(u^\ast,C) > \delta$, and fix arbitrary $u \in \ring^b$. Let $\challengeset \subseteq \ring$ be an exceptional set. For $\epsilon > 0$ satisfying $\delta - \epsilon < \lambda/3$. Let
+\[
+A = \{\alpha \in \mathcal{C} \mid \Delta(u^\ast + \alpha u, C) < \delta - \varepsilon\}
+\]
+If $|A| > 1/\varepsilon$ then there exist $v, v^\ast \in C$ such that
+\[
+\bigl|\set{i \in [n] \mid (u_i = v_i) \ \wedge \ (u^\ast_i = v^\ast_i)}\bigr| \geq (1 - \delta)\cdot n
+\]
+\end{lemma}
+
+\begin{proof}
+For $\alpha \in A$, let $v_\alpha \in C$ be such that $\Delta(u^\ast + \alpha u, v_\alpha) < \delta - \varepsilon$.
+
+We first show that for all $\alpha \in A$, the points $(\alpha, v_\alpha)$ are all collinear. To see this, let
+$\alpha_1, \alpha_2, \alpha_3 \in A$ be distinct. We have $\Delta(u^\ast + \alpha_3 u, v_{\alpha_3}) \le \delta - \varepsilon$.
+Let $\beta = \frac{\alpha_3 - \alpha_2}{\alpha_1 - \alpha_2}$, where we know inverses $\beta^{-1} \in \ring^\times$ and $(1-\beta)^{-1} = \frac{\alpha_3 - \alpha_2}{\alpha_1 - \alpha_3} \in \ring^\times$ exist by the exceptional set property. Then
+\[
+u^\ast + \alpha_3 u = \beta(u^\ast + \alpha_1 u) + (1-\beta)(u^\ast + \alpha_2 u),
+\]
+and so:
+\[
+\begin{array}{rl}
+\Delta(u^\ast + \alpha_3 u, \beta v_{\alpha_1} + (1-\beta)v_{\alpha_2}) &\leq \Delta(\beta(u^\ast + \alpha_1 u), \beta v_{\alpha_1}) + \Delta((1-\beta)(u^\ast + \alpha_2 u), (1-\beta) v_{\alpha_2}) \\
+&= \Delta(u^\ast + \alpha_1 u, v_{\alpha_1}) + \Delta(u^\ast + \alpha_2 u, v_{\alpha_2})  \\
+&< 2(\delta - \varepsilon),
+\end{array}
+\]
+where the equality follows from the fact that multiplying two points by a unit doesn't change their distance. Thus
+\[
+\Delta(\beta v_{\alpha_1} + (1-\beta) v_{\alpha_2}, v_{\alpha_3})<  3(\delta - \varepsilon) < \lambda.
+\]
+By our assumption on the minimum distance of $C$, we conclude that
+\[
+\beta v_{\alpha_1} + (1-\beta) v_{\alpha_2} = v_{\alpha_3},
+\]
+which implies the desired collinearity.
+
+Thus there exist $v, v^\ast \in C$ such that for all $\alpha \in A$,
+\[
+v_\alpha = v^\ast + \alpha v.
+\]
+Taking this information back to the definition of $v_\alpha$, we have that for all $\alpha \in A$,
+\[
+\Delta(u^\ast + \alpha u, v^\ast + \alpha v) < \delta - \varepsilon.
+\]
+Rewriting,
+\[
+\Delta(u^\ast - v^\ast, \alpha (v - u)) < \delta - \varepsilon
+\qquad\text{for all }\alpha \in A.
+\]
+For $i \in [b]$, we consider the following events
+\[
+E_A = u_i = v_i \wedge u^{\ast}_i = v^{\ast}_i \qquad
+E_B = u_i - v_i = u^{\ast}_i - v^{\ast}_i \qquad
+E_C = u_i - v_i = \alpha(u^{\ast}_i - v^{\ast}_i)
+\]
+Let $\#E$ be the number of $i \in [b]$ for which event $E$ holds. Then
+\[
+\Delta(u^\ast - v^\ast, \alpha (v - u)) = 1 - \frac{1}{b}(\#E_A + \#(E_B \wedge \bar{E_A}) + \#(E_C \wedge \bar{E_B}))
+\]
+Note we have no a priori upper bound on events $\bar{E_A}, E_B, \bar{E_B}$, so the most we can say is
+\[
+\Delta(u^\ast - v^\ast, \alpha (v - u)) \geq 1 - \frac{1}{b}(\#E_A + \#E_C)
+\]
+Now for any coordinate $i \in [n]$ where $u_i \neq v_i$ or $u^\ast_i \neq v^\ast_i$, there can be at most one 
+value of $\alpha \in \mathcal{C}$ for which $u^\ast_i - v^\ast_i = \alpha (v_i - u_i)$ by our assumption that $\mathcal{C}$ is an exceptional set. Let $t = |A|$. Thus there is an $\alpha \in A$ such that:
+\[
+\delta - \varepsilon > \Delta(u^\ast - v^\ast, \alpha (v - u))
+\geq 1 - \frac{1}{b}(\#E_A + \frac{b}{t})
+\]
+Putting everything together, we get that:
+\[
+\frac{\big|\set{i \in [b] \mid (u_i = v_i) \wedge (u^\ast_i = v^\ast_i)}\big|}{b}
+\geq 1 - \delta + \varepsilon - \frac{1}{t}.
+\]
+Thus if $t > 1/\varepsilon$, we have:
+\[
+\frac{\big|\set{ i \in [b] \mid (u_i = v_i) \wedge (u^\ast_i = v^\ast_i)}\big|}{b}
+\geq 1 - \delta,
+\]
+as claimed.
+\end{proof}
+
+\begin{theorem}[Proximity gap for rings]
+\label{thm:proximity gap}
+For a ring $\ring$, let $E \trianglelefteq \ring^\times$ be its largest exceptional subgroup, and let $\challengeset=a+\ideal$ for $a \in \ring$ be a coset of any nonzero ideal $\ideal \subseteq \ring$. Let $C \in \ring^b$ be a $\ring$-module with $\mathsf{RD}(C) = \lambda$, and let $u_1,\dotsc,u_m \in \ring^b$. If there exists $u^\ast \in \set{\sum_{i=1}^{m} \alpha_i u_i \mid \alpha_1,\dotsc,\alpha_m \in \challengeset}$ such that $\mathsf{RD}(u^\ast, C) > \delta$, then for any $\epsilon > 0$ such that $\delta-\epsilon < \lambda/3$ it holds that
+\[
+\Pr_{\alpha \gets \challengeset^m} \left[\mathsf{RD}\left(\sum_{i=1}^{m} \alpha_i u_i,C\right) < \delta - \epsilon\right] < \frac{1}{\epsilon |G|}
+\]
+\end{theorem}
+
+\begin{proof}
+Consider any $\gamma \in \challengeset^m$ such that $u^\ast = U \gamma$, where $U = [u_1,\dotsc,u_m]$. Let $\challengeset' = (\challengeset - \gamma_1) \otimes \dotsm \otimes (\challengeset - \gamma_m)$, such that the distributions $\sum_{i=1}^{m} \alpha_i u_i$ (for $\alpha \randpick \challengeset^m$) and $u^\ast + \sum_{i=1}^{m} \beta_i u_i$ (for $\beta \randpick \challengeset'$) are identical. We also note that $\challengeset' = \ideal^m$.
+
+Let $[D] = \set{[d] \in \projective^{m-1}(\ring) \mid \exists r \in \ring^\times: rd \in \ideal^{m}{\setminus}\set{\bm{0}}}$ be the subset of the projective space of dimension $m-1$ over $\ring$ containing just those projective classes intersecting with $\ideal^{m}{\setminus}\set{\bm{0}}$. For each $[d] \in [D]$, fix a representative $d \in \ideal^{m}{\setminus}\set{\bm{0}}$, and denote this representative set $D$. Next for each $d \in [D]$, let $S_{d} := \set{rd \mid r \in \ring^\times, rd \in \ideal^{m}{\setminus}\set{\bm{0}}}$. We define the equivalence relation $\sim$ over each $S_{[d]}$ by $x \sim y$ if there exists a $g \in G$ such that $gx \sim y$. \pnote{Might be good to prove $\sim$ is an equivalence relation here.} Let $T_d \subseteq S_d$ be any transversal of the $\sim$-classes of $S_d$, such that $S_d \subseteq \cup_{t \in T_d} Gt$, where for $t \in T_d$ the $G$-orbits $Gt$ are disjoint.
+
+We will show the orbits $Gt$, for $d \in D$ and $t \in T_d$, partition $\ideal^{m}{\setminus}\set{\bm{0}}$ into equi-size sets. Namely, we show that (1) $\ideal^{m}{\setminus}\set{\bm{0}} = \cup_{d \in D} \cup_{t \in T_d} G t$ (coverage), (2) there exists no $\beta \in \ideal^{m}{\setminus}\set{\bm{0}}$ and distinct $(t,d),(t',d') \in D \times T_D$ such that $\beta \in G t \cap G t'$ (disjointness), and (3) $|G t| = |G|$ for all $d \in D$ and $t \in T_d$ (order equality).
+\begin{enumerate}[nosep]
+    \item \emph{Coverage}: For any $g$ we have by definition of an ideal that $gt \in \ideal^m$. Since at least one entry $t_i$ of $t$ is nonzero and $g \in G \trianglelefteq \ring^\times$, we have $g t_i \in \ideal{\setminus}\set{0}$. Hence, $\cup_{d \in D} \cup_{t \in T_d} G t \subseteq \ideal^{m}{\setminus}\set{\bm{0}}$. For the reverse, we note that $\beta \in \ideal^{m}{\setminus}\set{\bm{0}}$ implies $[\beta] \in [D]$. Let $d \in D$ be the representative for $[\beta]$ with respect to the equivalence relation defined by $\projective^{m-1}$, such that $\beta = rd \in S_d$ for some $r \in \ring^\times$. Let $t \in T_d$ be the representative for $[\beta] = [dr]$ with respect to $\sim$ over $S_d$. Then for some $g \in G$, we have $gt = rd = \beta$, and therefore $\beta \in Gt$.
+    \item \emph{Disjointness}: Assume disjointness does not hold. Then $\beta = gt = g't'$ for some $g,g' \in G, t \in T_d, t' \in T_{d'}$. Since this implies $t = g^{-1}g't'$, we simultaneously have $d' = d$ (since $g,g'$ are units) and $t = t'$ (since $g^{-1}g' \in G$).
+    \item \emph{Order equality}: Since $G$ is exceptional, $gt = g't \Rightarrow (g-g')d = 0$ cannot hold for $g \neq g' \in G$.
+\end{enumerate}
+Since $G$ is exceptional, we can use~\cref{lemma:correlated-agreement} to bound $|\set{g \in G \mid \mathsf{RD}(u^\ast + g(Ut),C) < \delta - \epsilon}| < 1/\epsilon$ for all $d \in D, t \in T_d$. Summing over the orbits, we get
+\begin{align*}
+|\set{\beta \in \challengeset'{\setminus\set{0}} \mid \mathsf{RD}(u^\ast + U\beta,C) < \delta - \epsilon}| &\leq \frac{|\challengeset'| - 1}{\epsilon|G|} \\
+\end{align*}
+This directly implies our theorem statement since
+\begin{align*}
+\Pr_{\alpha \gets \challengeset^m} \left[\mathsf{RD}\left(\sum_{i=1}^{m} \alpha_i u_i,C\right) < \delta - \epsilon\right] \leq \frac{|\ideal|^m - 1}{|\challengeset|^m \epsilon |G|} < \frac{1}{\epsilon |G|}
+\end{align*}
+\end{proof}
+
+
+\begin{theorem}[Proximity gap for rings]
+\label{thm:proximity gap}
+For a ring $\ring$, let $E \subseteq \ring$ be an exceptional set. Let $\challengeset=a+A \in \ring^n$ for $a \in \ring^n$ and an $\ring$-submodule $A \trianglelefteq (\ring^n,+)$
+% such that there exists a set $T \subseteq A{\setminus}\set{\bm{0}}$ and the multiplicative map $\mu: E \times T \mapsto A{\setminus}\set{\bm{0}}, \enspace \mu(e,t) = et$ is bijective.
+Let $C \in \ring^b$ be a $\ring$-module with $\mathsf{RD}(C) = \lambda$, and let $u_1,\dotsc,u_m \in \ring^b$. If there exists $u^\ast \in \set{\sum_{i=1}^{m} \alpha_i u_i \mid \alpha_1,\dotsc,\alpha_m \in \challengeset}$ such that $\mathsf{RD}(u^\ast, C) > \delta$, then for any $\epsilon > 0$ such that $\delta-\epsilon < \lambda/3$ it holds that
+\[
+\Pr_{\alpha \gets \challengeset^m} \left[\mathsf{RD}\left(\sum_{i=1}^{m} \alpha_i u_i,C\right) < \delta - \epsilon\right] < \frac{1}{\epsilon |E|}
+\]
+\end{theorem}
+
+\begin{proof}
+Consider any $\gamma \in \challengeset^m$ such that $u^\ast = U \gamma$, where $U = [u_1,\dotsc,u_m]$. Let $\challengeset' = (\challengeset - \gamma_1) \otimes \dotsm \otimes (\challengeset - \gamma_m)$, such that the distributions $\sum_{i=1}^{m} \alpha_i u_i$ (for $\alpha \randpick \challengeset^m$) and $u^\ast + \sum_{i=1}^{m} \beta_i u_i$ (for $\beta \randpick \challengeset'$) are identical. We also note that $\challengeset' = \ideal^m$.
+
+Let $[D] = \set{[d] \in \projective^{m-1}(\ring) \mid \exists r \in \ring^\times: rd \in \ideal^{m}{\setminus}\set{\bm{0}}}$ be the subset of the projective space of dimension $m-1$ over $\ring$ containing just those projective classes intersecting with $\ideal^{m}{\setminus}\set{\bm{0}}$. For each $[d] \in [D]$, fix a representative $d \in \ideal^{m}{\setminus}\set{\bm{0}}$, and denote this representative set $D$. Next, for each $d \in D$, let $S_{d} := \set{rd \mid r \in \ring^\times, rd \in \ideal^{m}{\setminus}\set{\bm{0}}}$. We define an equivalence relation $\sim$ over each $S_{d}$ by $x \sim y$ if there exists an $e \in E \cup \set{1}$ such that $ex \sim y$. \pnote{Might be good to prove $\sim$ is an equivalence relation here.} Let $T_d \subseteq S_d$ be any transversal of the $\sim$-classes of $S_d$, such that $S_d \subseteq \cup_{t \in T_d} Gt$, where for $t \in T_d$ the $G$-orbits $Gt$ are disjoint.
+
+We will show the orbits $Gt$, for $d \in D$ and $t \in T_d$, partition $\ideal^{m}{\setminus}\set{\bm{0}}$ into equi-size sets. Namely, we show that (1) $\ideal^{m}{\setminus}\set{\bm{0}} = \cup_{d \in D} \cup_{t \in T_d} G t$ (coverage), (2) there exists no $\beta \in \ideal^{m}{\setminus}\set{\bm{0}}$ and distinct $(t,d),(t',d') \in D \times T_D$ such that $\beta \in G t \cap G t'$ (disjointness), and (3) $|G t| = |G|$ for all $d \in D$ and $t \in T_d$ (order equality).
+\begin{enumerate}[nosep]
+    \item \emph{Coverage}: For any $g$ we have by definition of an ideal that $gt \in \ideal^m$. Since at least one entry $t_i$ of $t$ is nonzero and $g \in G \trianglelefteq \ring^\times$, we have $g t_i \in \ideal{\setminus}\set{0}$. Hence, $\cup_{d \in D} \cup_{t \in T_d} G t \subseteq \ideal^{m}{\setminus}\set{\bm{0}}$. For the reverse, we note that $\beta \in \ideal^{m}{\setminus}\set{\bm{0}}$ implies $[\beta] \in [D]$. Let $d \in D$ be the representative for $[\beta]$ with respect to the equivalence relation defined by $\projective^{m-1}$, such that $\beta = rd \in S_d$ for some $r \in \ring^\times$. Let $t \in T_d$ be the representative for $[\beta] = [dr]$ with respect to $\sim$ over $S_d$. Then for some $g \in G$, we have $gt = rd = \beta$, and therefore $\beta \in Gt$.
+    \item \emph{Disjointness}: Assume disjointness does not hold. Then $\beta = gt = g't'$ for some $g,g' \in G, t \in T_d, t' \in T_{d'}$. Since this implies $t = g^{-1}g't'$, we simultaneously have $d' = d$ (since $g,g'$ are units) and $t = t'$ (since $g^{-1}g' \in G$).
+    \item \emph{Order equality}: Since $G$ is exceptional, $gt = g't \Rightarrow (g-g')d = 0$ cannot hold for $g \neq g' \in G$.
+\end{enumerate}
+Since $G$ is exceptional, we can use~\cref{lemma:correlated-agreement} to bound $|\set{g \in G \mid \mathsf{RD}(u^\ast + g(Ut),C) < \delta - \epsilon}| < 1/\epsilon$ for all $d \in D, t \in T_d$. Summing over the orbits, we get
+\begin{align*}
+|\set{\beta \in \challengeset'{\setminus\set{0}} \mid \mathsf{RD}(u^\ast + U\beta,C) < \delta - \epsilon}| &\leq \frac{|\challengeset'| - 1}{\epsilon|G|} \\
+\end{align*}
+This directly implies our theorem statement since
+\begin{align*}
+\Pr_{\alpha \gets \challengeset^m} \left[\mathsf{RD}\left(\sum_{i=1}^{m} \alpha_i u_i,C\right) < \delta - \epsilon\right] \leq \frac{|\ideal|^m - 1}{|\challengeset|^m \epsilon |G|} < \frac{1}{\epsilon |G|}
+\end{align*}
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{An alternate view of the lifted code}
+...
+\pnote{Todo: comparison to where we view this as a separate field encoding to each vector of coefficients, allowing us to choose any cyclotomic ring $\ring$ regardless of the size of exceptional set it offers, but forcing us to work over an extension field of $\integers_q$.}
+
+\subsection{An IOP of proximity to cyclotomic rings}
+\label{sec:IOP-of-proximity}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{From IOPPs to multilinear PCs over cyclotomic rings}
+\label{sec:}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

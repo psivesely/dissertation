@@ -1,0 +1,195 @@
+\section{Introduction}
+\label{sec:introduction}
+
+
+\newcommand{\comp}{\mathsf{Comp}}
+
+Succinct Non-interactive Arguments of Knowledge (SNARKs) are proof systems that allow a prover to succinctly demonstrate the validity of arbitrary computations. More precisely, given a relation $R$ consisting of input-witness tuples $(\inp;\wit)$ and a public input $\inp$, a SNARK is a non-interactive protocol that enables a prover, $\prover$, to convince a verifier, $\verifier$, that they know a witness, $\wit$, such that $(\inp;\wit)\in R$, 
+%\kai{new sentence. The SNARK is succinct in the sense that ...} 
+where communication and verifier runtime are sublinear (i.e.\ the scheme is \emph{succinct}). The most common approach to building SNARKs is to first choose a finite field $\FF$ and then express $R$ as a new relation $R_{\FF}'$ consisting 
+%\kai{change consisting of to defined by } 
+of a system of polynomial equations over $\FF$ in a certain fixed form (e.g.\ R1CS, CCS, AIR, Plonkish, or lookups)\footnote{Lookup and permutation constraints can be reduced to (high degree) polynomial equations; see \cref{ss:ucs_lookup} for details.}. This process is called \emph{arithmetization} of the computation $\comp$, and it is by far the most common paradigm in both the SNARK literature and industry \cite{Groth16,GWC19,ethstark,Cairo}. SNARKs based on this approach have experienced remarkable performance improvements over the past years. 
+
+
+A limitation of this approach is that most computations of interest (see \cref{tab:computations}) are not naturally expressed as systems of equations over a single finite field. Having to express a computation naturally defined over multiple algebraic domains, or with non-algebraic operations, over a single finite field results in large blowups to the circuit size, i.e.\ given $(\inp;\wit)\in R$, the size of the arithmetized $(\inp';\wit') \in R_{\FF}'$ is typically much larger than $(\inp;\wit)$ (as will the corresponding circuit for verifying membership) \cite{Zinc,jea_codes,EFpaper,binius}.  Accordingly, state-of-the-art SNARKs end up proving computations that are, in a sense, significantly larger than the original computation $\comp$. We call this relative size increase the \emph{arithmetization overhead}, and note it detrimentally affects all performance metrics of the SNARK: prover time, proof size, and verifier time. Beyond performance, there are two other problems brought by non-native arithmetizations:
+
+\emph{1) Need for expert arithmetization or generic arithmetizers (zkVMs).} Designing efficient and correct arithmetizations over a finite field is challenging both conceptually and in terms of implementation \cite{PailoorUnderconstrained,WenZKPSecurity}. This makes the arithmetization step inaccessible to non-experts, who are then bound to generic tools such as zkVMs \cite{Cairo,Jolt}. In fact, current zkVM designs even incur a \emph{double} arithmetization overhead: first from compiling the computation into VM cycles (typically composed of RISC-V instructions), and then from arithmetizing those cycles into a finite-field relation. We note that this double overhead is not inherent to the zkVM paradigm---one could design zkVMs whose underlying proof system avoids arithmetization overhead. We envision the present work as a step in this direction.
+
+\emph{2) Correctness and auditability.} The gap between the original computation and its arithmetized form makes the final proof system harder to audit and more prone to bugs, e.g., due to underconstrained systems.
+
+
+\subsection{Contributions}
+\label{sec:contributions}
+
+We next list the contributions of this work, which we elaborate on in the technical overview (\cref{ss:to_zinc_plus_compiler}).
+
+\parhead{Universal Constraint Systems (UCS)}
+We propose a new arithmetization framework which is tailored to express most computations of interest (as captured in \cref{tab:computations}), with significantly reduced arithmetization overhead compared to single-field constraint systems (see \cref{tab:computations} for concrete examples). In particular, we design a relation $\ucs$ called \emph{Universal Constraint System} (UCS) that efficiently encapsulates said computations (see \cref{s:crypto_ucs} and the formal definition in \cref{def:ucs}).  
+
+UCS is a generalization of constraints such as R1CS, CCS, AIR, lookups, etc., along two main axes: the algebraic domains over which constraints are defined, and the types of predicates supported. First, UCS expresses constraints simultaneously over different rings such as $\QQ$ (rationals), $\ZZ$ (integers), $\FF_q$ (prime or prime power fields), and, importantly, polynomial rings such as $\QQ[X], \ZZ[X], \FF_q[X], R[X]$. In short, UCS can express R1CS, AIR, etc.\ relations over multiple such rings in the same instance. Additionally, it supports ideal-membership predicates, i.e.\ predicates of the form  $Q(\dots)\in \primeideal$, where $Q$ is a polynomial expression in the input and the witness, and $\primeideal$ is an ideal of $\QQ[X]$ or $\FF_q[X]$. This expressivity allows one to capture operations such as rotation of bitstrings (through the ideal $X^w-1$), relating bitstrings and integers (through the ideal $(X-2)$), constraints over multiple rings and fields (through quotienting $\ZZ[X]$ via an ideal), etc.
+% \conffalse
+% \ifconf
+% \else
+% We refer to the end of  \cref{s:general_ucs_definition} 
+% % \albert{Move back to TO} for a thorough overview and motivation of these design choices. 
+% \fi
+
+\parhead{A SNARK for the UCS relation}
+We design a general framework for building SNARKs for $\ucs$, which we call Zinc+ (\cref{ss:to_zinc_plus_compiler}). This framework consists of two components: 
+
+
+
+\parhead{Zinc+ PIOP compiler.} A compiler that takes existing PIOPs over finite fields, and applies a so-called \emph{lifting} to adapt them to our constraint setting, which, as we mentioned, involves domains such as $\ZZ, \QQ$, $\FF_q$, and polynomial rings $R[X]$ (for $R\in \{\ZZ, \QQ, \FF_q\})$. %For infinite rings our PIOP is parameterized by flexible bit length and degree bounds, e.g., supporting inputs in $R^{<d,B}[X]$, where $R^{<d,B}[X]$ denotes the set of polynomials of degree less than $d$ with coefficients in $R$ of bit size less than $B$.
+%
+The compiled PIOP involves polynomial oracles defined over all the domains in the relation. Outside the PIOP model (i.e.\ when building a final SNARK), the correct typing (i.e., that each oracle's coefficients lie in the declared ring or field and satisfy the prescribed degree and bit-size bounds) and evaluations of the oracles are enforced via Zip$+$ (explained below). We prove that the Zinc$+$ PIOP achieves \emph{round-by-round knowledge soundness} (\cref{thm:zincplus-pior-knowledge}), with knowledge error $2^{-\lambda}$ per round (the PIOR has two rounds of verifier randomness, contributing at most $2 \cdot 2^{-\lambda}$ total knowledge error), where $\lambda$ is the security parameter. Since round-by-round knowledge soundness composes with the Fiat--Shamir transform in the random oracle model~\cite{BCS16}, this yields a knowledge-sound non-interactive argument (SNARK) when the PIOP is compiled with Zip$+$ and Fiat--Shamir (\cref{thm: compilation}).
+
+    \medskip
+
+    \noindent\emph{\underline{Zinc$+$ in a nutshell}.} 
+    In simple terms, the Zinc+ PIOP compiler works as follows: first, the prover sends an oracle (or oracles) $\oracle{\tilde{\wit}}$ to the multilinear extensions (MLE) of the witness vector(s) $\wit$. Second, all ideal membership constraints $Q(\ldots)\in \primeideal$ are reduced to strict equalities (over $\QQ, \QQ[X], \FF_q, \FF_q[X]$, etc.)  by checking that the evaluation on a random point of the MLE of $Q(\ldots)$ belongs to $\primeideal$. This way,  $Q(\ldots)\in \primeideal$ is replaced by an MLE evaluation claim, which is a strict equality. Third, the strict equality is projected onto a random finite field $\FF_q$ via one of the following maps, depending on whether our initial constraint is over $\QQ[X]$ or $\FF_q[X]$, respectively: 
+    \begin{equation}
+\begin{aligned}\psi_{q',a}: \QQ[X] &\to \FF_{q'} \\ f(X) &\mapsto f(a) \mod q' \end{aligned} \qquad \begin{aligned} \psi_{b}: \FF_q[X] &\to \FF_q \\ f(X) &\mapsto f(b) \end{aligned} 
+    \end{equation}
+    where $q'$ is a random prime when working over $\QQ[X]$, $a$ is a random integer, and  $b$ is a random element of $\FF_q$ (or of a field extension of $\FF_q$ if $q$ is small). 
+
+
+    Fourth, the resulting finite field equality is proved using any suitable PIOP $\Pi_{\FF}$ for constraints over a finite field $\FF$. During this step, every time the verifier of $\Pi_{\FF}$ queries the MLE of the projected witness at a point $\rr$, the Zinc+ verifier lifts $\rr$ and queries  $\oracle{\tilde{\wit}}$ at the lifted point, and then projects the resulting evaluation onto $\FF$. 
+
+\parhead{Zip$+$} An Interactive Oracle Proof of Proximity (IOPP) for handling commitments to multilinear polynomials whose coefficients belong to the rings mentioned above, i.e.\ $\QQ, \QQ[X],\FF_q, \FF_q[X]$. %\albertforkai{Do we have this mentioned somewhere? I.e.\ we can handle IOPPs for $F_q[X]$ right?} 
+    We call this IOPP Zip$+$ (\cref{sec:crypto_zip}). Zip$+$ is round-by-round knowledge sound, supports batched evaluations, and it can handle distance parameters up to the Mutual Correlated Agreement (MCA) bound of the underlying code (\cref{def:mca}) --unlike its predecessor Zip \cite{Zinc}, a PCS for multilinear polynomials with coefficients in the set $\QQ^{<\bitbound}$ of rationals of bit-size less than $\bitbound$. Zip$+$ is a modern version of the Brakedown/Ligero PCS \cite{Brakedown,Ligero} adapted to our rings and fields. 
+
+    In short, Zip$+$ allows one to commit to multilinear polynomials with coefficients in $\mainpolyring{\QQ}{\bitbound}{\degreebound}$, where $\mainpolyring{\QQ}{\bitbound}{\degreebound}$ denotes the set of rational polynomials of degree less than $\degreebound$ and coefficients in $\QQ^{<\bitbound}$. The commitment is done by using an improved version of Zip to commit to $\degreebound$ multilinear polynomials with coefficients in $\QQ^{<\bitbound}$. 
+    
+    In \cref{ss:efficiency-discussion} we discuss the efficiency of Zip$+$ in isolation and in the broader context of our compiled SNARK and use-cases.
+    
+
+    \medskip
+
+
+\parhead{Integer Pseudo Reed--Solomon (IPRS) codes}
+%
+%For this reason, we design a new family of linear codes over $\QQ$ and $\ZZ$, which we call Integer Pseudo Reed--Solomon (IPRS) codes. IPRS codes are not Reed--Solomon codes over the integers, but they have similar characteristics: they are minimum distance separable (MDS), they support efficient FFT-based encoding, and they do not blowup the bit-size of messages when encoding (which is an issue if one naively ports RS codes to the integers by evaluating polynomials on integer points). 
+%
+We introduce a new linear code over the field of rational numbers $\QQ$ and over the ring of integers $\ZZ$, which we call \emph{Integer Pseudo Reed--Solomon (IPRS) code} (\cref{ss:to_iprs}), and which we believe is of independent interest. This code is not a Reed--Solomon (RS) code over the integers, but it presents similar characteristics, namely it is minimum distance separable and admits a FFT encoding process. Additionally, IPRS codes do not blowup the bit-size of encoded messages (see next). 
+
+Our IOPP and multilinear PCS Zip$+$ relies at its core on  linear error correcting codes over $ \QQ, \QQ[X], \FF_q$, and $\FF_q[X]$. As with other code-based IOPPs, the performance of Zip$+$ is heavily influenced by both the minimum distance of the underlying code and the efficiency of its encoding. 
+Additionally, when working over $\QQ$ (or fields of size much larger than the size of the witness entries), one also needs to ensure that the bit-size of the codewords does not blowup compared to the bit-size of the messages. 
+
+
+\medskip
+
+\noindent\emph{\underline{IPRS codes in a nutshell}.}
+When working over small fields, Reed-Solomon (RS) codes are a natural choice as underlying code. These codes have optimal  minimum distance and support efficient FFT-based encoding. One could try to use RS codes over $\QQ$ or $\ZZ$ as well --- for example, by naively defining RS codes over $\QQ$ as the set of vectors obtained by evaluating low-degree polynomials on integer points. However, for practical code dimensions, the bit-size of the resulting codewords would be in the thousands or even millions, which would result in an inefficient IOPP. Alternatively, one could ``lift'' a standard RS code $\RS[\FF_q, n,k]$ from a small field $\FF_q$ onto $\QQ$ by looking at the Vandermonde generating matrix of $\RS[\FF_q, n,k]$ as an integer matrix with entries in $\{0,\ldots,q-1\}$, and defining the lifted code as the set of rational linear combinations of the rows of this matrix. However, this code does not have, a priori, an efficient FFT encoding. 
+
+
+IPRS codes constitute a middle ground between the two aforementioned RS-based constructions. In short, they are obtained by ``lifting'' to $\QQ$ the FFT encoding algorithm for a standard RS code over a small field $\FF_q$. Concretely, we fix such an FFT algorithm (by specifying its radix, twiddle factors, depth, etc.), and then we look at its twiddle factors and other constants as integers from $\{-(q-1)/2, \ldots, (q-1)/2\}$, and perform the FFT algorithm over $\QQ$, without performing modular reduction. The IPRS code is defined as the set of vectors obtained by applying such lifted FFT algorithm.  In \cref{ss:to_iprs} we discuss the performance and properties of these codes.
+
+
+\medskip
+\noindent\emph{\underline{RAA and JEA codes}.}
+Non RS-based codes such as RAA and JEA codes \cite{jea_codes,blaze} can be defined over $\QQ$ and $\ZZ$ without blowup issues and with efficient encoding. However, their \emph{proved} minimum distance is significantly smaller than that of RS codes and our IPRS codes.
+
+
+
+ 
+
+% \noindent We further describe a compiler that produces a SNARK for $\ucs$ from any round-by-round knowledge sound PIOP for $\ucs$ and a round-by-round knowledge sound IOPP for polynomials as Zip$+$. 
+
+%\parhead{Concrete SNARK for UCS} We instantiate the framework and compilers mentioned above, together with the Zip+ IOPP, to a concrete SNARK for an AIR-like subfamily of $\ucs$. We call this SNARK \emph{AirZinc} (\cref{ss:piop_uair_instantiation,ss:rolled_out_iop}). It is composed of our Zip+ IOPP together with a sumcheck-based PIOP for the AIR-like subfamily of $\ucs$. 
+
+\parhead{Implementation and Evaluation}% \albert{Revisit this}
+We partially implement our proof system (\cref{sec:experiments}). Concretely, we implement the Zip+ IOPP and a component of our PIOP.  We arithmetize  the SHA-256 compression function and the ECDSA verification algorithm as an instance of our UCS relation. Then we evaluate the implemented components on inputs corresponding to said arithmetizations. We expect the IOPP to constitute the most expensive part of our scheme, in prover time, proof size, and verifier time. Hence our benchmarks for the IOPP may be taken as a proxy for the performance of the full proof system on the arithmetized computations. 
+
+Our partial benchmarks provide preliminary evidence that, when run on computations of practical interest (such as SHA-256 hashing followed by ECDSA signature verification---see \cref{tab:computations}), a fully optimized end-to-end implementation of our schemes may approach the performance of state-of-the-art SNARKs in prover time, with comparable or smaller proof size, and a fast verifier. We emphasize that our current benchmarks are partial: they cover the Zip$+$ IOPP (which we expect to dominate the overall cost), together with most steps of the Zinc$+$ PIOP, but not the full end-to-end pipeline. Therefore, the figures reported below should be understood as \emph{indicative estimates}, not direct apples-to-apples comparisons with fully deployed systems. The next table describes the costs of our Zip$+$ IOPP compiled with Merkle tree commitments, which yields a hash-based polynomial commitment scheme. Throughout this paper, all reported Zip$+$ IOPP times include the cost of Merkle tree hashing.   In \cref{tab:sha256-snark-steps} we provide almost full prover performance for the Zinc+ PIOP. See \cref{sec:crypto_zip} for a detailed description of our experiments.  % \albert{Revisit wording}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{rrr}
+\toprule
+\multicolumn{3}{c}{\textbf{Zip$+$ IOPP  on  trace of $8$x SHA-256  $+$ ECDSA}} \\
+\midrule
+Prover (ms) & Verifier (ms) & Proof (KB) \\
+\midrule
+10.71 & 2.30 & 211 \\
+\bottomrule
+\end{tabular}
+\caption{Benchmarks for our Zip$+$ IOPP compiled with Merkle tree commitments, on a batched set of multilinear polynomials whose sizes and types correspond   to our arithmetization of $8$ SHA-256 compressions, followed by one ECDSA signature verification.  All reported times include the cost of Merkle tree hashing.  The compiled IOPP  is expected to dominate all costs of our proof system (see \cref{sec:experiments,ss:efficiency-discussion}), and so we view these benchmarks as a rough estimate of times Zinc+ could achieve on this task. We note that ours is a PoC implementation.}
+\label{tab:intro_benchmarks}
+\end{table}
+
+
+
+The following table lists some computations of practical interest in the context of SNARKs, and the types of operations they involve. 
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}l*{7}{c}@{}}
+\toprule
+\textbf{Computation} & $\ZZ/2^w\ZZ$ & \shortstack{\textbf{Bit}} & $\FF_q$ & $\FF_{2^w}$ & $\ZZ/n\ZZ$ & $\ZZ$ or $\QQ$ & $R_{\mathsf{latt}}$ \\
+\midrule
+\multicolumn{8}{@{}l}{\emph{Cryptographic primitives}} \\
+Classic hashes (SHA, etc.) & \checkmark & \checkmark & & & & & \\
+AES / symmetric encr. & \checkmark & \checkmark & & \checkmark & & & \\
+Elliptic curve crypt. & &  & \checkmark & & & & \\
+Lattice crypt. & \checkmark & & & & & & \checkmark \\
+RSA crypt. & & & & & \checkmark & & \\
+\midrule
+\multicolumn{8}{@{}l}{\emph{Applications}} \\
+zkVMs / CPU emulation & \checkmark & \checkmark & \checkmark & & & & \\
+zkID & \checkmark & \checkmark & \checkmark & & \checkmark & & \\
+Blockchain transactions & \checkmark & \checkmark & \checkmark & & & & \\
+TLS (AEAD) & \checkmark & \checkmark & \checkmark & \checkmark & & & \\
+Proof recursion (classic hash) & \checkmark & \checkmark & \checkmark & & \checkmark & & \\
+Hash-to-curve & \checkmark & \checkmark & \checkmark & & & & \\
+% XMSS with Poseidon & & \checkmark & \checkmark & & & & \\
+FHE & \checkmark & & & & & \checkmark & \checkmark \\
+Machine learning & & & & & & \checkmark & \\
+Finance & & & & & & \checkmark & \\
+%\midrule
+%\multicolumn{8}{@{}l}{\emph{Further applications (cf.\ \cref{ss:further_operations})} \albert{Revisit}} \\
+%ZK biometric auth. & \checkmark & \checkmark & & & & & \\
+%Electronic voting & & \checkmark & \checkmark & & & & \\
+%Code-based PQ crypto & & \checkmark & & \checkmark & & & \\
+\bottomrule
+\end{tabular}
+\caption{Common computations and the types of arithmetic they require. Columns named with a ring $R$ refer to ``addition and multiplication $R$''. The Bit column refers to operations such as XOR, AND, rotations, shifts, etc. For an integer $m\geq 1$,  $\ZZ/m\ZZ $ denotes integers modulo $m$ (where composite $m$ are relevant in RSA cryptography and lattices, FHE, etc.). Further, $\FF_q$ is a finite field (often prime); $\FF_{2^w}$ denotes fields of size $2^w$; and $R_{\mathsf{latt}}$ denotes rings relevant to lattice-based cryptography such as  cyclotomic rings $\ZZ[X]/(X^n+1)$.\\\hspace{\textwidth}
+% Per row, we checkmark a cell if there is some common instantiation of the application that uses the corresponding type of operation, even if not all instantiations do.\newline
+\phantom{     }zkID refers to performing a classic hash followed by a signature verification with, e.g.\ ECDSA or RSA. Proof recursion refers to proving acceptance of a SNARK verifier in a context where the original proof system uses classic hashes (due to Fiat-Shamir or Merkle tree commitments); it has $\ZZ/n\ZZ$ checkmarked as it sometimes requires using different moduli, e.g.\ in IVC recursion \cite{Nova}. Hash-to-curve refers to algorithms that iteratively perform hashes and check membership of points on an elliptic curve. zkVMs may use so-called precompiles/builtins to perform computations such as ECDSA verification. In this case they also involve prime field arithmetic.}
+\label{tab:computations}
+\end{table}
+
+
+\subsection{Related work}
+\label{ss:related_work} 
+
+%\albert{Add the new Alireza paper}
+
+\parhead{SNARKs for integer constraints}
+Zinc \cite{Zinc} presents a framework for building proof systems for constraints over $\ZZ$ or $\QQ$ and introduces a hash-based PCS for polynomials with coefficients in $\QQ$, built with a tensor IOPP similar to the one introduced in Brakedown~\cite{Brakedown}.
+
+Our work improves upon \cite{Zinc} significantly in the following ways. (1) our UCS constraints strictly generalize Zinc's, which is restricted to constraints over $\ZZ$ and $\QQ$, by additionally supporting multiple finite fields, polynomial rings $R[X]$, and ideal-membership predicates. UCS supports simultaneously multiple rings and fields of the form $R^{<d}[X]$ and ideal membership constraints, which, as we demonstrate, enriches the expressivity of the constraint system substantially. (2) We design a PIOP framework for these more general constraints.  Additionally, we prove round-by-round knowledge soundness, allowing for Fiat-Shamir compilation. (3) Our IOPP Zip$+$ is an improvement to the PCS from \cite{Zinc} in that it supports polynomials over a wide range of rings and fields, can handle proximity parameters up to the MCA bound of the underlying code (\cref{def:mca}) (this greatly helps reduce proof size and verifier time), merges the so-called ``test'' and ``evaluate'' phases into one, is proved to be round-by-round knowledge sound, and has batching capabilities. (4) We improve upon the underlying linear code with our IPRS codes. (5) We demonstrate the practicality of our approach with our implementation and evaluation.
+
+Zartan~\cite{Zartan} builds SNARKs over $\ZZ$ by compiling so-called mod-AHPs with a PCS for integral polynomials based on hidden-order groups~\cite{BlockDARK,BunzFisch22}. %\albert{Sentence seems weird}
+We adopt the idea from~\cite{Zartan} of working modulo a random prime, but replace the hidden-order-group PCS with a hash-based PCS (Zip$+$), thereby avoiding the stronger cryptographic assumptions (e.g.\ the adaptive root assumption) that hidden-order-group commitments require. Moreover, as in the comparison with Zinc \cite{Zinc}, our scheme works with constraint systems that are substantially more expressive than Zartan's.
+
+
+\parhead{Binary-field SNARKs}
+Binius~\cite{binius,fribinius} is a series of SNARKs for relations over binary fields $\FF_{2^k}$. Binary fields are more friendly to bitstring operations than prime fields. For example, bitwise XOR can be modeled as addition in  $\FF_{2^k}$. However, AND, rotation, and modular-$2^w$ arithmetic remain non-native in binary fields. Despite this, Binius achieves significant improvements on computations involving bitstring operations and arithmetic modulo $2^w$, when compared to prime-field SNARKs~\cite{ethproofs}. We believe this is in part due to $\FF_{2^k}$ being more amenable to some of these operations, and due to the \emph{pay-per-bit} capacity of Binius' IOPP. 
+
+%\albert{Revisit wording}
+Our benchmarks show that, for computations dominated by bitstring and modular-integer operations (e.g.\ SHA-256 hashing), Zinc$+$ achieves performance competitive with Binius. For computations that additionally involve prime-field arithmetic (e.g.\ SHA-256 followed by ECDSA signature verification), our results indicate a clear advantage, since Zinc$+$ handles prime-field constraints natively whereas Binius must emulate them over binary fields. While not evaluated in the benchmarks of this paper, Zinc$+$ can natively handle further constraints such as lattice-based encryption combined with classic hashing (see \cref{ss:further_examples}).  
+
+\parhead{Proof systems over rings}
+There are a number of works describing SNARKs over different types of specific rings, such as cyclotomic rings \cite{beullens2023labrador}, Galois rings \cite{new_rings_work_one,new_rings_work_two}, and  abstract rings with large exceptional sets \cite{bootle2021sumcheck,attema2022vector,soria2022doubly}. Approaches for proving statements modulo $2^n$ are based on VOLE techniques (see, e.g.\ \cite{C:LinXinYao24,baum2021appenzeller,baum2022moz}) but yield non-succinct schemes.  %Efficient lattice-based SNARKs are set over power-of-two cyclotomic rings \cite{beullens2023labrador}, and come with the downside of proofs having at least a quadratic dependence on the security parameter. Other works are set over Galois rings, and show how to prove cyclotomic ring constraints by projecting to Galois rings, thereby avoiding the dimensional overhead (i.e.\ polynomial dependence on $\lambda$) implicit in lattice-based commitments \cite{new_rings_work_one,new_rings_work_two}. More generally, some papers describe protocols for any ring/module with sufficiently large exceptional sets \cite{bootle2021sumcheck,attema2022vector,soria2022doubly}, but this requirement often results in significant embedding overhead, and still restricts the circuit to a single ring.
+%
+Unlike our work, none of these approaches support the wide range of rings and fields that we can handle with our framework, including constraints over $\ZZ$ and $\ZZ[X]$. The recent works FREPack~\cite{FREPack} and Swirl~\cite{swirl} treat the problem of allowing different constraint domains within the same proof system. FREPack focuses on highly repetitive computations and packs multiple field operations into a single CCS/R1CS constraint via the Chinese Remainder Theorem, achieving significant speedups for structured circuits but limiting its flexibility: the rings used must factor the chosen CRS modulus, and the approach does not natively support polynomial-ring constraints or ideal-membership predicates as UCS does. Swirl stacks WHIR with LogUp to handle lookups across different subfields within a single proof, but remains in a finite-field setting and does not address constraints over $\ZZ$, $\QQ$, or polynomial rings $R[X]$. In contrast, Zinc+ supports constraints over $\ZZ, \QQ, \FF_q$ and their polynomial ring counterparts simultaneously, with ideal-membership predicates that natively capture operations such as bitstring rotation and modular reduction without additional encoding.
+
+\parhead{Applications}
+In this work we discuss the example of SHA-256 hashing followed by ECDSA signature verification. Two recent approaches to this, which additionally include document parsing, are \cite{longfellow,vega}. As future work, we plan to include document parsing in our arithmetizations and compare our scheme with these approaches.
+
+\subsection{Acknowledgments}
+\label{sec:acknowledgments}
+
+We thank Benedikt B\"unz, Giacomo Fenzi, Amit Kumar, Alin Tomescu, and Arantxa Zapico for helpful discussions and contributions to the implementation.
+
+The authors used AI-based tools (GitHub Copilot, ChatGPT) for grammar checking, editing, and assisting with code generation during the preparation of this manuscript. The authors bear full responsibility for the correctness and originality of all content.

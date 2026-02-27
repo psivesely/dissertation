@@ -1,0 +1,169 @@
+\subsection{Zinc+: a PIOP for UCS from PIOPs over finite fields}
+\label{ss:to_zinc_plus_compiler}
+
+We now describe the Zinc$+$ compiler, which constructs a PIOP for our UCS relation~$\ucs$ from PIOPs for standard algebraic relations over finite fields. The compiler generalizes the Zinc compiler from~\cite{Zinc}, which handles algebraic relations over~$\QQ$. %In particular, it works in the polynomial-ring setting of~$\QQ[X]$ and handles ideal-membership constraints.
+%
+
+For clarity, we present a simplified version that focuses on UCS instances that only have $\QQ[X]$-constraints (i.e.\ instances where $\primetuple=\emptyset$, so there are no $\FF_{q_i}[X]$-constraints). The general case  is discussed in \cref{rem:fq_adaptation_overview} below and treated fully in \cref{sec:zincplus-pior}.
+
+Recall that for a prime $q$, $\local{q}$ denotes the subring of $\QQ$ formed by rationals whose denominator (in lowest form) is not divisible by $q$, cf.\ \cref{s:basic_notions}.  We let $$\phi_q:\local{q}[X]\to \FF_q[X]$$  be the natural projection that reduces coefficients modulo~$q$. We also let \begin{align*}\psi_{a}:\FF_q[X]&\to \FF_q\\ f&\mapsto f(a) \end{align*} be the evaluation map that replaces $X$ by $a$. Both $\phi_q$ and $\psi_{a}$ are ring homomorphisms. We let $$\psi_{q,a} = \psi_a \circ \phi_q:\local{q}[X]\to \FF_q$$ be the composition of the two maps.
+
+
+\subparagraph{From UCS constraints over $\QQ[X]$ to algebraic constraints over a finite field.}
+
+Recall that a $\QQ[X]$-constraint in $\ucs$ takes the form
+\begin{equation}\label{eq:to_qx_constraint}
+Q(\rowindex, \yy, \ff_0)\in \primeideal, \qquad \text{for all rows } \rowindex\in [\numrows],
+\end{equation}
+where $Q$ is a polynomial with coefficients in $\QQ$ and involving $\rowindex$, the public input~$\yy\in \mainpolyring{\QQ}{\bitbound}{\degreebound_0}^{\inplen}$ and the witness~$\ff_0\in \mainpolyring{\QQ}{\bitbound}{\degreebound_0}^{\witlen}$, and $\primeideal\subseteq \QQ[X]$ is an ideal. Assume $\numrows=2^\mu$ and identify $[\numrows]$ with $\{0,1\}^\mu$.  %We let $v_\constraintindex:\{0,1\}^\mu\to\QQ[X]$ be defined as
+%
+%$
+%v_Q(\bb) \defeq Q(\bb, \yy, \ff_0) \quad \text{for all } \bb\in\{0,1\}^\mu,
+%$
+We assume without loss of generality that $\primeideal \neq \QQ[X]$, since otherwise the constraint is always satisfied.
+
+Our Zinc$+$ compiler first reduces the constraint \eqref{eq:to_qx_constraint} to standard algebraic constraints over a finite field $\FF_q$ via a three-step process. After that, it invokes any suitable PIOP working over $\FF_q$ to certify said constraints. The three-step process is formed by (1) a randomized projection from  $\local{q}[X]\subseteq \QQ[X]$ onto $\FF_q[X]$, where $q$ is a randomly sampled prime, which reduces \eqref{eq:to_qx_constraint} to an ideal membership constraint over $\FF_q[X]$ of the form 
+\begin{equation}\label{eq:to_qx_constraint_proj}
+\phi_q(Q)(\rowindex, \phi_q(\yy), \phi_q(\ff_0))\in \primeideal', \qquad \text{for all rows } \rowindex\in [\numrows],
+\end{equation} 
+where  $\primeideal' = \phi_q(\primeideal\cap \local{q})$;
+%
+(2) a randomized \emph{ideal check} that replaces the $2^\mu$ ideal membership constraints in \eqref{eq:to_qx_constraint_proj} with a strict equality over $\FF_q[X]$; and (3) a randomized \emph{projection} from $\FF_q[X]$ onto the finite field $\FF_q$, which turns the strict equality over $\FF_q[X]$ from Step (2) into an equality over $\FF_q$.  
+
+
+
+
+We note that $\phi_{q}$ is only well-defined on the subring $\local{q}[X]$ of $\QQ[X]$. In our completeness and security proofs, we show that for random $q$ the probability that the relevant elements do not belong to this subring is negligible.   For brevity, we do not consider this issue further in the present overview. We refer to \cref{subsec:ucs-pior-security} for the technical details, or to the technical overview of the Zinc paper~\cite{Zinc}, where this matter is discussed thoroughly.
+
+
+
+We remark that both Zartan \cite{Zartan} and Zinc \cite{Zinc} already used a randomized projections onto finite fields. In particular, \cite{Zartan} projects $\ZZ$ onto $\FF_q$ for $q$ a random prime, and \cite{Zinc} projects $\local{q}$ onto $\FF_q$. Overall, Zinc+ employs the projection given by $\psi_{q,a} = \psi_a \circ \phi_q$, which is applied in a two-stage manner: first $\phi_q$ is applied in Step (1), and then $\psi_a$ is applied in Step (3). 
+
+\medskip
+
+
+We next describe the Zinc+ compiler in more detail.
+
+\subparagraph{Step 1: Prime projection from $\QQ[X]$ onto $\FF_q[X]$.}
+
+The verifier samples a random $\Omega(\lambda)$-bit prime~$q$. The constraint~\eqref{eq:to_qx_constraint} is replaced by 
+\[
+\phi_q(Q)(\bb, \phi_q(\yy), \phi_q(\ff_0)) \in \primeideal', \qquad \text{in } \FF_q[X],\ \text{ for all } \bb\in\{0,1\}^\mu,
+\]
+where $\primeideal' = \phi_q(\primeideal \cap \local{q}[X])$.
+
+\begin{proof}[Proof sketch of soundness for Step 1]
+When $\primeideal=(0)$, if $Q(\bb,\yy,\ff_0) = 0$ fails over~$\QQ[X]$ for some~$\bb$, the element $Q(\bb,\yy,\ff_0)\in \QQ[X]$ is a nonzero polynomial in~$\QQ[X]$, and it vanishes modulo~$q$ only when $q$ divides the numerators of its coefficients in lowest form. Say that such a prime~$q$ is ``bad''.
+By a counting argument (cf.\ \cref{lemma:prime-division-bound} and~\cite{Zinc}), only polynomially many primes cause this, so the probability of sampling a bad prime is negligible provided the set of sampleable primes is large enough (see \cref{rem:bounded_coeffs} for some comments on this).
+
+
+
+Now assume $\primeideal\neq (0)$. We want to show that if $Q(\bb,\yy,\ff_0)\notin \primeideal$ for some~$\bb$, then $\phi_q(Q(\bb,\yy,\ff_0))\notin \primeideal'$ except with negligible probability over the choice of~$q$. Every ideal of $\QQ[X]$ (and of~$\FF_q[X]$) is principal. Let $g$ denote the monic generator of~$\primeideal$. Since $\primeideal\neq \QQ[X]$, we have $\deg g \geq 1$. Because $g$ is monic, $\phi_q(g)$ has the same degree as~$g$ whenever $g\in \local{q}[X]$, which fails only for the finitely many primes dividing a denominator of some coefficient of~$g$; in particular $\primeideal' = (\phi_q(g))$ with $\deg\phi_q(g)=\deg g$ except with negligible probability.
+
+If $\deg Q(\bb,\yy,\ff_0) < \deg g$, consider two cases. If $\phi_q(Q(\bb,\yy,\ff_0))=0$ in~$\FF_q[X]$, then $Q(\bb,\yy,\ff_0)$ is a nonzero element of~$\QQ[X]$ that vanishes modulo~$q$, and the counting argument from the $\primeideal=(0)$ case shows this happens with negligible probability. Otherwise $\phi_q(Q(\bb,\yy,\ff_0))\neq 0$, and since its degree is less than $\deg\phi_q(g)$, it cannot belong to $(\phi_q(g))=\primeideal'$, so soundness holds.
+
+If $\deg Q(\bb,\yy,\ff_0) \geq \deg g$, we write $Q(\bb,\yy,\ff_0) = g\cdot h + r$ via Euclidean division in~$\QQ[X]$, where $\deg r < \deg g$. Euclidean division is exact over~$\QQ[X]$ (since $\QQ$ is a field), and the quotient $h$ and remainder $r$ are uniquely determined. Because $Q(\bb,\yy,\ff_0)\notin (g)$, the remainder $r$ is nonzero. Moreover, since $g$ is monic, the Euclidean division algorithm introduces no new denominator primes: each step subtracts a monomial multiple of~$g$ from the current polynomial, and since $g$ has leading coefficient~$1$, no denominator prime factors, other than the ones already present in $Q$ and $g$, are used. Consequently, the coefficients of both~$h$ and~$r$ lie in~$\local{q}$ whenever those of $Q(\bb,\yy,\ff_0)$ and~$g$ do (which holds except for negligibly many primes~$q$). Once we have $r\neq 0$ with $\deg r < \deg g$, the low-degree argument above applies to~$r$ after projection: $\phi_q(Q(\bb,\yy,\ff_0)) = \phi_q(g)\cdot\phi_q(h) + \phi_q(r)$, and since $\deg\phi_q(r) < \deg\phi_q(g)$, the element $\phi_q(Q(\bb,\yy,\ff_0))$ can belong to~$(\phi_q(g))=\primeideal'$ only if~$\phi_q(r)=0$, which happens with negligible probability by the counting argument for the zero-ideal case.  See \cref{lemma:prime-division-bound} for the precise bound on the number of bad primes. \albert{Psi, is this accurate?}  \end{proof}
+
+\begin{remark}[Correct typing of $\yy$ and $\ff_0$]\label{rem:bounded_coeffs} In the above argument, it is essential that the entries of $\yy$ and $\ff_0$ belong to $\mainpolyring{\QQ}{\bitbound}{\degreebound_0}$, i.e.\ that the entries are polynomials of degree bounded by $\degreebound_0$, and with coefficients of bit-size less than $\bitbound$. This is necessary to conclude that only polynomially many primes can divide the coefficients of $Q(\bb,\yy,\ff_0)$. In our PIOP soundness model, we assume malicious PIOP provers send oracles to polynomials whose coefficients belong to  $\mainpolyring{\QQ}{\bitbound}{\degreebound_0}$ (and, perhaps, other appropriately typed sets). We delegate the task of enforcing this correct typing \albert{name?} to the Polynomial Commitment Scheme (PCS) or to the IOPP. See \cref{rem:piop_iopp_separation} for more details, and the technical overview of Zinc \cite{Zinc} for a thorough discussion of this matter.
+\end{remark}
+
+\subparagraph{Step 2: Ideal check via random MLE evaluation.}
+
+The projected constraint from Step~1 requires $\phi_q(Q)(\bb, \phi_q(\yy),\phi_q(\ff_0))\in \primeideal'$ for all $\bb\in\{0,1\}^\mu$ over~$\FF_q[X]$. Let $\bar v(\rowvar)$ denote the multilinear polynomial on $\mu$ variables such that $\bar v(\bb) = \phi_q(Q)(\bb, \phi_q(\yy), \phi_q(\ff_0))$ for all $\bb \in \{0,1\}^\mu$. The verifier samples a random point $\rr\getsr S^\mu$ for a large subset $S\subseteq \FF_q$, and the prover sends
+\[
+e = \bar v(\rr) = \sum_{\bb\in\{0,1\}^\mu} \phi_q(Q)(\bb, \phi_q(\yy),\phi_q(\ff_0)) \cdot \meq(\bb;\rr) \quad \in \FF_q[X].
+\]
+The verifier checks that $e\in \primeideal'$. 
+Then the original $\numrows$-row constraint~\eqref{eq:to_qx_constraint_proj} is replaced by the constraint  
+\begin{equation}\label{e:strict_in_Fq_X}\phi_q(\Sigma^{\rr,e})(\phi_q(\yy), \phi_q(\ff_0))=0, \qquad \text{in }\FF_q[X],\end{equation} where $\Sigma^{\rr,e}(\inpvar, \ZZZ)$ is defined as
+\[
+\phi_q(\Sigma^{\rr,e})(\inpvar, \ZZZ) \defeq \sum_{\bb\in\{0,1\}^\mu}  \phi_q(Q)(\bb, \inpvar, \ZZZ)\cdot \meq(\bb;\rr) - e \quad \in (\FF_q[X])[\inpvar, \ZZZ],
+\]
+The prover and verifier will now focus on proving the strict equality \eqref{e:strict_in_Fq_X} over $\FF_q[X]$.
+
+
+\begin{proof}[Proof sketch of soundness for Step 2]
+
+The following lemma justifies that if $e\in \primeideal'$, then with high probability over the choice of $\rr$, the original ideal membership constraints hold as well.
+
+\begin{lemma}[Testing ideal membership via MLE evaluation; informal version of \cref{lem:ideal-batching}]
+\label{lem:ideal_membership_mle_test}
+Let $\KK$ be a field, let $\primeideal\subseteq \KK[X]$ be an ideal such that $\primeideal\cap \KK=(0)$, and let $n=2^\mu$.
+Let $\vv\in\KK[X]^n$ be a vector and $\multilinmle{\vv}$ its multilinear extension.
+If not all entries of $\vv$ belong to $\primeideal$, then for any finite $S\subseteq \KK$ and uniformly random $\rr \gets S^\mu$,
+\(
+\Pr[\multilinmle{\vv}(\rr) \in \primeideal] \le \frac{\mu}{|S|}.
+\)
+\end{lemma}
+The result follows by projecting onto the quotient ring $\KK[X]/\primeideal$ and applying the Schwartz--Zippel lemma for exceptional sets (\cref{lem:sz_exceptional_sets}); a full proof is given in \cref{lem:ideal-batching}. 
+Note that here we have $\primeideal'\cap \FF_q=(0)$ because $\primeideal \neq \QQ[X]$ and is generated by a monic polynomial. \albert{Psi, did you analyse this?}
+%$
+%
+\end{proof}
+
+Thus ideal-membership predicates can be handled analogously to strict equalities in standard proof systems: just as one checks $\multilinmle{\uu}(\rr)=0$ (i.e.\ membership in the zero ideal) to test whether all entries of a vector~$\uu$ are zero, one checks $\multilinmle{\uu}(\rr)\in\primeideal'$ to test whether all entries of~$\uu$ belong to~$\primeideal$.
+
+% \begin{comment}
+% \begin{remark}[Cost of the ideal check]\label{rem:ideal_check_cost}
+% In full generality, computing the elements $e_t$ can require performing computations between polynomials modulo the ideal $\primeideal'$. Concretely, for our first example in \cref{s:crypto_ucs}, and our SHA-256+ECDSA arithmetization \cref{ss:sha256_64_rounds}, this can be computed by essentially only performing $\FF_q$-scalar operations on $\FF_q[X]$, without the need for polynomial multiplication. We expect the later to arise mostly around lattice-based computations. 
+% \end{remark}
+% \end{comment}
+
+\subparagraph{Step 3: Evaluation projection from $\FF_q[X]$ to $\FF_q$.}
+
+The verifier samples a random element $a\getsr \FF_q$ and both parties apply the evaluation map~$\psi_a$. Keeping in mind that $\psi_a$ is a ring homomorphism, the claim $\phi_q(\Sigma^{\rr,e})(\phi_q(\yy), \phi_q(\ff_0))=0$ in~$\FF_q[X]$ is replaced by
+\begin{equation}\label{e:new_claim}
+\psi_{q,a}\!\bigl(\Sigma^{\rr,e}\bigr)\!\bigl(\psi_{q,a}(\yy),\, \psi_{q,a}(\ff_0)\bigr) = 0 \qquad \text{in } \FF_q,
+\end{equation}
+where we used $\psi_a \circ \phi_q = \psi_{q,a}$. 
+
+\begin{proof}[Proof sketch of soundness for Step 3]  The field element $\psi_{q,a}\!\bigl(\Sigma^{\rr,e}\bigr)\!\bigl(\psi_{q,a}(\yy),\, \psi_{q,a}(\ff_0)\bigr)$ is the result of evaluating the polynomial $u(X)=\phi_q(\Sigma^{\rr,e})(\yy, \ff_0)\in \FF_q[X]$ at $X=a$. If $u$ is nonzero, then the probability that \eqref{e:new_claim} holds is at most $\deg u/|\FF_q|$. This is negligible as long as $\degreebound_0$ and $\deg Q$ are much smaller than $|\FF_q|$.
+\end{proof}
+
+
+
+\subparagraph{Combining the three steps.}
+
+The following diagram summarizes the three steps of the reduction from $\QQ[X]$-constraints to algebraic constraints over $\FF_q$:
+\[
+\QQ[X] \xrightarrow[\text{(Step 1)}]{\phi_q} \FF_q[X] \xrightarrow[\text{(Step 2: ideal check)}]{\text{MLE eval at } \rr} \FF_q[X] \xrightarrow[\text{(Step 3)}]{\psi_a} \FF_q.
+\]
+Since~\eqref{e:new_claim} is a standard algebraic claim over a finite field, the prover and verifier can now invoke any PIOP for algebraic relations over~$\FF_q$ to prove it. In particular, the verifier can query the oracle $\oracle{\psi_{q,a}(\tilde{\ff}_0)}$ at any point $\rr\in \FF_q^\mu$ by querying $\oracle{\tilde{\ff}_0}$  at $\hat{\rr}$ and then applying $\psi_{q,a}$ to the result, where $\hat{\rr}$ is a preimage of $\rr$ under the map induced by $\psi_{q,a}$. 
+
+
+
+The overall protocol is summarized informally in \cref{a:tech_overview_zincplus_compiler}; the formal version is given in Protocol~\ref{prot:zincplus-ucs-pior} in \cref{sec:zincplus-pior}.
+
+% \begin{breakablealgorithm}
+\begin{figure}[h!]
+\caption{$\Zinc^+$-$\PIOP$ (simplified, $\QQ[X]$-part only): a PIOP for $\ucs$ from PIOPs over finite fields (informal).}
+\label{a:tech_overview_zincplus_compiler}
+\textbf{Input:} $\prover$ and $\verifier$ receive $(\idx, \inp;\wit)\in \ucs$ and $(\idx, \inp)$, respectively, with $\wit=(\ff_0)$, $\ff_0\in (\mainpolyring{\QQ}{\bitbound}{\degreebound})^{\witlen}$.
+\begin{algorithmic}[1]
+\STATE $\prover$ sends the oracle $\oracle{\tilde{\ff}_0}$ to the multilinear extension of~$\ff_0$.
+\STATE \textbf{(Step 1: Prime projection.)} $\verifier$ samples a random $\Omega(\lambda)$-bit prime~$q$. Both parties replace each constraint $Q(\bb,\yy,\ff_0)\in \primeideal\ (\forall \bb\in \{0,1\}^\mu)$  (cf.\ \eqref{eq:to_qx_constraint}) in $\QQ[X]$,  by the constraint $$\phi_q(Q)(\bb,\phi_q(\yy),\phi_q(\ff_0))\in \primeideal' \qquad \forall \bb\in \{0,1\}^\mu$$  in~$\FF_q[X]$ (cf.\ \eqref{eq:to_qx_constraint_proj}). If some application of $\phi_q$ is not well defined, the protocol aborts. 
+\STATE \textbf{(Step 2: Randomized ideal check.)} $\verifier$ samples $\rr\getsr (\FF_q)^\mu$. For each constraint~$(Q,\primeideal)$, $\prover$ computes and sends $e\in \FF_q[X]$, which is supposedly the evaluation at $\rr$ of the multilinear extension (MLE) of the vector $(\phi_q(Q)(\bb,\phi_q(\yy),\phi_q(\ff_0)))_{\bb\in \{0,1\}^\mu}$ in $\FF_q[X]$, i.e.\ supposedly $$0 =  \phi_q(\Sigma^{\rr,e})(\phi_q(\yy), \phi_q(\ff_0)) =\sum_{\bb\in\{0,1\}^\mu} \phi_q(Q)(\bb,\phi_q(\yy),\phi_q(\ff_0)) \cdot \meq(\bb;\rr) -e \qquad \text{in } \FF_q[X].$$   
+$\verifier$ checks $e \in \primeideal'$ (over~$\FF_q[X]$). The new claim is \eqref{e:strict_in_Fq_X}, i.e.\ $\phi_q(\Sigma^{\rr,e})(\phi_q(\yy), \phi_q(\ff_0))=0$ in~$\FF_q[X]$.
+\STATE \textbf{(Step 3: Evaluation projection.)} $\verifier$ samples $a\getsr \FF_q$ and both parties evaluate $\phi_q(\Sigma^{\rr,e})(\phi_q(\yy), \phi_q(\ff_0))\in \FF_q[X]$ at $X=a$, obtaining the finite-field claim~\eqref{e:new_claim}, i.e.\
+\begin{equation}\label{eq:final_claim}
+\psi_{q,a}\!\bigl(\Sigma^{\rr,e}\bigr)\!\bigl(\psi_{q,a}(\yy),\, \psi_{q,a}(\ff_0)\bigr) = 0 \qquad \text{in } \FF_q.
+\end{equation}
+\STATE \textbf{(Finite-field PIOP.)} $\prover$ and $\verifier$ execute a PIOP over~$\FF_q$ to prove the above claim. Oracle queries to the witness are answered by querying $\oracle{\tilde{\ff}_0}$ at an appropriate lifted point, and applying $\psi_{q,a} = \psi_a\circ \phi_q$ to the result.  $\verifier$ accepts if and only if the finite-field PIOP accepts.
+\end{algorithmic}
+\end{figure}
+% \end{breakablealgorithm}
+
+\begin{remark}[Adaptation to {$\FF_{q_i}[X]$}-constraints]\label{rem:fq_adaptation_overview}
+The full Zinc$+$ compiler (Protocol~\ref{prot:zincplus-ucs-pior} in \cref{sec:zincplus-pior}) also handles $\FF_{q_i}[X]$-constraints. The treatment is analogous: Step (1) is skipped; the ideal check (Step 2) works identically (since \cref{lem:ideal_membership_mle_test} applies over any field), and the evaluation projection (Step 3) uses a map $\psi_{q_i,a_i}:\FF_{q_i}[X] \to \FF_{\tilde q_i}$ that evaluates at a random element~$a_i$ of a sufficiently large extension field~$\FF_{\tilde q_i}$ of~$\FF_{q_i}$. Choosing the extension degree~$\ell_i$ large enough (so that $|\FF_{\tilde q_i}|\geq \Omega(2^\lambda)$) ensures negligible soundness error for each $\FF_{q_i}[X]$-part. 
+
+
+The $\FF_{q_i}[X]$-constraints pose some technical hurdles of their own. For instance, when $q_i$ is small (say $q_i=2$), the extension $\FF_{\tilde{q}_i}$ must be large, and one must analyse the event that $a_i\in \FF_{\tilde q_i}$ has small extension degree over~$\FF_{q_i}$ (e.g.\ $a_i$ happens to belong to the base field $\FF_{q_i}$), which prevents the image of the projection  $\psi_{a_i}$ from covering all of~$\FF_{\tilde q_i}$ and can cause a soundness loss. Fortunately, this bad event can be shown to occur with negligible probability.
+
+The $\QQ[X]$-part and the $\FF_{q_i}[X]$-parts are compiled independently: each part is projected to its own finite field ($\FF_q$ for the $\QQ[X]$-part, $\FF_{\tilde q_i}$ for each $\FF_{q_i}[X]$-part), and independent finite-field PIOPs are invoked for each. The witness vector~$\ff_0$, shared across all parts, is handled by answering the verifier's finite-field oracle queries via queries to the original $\QQ[X]$-oracle~$\oracle{\tilde \ff_0}$ composed with the appropriate projection. The knowledge error from each part is bounded separately, and the overall error is obtained by a union bound. 
+
+\end{remark}
+
+%\subparagraph{Combined soundness error.}
+%The three-step reduction introduces a knowledge error contribution from each step. Step~1 (prime projection) fails only if the randomly sampled prime~$q$ divides a coefficient of a nonzero constraint evaluation; the number of such ``bad'' primes is polynomial in the instance parameters, so the error is bounded by $2^{-\lambda}$ when $|\primeset|(\bitbound_\primeset-1)\geq 2^{\lambda+4}\degreebound_0^2\bitbound$. Step~2 (ideal check via random MLE evaluation) contributes an error of at most $\mu/|S|$ by \cref{lem:ideal_membership_mle_test}, which is negligible for $|S|\geq 2^\lambda$. Step~3 (evaluation projection from $\FF_q[X]$ to $\FF_q$) contributes an error of at most $\deg u/|\FF_q|$, which is negligible for $|\FF_q|\geq 2^\lambda$. Overall, the Zinc$+$ PIOP achieves round-by-round knowledge soundness with per-round knowledge error at most $2^{-\lambda}$ (\cref{thm:zincplus-pior-knowledge}), provided the prime set and field extensions are chosen to satisfy the parameter constraints stated therein.
+
+

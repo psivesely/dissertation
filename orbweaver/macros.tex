@@ -1,0 +1,173 @@
+% allow in-line math breaks
+\defcommand{\CB}{\allowbreak}
+
+\defcommand{\norm}[1]{\emath{\left\| #1 \right\|}}
+% such that in probability statements
+\defcommand{\pST}{\; \middle| \;}
+% \DeclareMathOperator{\max}{max}
+\defcommand{\Or}{\vee}
+\defcommand{\And}{\wedge}
+\defcommand{\Not}{\neg}
+\defc{\defeq}{:=}
+\defcommand{\set}[1]{\ensuremath{\mleft\{#1\mright\}}}
+\defcommand{\pair}[2]{(#1 ,\CB #2)}
+\defcommand{\quintuple}[5]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5)}
+\defcommand{\quintuplenp}[5]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5}
+\defcommand{\sextuple}[6]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6)}
+\defcommand{\septuplenp}[7]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7}
+\defcommand{\octuplenp}[8]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7,\CB #8}
+\defcommand{\nonuplenp}[9]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7,\CB #8,\CB #9}
+
+% expectation
+\defcommand{\prob}[1]{\Pr\left[ #1 \right]}
+
+% types
+\defc{\bits}{\{0,1\}}
+\defc{\naturals}{\mathbb{N}}
+\defc{\cmplx}{\mathbb{C}}
+\defc{\reals}{\mathbb{R}}
+\defc{\integers}{\mathbb{Z}}
+\defc{\integersq}{\mathbb{Z}_{\modulus}}
+\defcommand{\integerball}[1]{\integers(#1)}
+\defc{\preimagepowers}{P}
+
+\defcommand{\field}{\mathbb{F}}
+
+\defcommand{\innerproduct}[2]{\langle #1, \ #2 \rangle}
+
+\defc{\randpick}{\ {\gets}{\scriptstyle\$}\ }
+
+\defc{\secparam}{\lambda}
+\defc{\knowledgeerror}{\kappa}
+\defcommand{\poly}{\mathrm{poly}}
+\defcommand{\negl}{\mathrm{negl}}
+\defc{\adversary}{\mathcal{A}}
+\defcommand{\adversaryb}{\mathcal{B}}
+\defcommand{\Ideal}{\mathcal{I}}
+\defc{\extractor}{\mathcal{E}}
+\defc{\extractoradversary}{\mathcal{E}_{\adversary}}
+
+% public parameters
+\defcommand{\pp}{\mathsf{pp}}
+\defc{\krisisparameters}{\octuplenp{\fring}{\numcols}{\monomialarity}{\monomialset}{\targetmonomial}{\ddistfamily}{\normboundpublicpreimages}{\normboundasterisk}}
+\defc{\kprisisparameters}{\quintuplenp{\fring}{\numcols}{\ddistfamily}{\normboundpublicpreimages}{\normboundasterisk}}
+\defc{\knowledgekrisisparameters}{\nonuplenp{\fring}{\numcols}{\monomialarity}{\monomialset}{\ddistfamily}{\tdist}{\normboundknowledge}{\normboundpublicpreimages}{\normboundasterisk}}
+\defc{\knowledgekprisisparameters}{\septuplenp{\fring}{\numcols}{\ddistfamily}{\tdist}{\normboundknowledge}{\normboundpublicpreimages}{\normboundasterisk}}
+\defcommand{\td}{\mathsf{td}}
+\defc{\proofopening}{\pi_{0}}
+\defc{\proofextracted}{\proofopening^{*}}
+\defc{\proofknowledge}{\pi_{1}}
+
+
+\defcommand{\polylog}{\mathrm{polylog}}
+\defcommand{\hybrid}[1]{\ensuremath{\mathsf{Hyb}_{#1}\xspace}}
+\defcommand{\vk}{\mathsf{vk}}
+\defcommand{\challengeset}{\mathcal{H}}
+
+% Functional commitments
+\defc{\sys}{\textsf{Orbweaver}}
+\defc{\setup}{\mathsf{Setup}}
+\defc{\commit}{\mathsf{Com}}
+\defc{\prove}{\mathsf{Prove}}
+\defc{\commitment}{c}
+\defc{\commitmentkey}{\mathsf{ck}}
+\defc{\ck}{\mathsf{ck}}
+\defc{\evaluationkey}{\commitmentkey_{\evaluationpt}}
+\defc{\evaluationpt}{z}
+\defc{\vkf}{\mathsf{vk}_{\function}}
+\defc{\open}{\mathsf{Open}}
+\defc{\preverify}{\mathsf{PreVerify}}
+\defc{\verify}{\mathsf{Verify}}
+\defc{\functionalcommitmentalgs}{\quintuple{\setup}{\commit}{\open}{\preverify}{\verify}}
+\defc{\publicinputdim}{s}
+\defc{\secretinputvector}{\symbfup{x}}
+\defc{\secretinputvectorextracted}{\symbfup{x}^{*}}
+\defcommand{\secretinput}[1]{\emath{x_{#1}}}
+\defc{\secretinputdim}{w}
+\defc{\output}{y}
+\defc{\outputextracted}{\output^{*}}
+\defc{\numoutputs}{t}
+\defc{\functionfamily}{\mathcal{F}}
+\defc{\function}{f}
+\defc{\inputalphabet}{\mathcal{X}}
+\defc{\inputalphabetextracted}{\inputalphabet^{*}}
+\defc{\inputalphabetasterisk}{\mathcal{X}^{*}}
+\defc{\imagespace}{\mathcal{Y}}
+
+\defc{\ring}{\mathcal{R}}
+\defc{\ringdegree}{n}
+\defc{\modulus}{q}
+\defc{\pmodulus}{M}
+\defc{\modq}{\bmod\modulus}
+\defc{\modp}{\bmod\pmodulus}
+\defc{\fring}{\ring_{\modulus}}
+\defc{\fringinvertiblesubset}{\ring_{\modulus}^{\times}}
+\defc{\fringmultgroup}{\fring^{\times}}
+\defcommand{\automorphism}[1]{\emath{\sigma_{-1}(#1)}}
+% \defcommand{\norm}[1]{\emath{\left\| #1 \right\|}}
+\defcommand{\ltwonorm}[1]{\norm{#1}_{2}}
+\defcommand{\linfinitynorm}[1]{\norm{#1}_{\infty}}
+\defc{\normboundpublicpreimages}{\beta}
+\defc{\gadgetbase}{b}
+\defc{\normboundproofopening}{\delta_{0}}
+\defc{\normboundproof}{\normboundproofopening}
+\defc{\normboundproofknowledge}{\delta_{1}}
+\defc{\normboundinput}{\alpha}
+\defc{\normboundoutput}{\delta_{\pmodulus}}
+\defc{\normboundknowledge}{\alpha^{*}}
+\defc{\normboundextractedinput}{\alpha^{*}}
+\defc{\normboundextractedoutput}{\normboundoutput^{*}}
+\defc{\normboundproofextracted}{\normboundproof^{*}}
+\defcommand{\vec}[1]{\ensuremath{\mathsf{vec}(#1)}\xspace}
+
+\defc{\publicsismatrix}{\symbfup{A}}
+\defc{\publicsisvector}{\symbfup{a}}
+\defc{\trapdoor}{\mathsf{td}}
+\defc{\trapdoorgenerator}{\mathsf{TrapGen}}
+\defc{\preimagesampler}{\mathsf{SampPre}}
+\defc{\sampd}{\mathsf{SampD}}
+\defc{\gadgetvector}{\symbfup{g}}
+\defc{\trapdoorvector}{\symbfup{r}}
+\defc{\numcols}{\mathsf{\ell}}
+\defc{\kmisis}{k\text{-}M\text{-}\mathsf{ISIS}}
+\defc{\varX}{X}
+\defc{\varXvector}{\symbfup{X}}
+\defc{\monomial}{g}
+\defc{\monomialarity}{y}
+\defc{\monomialinvarvvector}{\monomial(\symbfup{v})}
+\defc{\monomialinX}{\monomial(\varX)}
+\defc{\targetmonomial}{\monomial^{*}}
+\defc{\targetmonomialinX}{\monomial^{*}(X)}
+\defc{\polynomialring}{\ring(\varX)}
+\defc{\exponent}{e}
+\defc{\exponentvector}{\symbfup{e}}
+\defc{\monomialset}{\mathcal{G}}
+\defc{\monomialfamilytuple}{\pair{\monomialset}{\targetmonomial}}
+\defc{\tdist}{\mathcal{T}}
+\defc{\vart}{t}
+\defcommand{\spanangle}[1]{\ensuremath{\langle #1 \rangle}}
+\defc{\lhl}{\mathsf{lhl}}
+\defc{\varv}{v}
+\defc{\varetavec}{\symbfup{\eta}}
+\defc{\varhvector}{\symbfup{h}}
+\defc{\varvvector}{\symbfup{v}}
+\defc{\preimage}{\symbfup{u}}
+\defc{\zerovector}{\symbfup{0}}
+\defc{\ddist}{\mathcal{D}_{\monomial, \publicsisvector, \varvvector}}
+\defc{\ddistknowledge}{\mathcal{D}_{\monomial, \publicsisvector, t, \varvvector}}
+\defc{\ddistfamily}{\mathcal{D}}
+\defc{\advantage}{\mathsf{Adv}}
+\defc{\vol}{\mathsf{Vol}}
+
+% assumptions
+\defc{\krisis}{k\text{-}R\text{-}\mathsf{ISIS}}
+\defc{\ksdh}{k\text{-}\mathsf{SDH}}
+\defc{\kea}{\mathsf{KEA}}
+\defc{\risis}{R\text{-}\mathsf{ISIS}}
+\defc{\rvsis}{R\text{-}V\text{-}\mathsf{SIS}}
+\defc{\rsis}{R\text{-}\mathsf{SIS}}
+\defc{\isis}{\mathsf{ISIS}}
+\defc{\sis}{\mathsf{SIS}}
+\defc{\normboundasterisk}{\beta^{*}}
+\defc{\expansionfactor}{\ensuremath{\gamma_{\ring}}}
+\defc{\kprisis}{k\text{-}P\text{-}R\text{-}\mathsf{ISIS}}

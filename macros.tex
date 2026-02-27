@@ -1,3 +1,23 @@
+\theoremstyle{plain} % italics
+\newtheorem{itheorem}{Theorem}%[section]
+\newtheorem{icorollary}{Corollary}%[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{assumption}{Assumption}
+\newtheorem{construction}{Construction}
+\theoremstyle{definition} % not italics
+\newtheorem{idefinition}{Definition}%[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark} %
+\newtheorem{case}{Case}
+\crefname{assumption}{Assumption}{Assumptions}
+\crefname{step}{Step}{Steps}
+\crefname{figure}{Figure}{Figures}
+
 \newenvironment{blockquotation}
   {\begin{quote}\begin{singlespace}}
   {\end{singlespace}\end{quote}}
@@ -110,14 +130,6 @@
 \newc{\fI}{\mathscr{I}}
 \newc{\fP}{\mathscr{P}}
 \newc{\fV}{\mathscr{V}}
-
-\DeclareSymbolFont{sfoperators}{OT1}{cmss}{m}{n}
-% don't waste a math group
-\DeclareSymbolFontAlphabet{\mathsf}{sfoperators}
-% tell LaTeX to use sfoperators for names of operators
-\makeatletter
-\renewc{\operator@font}{\mathgroup\symsfoperators}
-\makeatother
 
 \DeclareMathOperator{\GOE}{GOE}
 \DeclareMathOperator{\sym}{sym}
@@ -234,3 +246,158 @@
 \newc{\extractor}{\mathcal{E}}
 \newc{\extractoradversary}{\mathcal{E}_{\adversary}}
 \newc{\challenger}{\mathcal{C}}
+
+\newc{\prover}{\mathsf{P}}
+\newc{\verifier}{\mathsf{V}}
+
+\makeatletter
+\long\def\defcommand#1{%
+  \@ifnextchar[{\defcommand@i{#1}}{\defcommand@ii{#1}}%
+}
+\long\def\defcommand@i#1[#2]#3{%
+  \ifdefined#1%
+    \renewcommand{#1}[#2]{#3}%
+  \else%
+    \newcommand{#1}[#2]{#3}%
+  \fi%
+}
+\long\def\defcommand@ii#1#2{%
+  \ifdefined#1%
+    \renewcommand{#1}{#2}%
+  \else%
+    \newcommand{#1}{#2}%
+  \fi%
+}
+\makeatother
+
+\newcommand{\defc}[2]{%
+  \ifdefined#1%
+    \renewc{#1}{#2}%
+  \else%
+    \newc{#1}{#2}%
+  \fi%
+}
+
+\newcommand{\norm}[1]{\ensuremath{\left\lVert #1 \right\rVert}}
+\newcommand{\ceil}[1]{\ensuremath{\left\lceil #1 \right\rceil}}
+
+\makeatletter
+
+% Add a period at the end unless the string already ends with punctuation.
+% (based on code by Uwe Lueck; see dtrt.sty)
+\def\dt@TestPunct#1{\ifx\dt@TestPunct#1\dt@TestPunct\else\dt@Puncttrue\fi}
+\def\dt@TestDot#1.\dt@TestEnd#2\dt@TestStop{\dt@TestPunct{#2}}
+\def\dt@TestQuestM#1?\dt@TestEnd#2\dt@TestStop{\dt@TestPunct{#2}}
+\def\dt@TestExclaM#1!\dt@TestEnd#2\dt@TestStop{\dt@TestPunct{#2}}
+\def\dt@TestColonM#1:\dt@TestEnd#2\dt@TestStop{\dt@TestPunct{#2}}
+\newif\ifdt@Punct
+\def\dt@MaybeAddPunct#1{%
+  \dt@Punctfalse%
+  \dt@TestDot#1\dt@TestEnd.\dt@TestEnd\dt@TestStop%
+  \dt@TestQuestM#1\dt@TestEnd?\dt@TestEnd\dt@TestStop%
+  \dt@TestExclaM#1\dt@TestEnd!\dt@TestEnd\dt@TestStop%
+  \dt@TestColonM#1\dt@TestEnd:\dt@TestEnd\dt@TestStop%
+  #1\ifdt@Punct \else .\fi%
+}
+
+% Macros for ignoring spaces and paragraphs.
+% The first ignores all spaces and implicit paragraphs (empty separation line),
+% the second also explicit \par.
+% (Source noted in dtrt.sty)
+\def\dt@ignorespacesandimplicitepars{%
+  \begingroup \catcode13=10 \@ifnextchar\relax {\endgroup}%
+  {\endgroup}%
+}
+\def\dt@ignorespacesandallpars{%
+  \begingroup \catcode13=10 \@ifnextchar\par
+  {\endgroup\expandafter\ignorespacesandallpars\@gobble}%
+  {\endgroup}%
+}
+
+% \parheadnoperiod{text}: parhead without extra punctuation.
+\newcommand{\parheadnoperiod}[1]{%
+  \smallskip \noindent
+  {\bfseries\boldmath\ignorespaces {#1}}%
+  \hskip 0.9em plus 0.3em minus 0.3em%
+  \dt@ignorespacesandimplicitepars%
+}
+
+% \parhead{text}: appends period if needed.
+\newcommand{\parhead}[1]{%
+  \parheadnoperiod{\dt@MaybeAddPunct{#1}}%
+  \dt@ignorespacesandimplicitepars%
+}
+
+\makeatother
+
+% FINAL PATCH (compile-tested + visually inspected)
+% Requires:
+%   \usepackage{etoolbox}
+%   \usepackage{setspace}
+% Put after those packages are loaded.
+
+% --- 1) All array-based structures: make row spacing single-ish globally ---
+% This covers:
+%   array, matrix, bmatrix, pmatrix, vmatrix, Vmatrix, cases,
+%   tabular, tabular*, longtable
+\renewcommand{\arraystretch}{0.60}
+
+% --- 2) Table floats: single-space surrounding table text/caption context ---
+\BeforeBeginEnvironment{table}{\begingroup\singlespacing}
+\AfterEndEnvironment{table}{\endgroup}
+
+% --- 3) longtable is not inside a table float, so wrap it explicitly ---
+\BeforeBeginEnvironment{longtable}{\begingroup\singlespacing}
+\AfterEndEnvironment{longtable}{\endgroup}
+
+% --- 4) Displayed equations: single-spaced internally, no extra blank space above/below ---
+\newcommand{\tightdisplaymath}{%
+  \begingroup
+  \singlespacing
+  \setlength{\abovedisplayskip}{0pt}%
+  \setlength{\belowdisplayskip}{0pt}%
+  \setlength{\abovedisplayshortskip}{0pt}%
+  \setlength{\belowdisplayshortskip}{0pt}%
+}
+\newcommand{\tightdisplaymathend}{\endgroup}
+
+\BeforeBeginEnvironment{equation}{\tightdisplaymath}
+\AfterEndEnvironment{equation}{\tightdisplaymathend}
+\BeforeBeginEnvironment{equation*}{\tightdisplaymath}
+\AfterEndEnvironment{equation*}{\tightdisplaymathend}
+
+\BeforeBeginEnvironment{align}{\tightdisplaymath}
+\AfterEndEnvironment{align}{\tightdisplaymathend}
+\BeforeBeginEnvironment{align*}{\tightdisplaymath}
+\AfterEndEnvironment{align*}{\tightdisplaymathend}
+
+\BeforeBeginEnvironment{alignat}{\tightdisplaymath}
+\AfterEndEnvironment{alignat}{\tightdisplaymathend}
+\BeforeBeginEnvironment{alignat*}{\tightdisplaymath}
+\AfterEndEnvironment{alignat*}{\tightdisplaymathend}
+
+\BeforeBeginEnvironment{flalign}{\tightdisplaymath}
+\AfterEndEnvironment{flalign}{\tightdisplaymathend}
+\BeforeBeginEnvironment{flalign*}{\tightdisplaymath}
+\AfterEndEnvironment{flalign*}{\tightdisplaymathend}
+
+\BeforeBeginEnvironment{gather}{\tightdisplaymath}
+\AfterEndEnvironment{gather}{\tightdisplaymathend}
+\BeforeBeginEnvironment{gather*}{\tightdisplaymath}
+\AfterEndEnvironment{gather*}{\tightdisplaymathend}
+
+\BeforeBeginEnvironment{multline}{\tightdisplaymath}
+\AfterEndEnvironment{multline}{\tightdisplaymathend}
+\BeforeBeginEnvironment{multline*}{\tightdisplaymath}
+\AfterEndEnvironment{multline*}{\tightdisplaymathend}
+
+% Optional, only if you still use eqnarray anywhere:
+\BeforeBeginEnvironment{eqnarray}{\tightdisplaymath}
+\AfterEndEnvironment{eqnarray}{\tightdisplaymathend}
+\BeforeBeginEnvironment{eqnarray*}{\tightdisplaymath}
+\AfterEndEnvironment{eqnarray*}{\tightdisplaymathend}
+
+% Wrap any section/block in this to force single spacing inside it
+\newenvironment{singlespacedblock}
+  {\begingroup\singlespacing}
+  {\endgroup}

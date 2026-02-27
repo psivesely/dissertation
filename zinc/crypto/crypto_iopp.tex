@@ -1,0 +1,68 @@
+\subsection{Zip+: an IOPP for constrained interleaved codes in $\QQ^{<d}[X]$ and $\FF_q^{<d}[X]$}
+\label{sec:crypto_zip}
+
+%The formal construction, protocols, and round-by-round knowledge soundness proofs for Zip+ are given in \cref{sec:zip_plus_appendix}.
+
+To go along with Zinc+, we design a new IOPP, which we call Zip+. At a high level, Zip+ is an IOPP that tests proximity to interleaved codes with constraints given by multilinear evaluations.
+
+In order to describe Zip+ in more detail, we start with some setup. Let $\mc{C}\subseteq \QQ^n$ be a linear code over $\QQ$ with generator matrix $M \in \Qq^{n \times k_1}$ and let $\mc{C}^{k_2}$ be the $k_2$-wise interleaved code of $\mc{C}$ where $k_1, k_2$ are powers of $2$. Intuitively, interleaving effectively means that given $w \in \Qq^{k_1 \cdot k_2}$, we view $w$ as a $k_2 \times k_1$ matrix with rows $w_1, \ldots, w_{k_2} \in \Qq^{k_1}$ and we say that the encoding of $w$ under $\mc{C}^{k_2}$ is the $k_2 \times n$ matrix with rows $M\cdot w_1, \ldots, M \cdot w_{k_2}$, or equivalently $w\cdot M^T$.
+
+We extend $\mc{C}$ to a code $\mc{C}^{<d}[X]$ over $\QQ^{<d}[X]$ by applying the same generator matrix $M$ to each coefficient of the message polynomials. Precisely, given $w \in \left(\QQ^{<d}[X]\right)^{k_1}$, we write $w = \sum_{\ell=0}^{d-1} w^{(\ell)}\cdot X^\ell$ and define the encoding of $w$ as $$M\cdot w = \sum_{\ell=0}^{d-1} (M\cdot w^{(\ell)}) \cdot X^\ell \in \left(\QQ^{<d}[X]\right)^{n}.$$  We can then define the interleaved code $\left(\mc{C}^{<d}[X]\right)^{k_2}$ as above, replacing $\QQ$ by $\QQ^{<d}[X]$.
+
+\albert{May be good to talk about evaluation modulo a prime from the beginning. At least, when presenting the vectors $q_1$ and $q_2$, we should clarify this are taken modulo a prime in our scheme} The goal of Zip+ is as follows: Given an input oracle $\oracle{V} \in \left(\QQ^{<d}[X]\right)^{k_2 \times n}$, an evaluation point $\zz \in \Qq^{\mu}$, a target value $\alpha \in \QQ^{<d}[X]$, a degree bound $d$, and bitlength bounds $B_0 < B$, Zip+ aims to prove satisfaction of the following two properties
+\begin{itemize}
+  \item \textbf{Completeness:} $V$ is the interleaved encoding of a vector $w \in \left(\Qq^{< d, B_0}[X]\right)^{k_2 \times k_1}$ satisfying the multilinear evaluation constraint $\widetilde{w}(\zz) = \alpha$ ($\widetilde{w}$ is the multilinear extension of $w$).
+  \item \textbf{Soundness:} The verifier rejects if $V$ is far (in Hamming distance) from all encodings of vectors $w \in \left(\Qq^{< d, B}[X]\right)^{k_2 \times k_1}$ satisfying $\widetilde{w}(\zz) = \alpha$.
+\end{itemize}
+We remark that compared to the usual completeness and soundness cases in IOPPs, Zip+ has a gap between the bitlengths of the entries in the words accepted in the completeness case and those rejected in the soundness case. A similar gap occurs in Zip \cite{Zinc}, although in Zip only encodings of integer matrices are considered. This is not problematic, since when using Zip+ as a subroutine in an IOP one can configure bit-size bounds appropriately to guarantee soundness and completeness as initially intended. This is explained at length in the technical overview of \cite{Zinc} and we omit the details here. The scenario is analogous to standard IOPPs of proximity to codes: an IOPP guarantees completeness when the prover uses codewords, while soundness only guarantees the prover is using words that are close to the code, but not necessarily in it.
+
+We note that Zip+ can also be extended to input oracles $V$ with entries in $\FF_q^{<d}[X]$ for some field $\FF_q$, and corresponding constraints over $\FF_q^{<d}[X]$. \albert{To be polished the remark commented below.}
+
+
+%\begin{remark}[Comparison to other IOPPs and usage in {$\FF_q^{<d}[X]$}]
+ %Zip+ can be viewed as a "triply-interleaved" version of Zip \cite{Zinc}, a Brakedown/Ligero-style PCS for polynomials with integer coefficients. The improvements of Zip+ with respect to Zip are listed in  \cref{ss:related_work}.
+%
+%$Zip+ can also be extended to input oracles $V$ with entries in $\FF_q^{<d}[X]$ for some field $\FF_q$, and corresponding constraints over $\FF_q^{<d}[X]$. In this case the scheme becomes similar to, again, an IOPP for a ``triply-interleaved'' constraint code, with a specific proximity generator which combines within in each interleaving first, before combining the resulting random combinations.  
+%\end{remark}
+
+Similar to how other IOPPs are used in IOPs, Zip+ is able to enforce that, after the prover provides an oracle to a supposed encoding $V$, the verifier can ask for arbitrary multilinear evaluations of the underlying message of $V$ and can detect (through running Zip+) if the prover is cheating. As such, Zip+ can be used to compile multilinear Poly-IOPs over $\Qq, \QQ[X], \FF_q, \FF_q[X]$ into legitimate IOPs.  We do this in \cref{sec:compilation_appendix}. 
+
+\medskip 
+We now provide a high-level overview of Zip+. The initial claim to be verified is:
+\begin{equation}\label{eq:zip_step0}
+  V \text{ is close to } M \cdot w \text{ for some } w \in \left(\QQ^{<d}[X]\right)^{k_2 \times k_1} \text{ such that } \widetilde{w}(\zz) = \alpha.
+\end{equation}
+
+\noindent\textbf{Reduction from $\QQ^{<d}[X]$ to $\QQ$.}
+The first step reduces the claim~\eqref{eq:zip_step0} to a constraint over $\QQ$, namely \eqref{eq:zip_step1}. Note that since $V$ has entries in $\left(\QQ^{<d}[X]\right)^{k_2 \times n}$, $V$ can be written as $$V=\sum_{\ell=0}^{d-1} V^{(\ell)} \cdot X^\ell$$ with $V^{(\ell)} \in \QQ^{k_2\times n}$, and similarly we can write $\alpha = \sum_{\ell=0}^{d-1} \alpha^{(\ell)} \cdot X^\ell$ with $\alpha^{(\ell)} \in \Qq$.
+
+Hence the multilinear evaluation claim is equivalent to $d$ simultaneous claims on each coefficient, i.e.\ to the $d$ claims $\widetilde{w}^{(\ell)}(\zz) = \alpha^{(\ell)}$ for each coefficient index $\ell=0, \ldots, d-1$. To reduce these $d$ claims down to $1$, the verifier samples random coefficients $s_0, \ldots, s_{d-1}$ and the prover and verifier reduce to checking a single multilinear evaluation claim over $\QQ$: i.e.\ $$\sum_{\ell=0}^{d-1} s_\ell \cdot \widetilde{w}^{(\ell)}(\zz) = \sum_{\ell=0}^{d-1} s_\ell \cdot \alpha^{(\ell)} \in \QQ.$$
+Let $V' = \sum_{\ell=0}^{d-1} s_\ell \cdot V^{(\ell)} \in \QQ^{k_2\times n}$ and $\alpha' = \sum_{\ell=0}^{d-1} s_\ell \cdot \alpha^{(\ell)}\in \QQ$. The prover and verifier have now reduced the initial claim to the following claim, at the cost of introducing a small soundness error:
+\begin{equation}\label{eq:zip_step1}
+  V' \text{ is close to } M \cdot w' \text{ for some } w'\in \QQ^{k_2\times k_1} \text{ such that } \widetilde{w}'(\zz) = \alpha'.
+\end{equation}
+
+\medskip
+\noindent\textbf{Reduction to inner products.}
+The next step reduces the claim~\eqref{eq:zip_step1} to an inner product constraint (namely \eqref{eq:zip_step2}), using a standard technique. Recall that given the evaluation point $\zz = (z_1, \ldots, z_\mu) \in \Qq^\mu$, one can find vectors $\qq_2 \in \Qq^{k_2}$ and $\qq_1 \in \Qq^{k_1}$ such that $\widetilde{w}'(\zz) = \alpha'$ is equivalent to the bilinear form $\qq_2^\top \cdot w' \cdot \qq_1 = \alpha'$. To reduce this to an inner product constraint, the prover provides an intermediate vector $b \in \Qq^{k_1}$, claiming that $b^\top = \qq_2^\top \cdot w'$. The verifier checks that $\langle b, \qq_1 \rangle = \alpha'$, which holds if $b$ is computed honestly. The prover and verifier have thus reduced~\eqref{eq:zip_step1} to:
+\begin{equation}\label{eq:zip_step2}
+  V' \text{ is close to } M \cdot w' \text{ for some } w' \in \Qq^{k_2 \times k_1} \text{ such that } \qq_2^\top \cdot w' = b^\top \in \QQ^{k_1}.
+\end{equation}
+
+\medskip
+\noindent\textbf{Random linear combination across oracles.}
+Starting from~\eqref{eq:zip_step2}, we are in a similar setting to Zip. It will be convenient here to think of $\oracle{V'}$ as consisting of $k_2$ row oracles $\oracle{v'_1}, \ldots, \oracle{v'_{k_2}} \in \Qq^{n}$. To conclude, the verifier chooses random coefficients $r_1, \ldots, r_{k_2} \in [2^K]$, where $K \in \N$ is sufficiently large, and the prover replies with $w^\star \in (\QQ^{< B'})^{k_1}$ which is supposedly $\sum_{j=1}^{k_2} r_j \cdot w'_j$, where the $w'_j$ are the underlying messages of the $v'_j$'s. Here $B'$ is a second bitlength bound that is larger than both $B_0, B$ and is meant to capture the bitlength of the linear combination $\sum_{j\in[J]} r_j \cdot w'_j$ in the honest prover's case. To conclude, the verifier checks if $\qq_2^\top \cdot w^\star = b^\top \cdot (r_1,\ldots, r_{k_2})$ where $(r_1,\ldots, r_{k_2})$ is the length $k_2$ vector with entries $r_1, \ldots, r_{k_2}$. If so, then the verifier checks if $M \cdot w^\star$ and $\sum_{j\in[J]} r_j \cdot v'_j$ are equal by performing a sufficient number of spot checks, where each spot check requires querying a column of $\oracle{V}$. The round-by-round knowledge soundness analysis of Zip+ is similar to that of Zip and other similar IOPPs, but extra care is needed in some parts which we highlight next:
+
+\subparagraph{Technical observations.}  \emph{List-Decoding Regime and Mutual Correlated Agreement (MCA)}: In contrast to Zip, which works in the unique decoding regime, Zip+ is designed to work in the list decoding regime (and in particular up to the distance at which MCA holds). As such, the round-by-round knowledge soundness analysis of Zip no longer carries over and we need to rely on a new analysis which shows round-by-round knowledge soundness according to a recent notion from \cite{BCFW25}. By leveraging MCA, we are able to show round-by-round knowledge soundness beyond unique decoding, and as an added bonus, we can merge the test and evaluation phases (which were previously separate in Zip).
+  
+\emph{MCA for Linear Codes over $\Qq$}: The MCA property was introduced in \cite{whir} and over finite fields it is known that any linear code has MCA up to a distance known as the ``1.5 Johnson Bound'' \cite{zei}. We observe that similar techniques also apply over $\QQ$ and provide the straightforward adaptation (of \cite{zei}) to show MCA up to the ``1.5 Johnson Bound'' for codes over $\Qq$.\footnote{We note that in our experiments we use a rate of $1/4$ and the Unique Decoding Radius (UDR), since in this parameter regime the UDR leads to better performance than the 1.5 Johnson bound.}
+
+\emph{Bitlength Bounds for Combinations of Rationals}: In the overview above, the honest prover sends a vector $w^\star$ in the last stage which may have bitlength up to $B' > B_0$. On the other hand, we want to reject any cheating prover using $B$-bitlength messages, which requires us to set $B' < B$ so that a random linear combination involving a rational of at least $B$ bits is very unlikely to have bitlength at most $B'$. This causes the aforementioned gap in the bitlength bounds between the completeness and soundness cases. Similar issues arose in Zip, but since we would like to allow the honest prover to use rationals (rather than just integers), a more careful analysis of the bitlengths of sums and linear combinations of rationals is needed.
+
+\subparagraph{Batching capabilities and checking evaluations modulo a random prime} We also allow for batching multiple multilinear evaluation claims together and handle evaluation claims that are taken modulo a randomly chosen, large, prime. 
+
+The former is done using standard techniques---we use sumcheck to reduce from multiple multilinear evaluation points to one (if all evaluation points are the same, sumcheck is not required), and then reduce to the case discussed above. We do so by paying extra care to not unnecessarily increase the bit-size of the messages and codewords, by merging this batching step with the reduction from $\QQ^{<d}[X]$ to $\QQ$ described previously. This makes the bit-length increase by $\sim 128$, rather than the $\sim 256$ increase we would have if we followed a naive two-step approach.
+
+Handling claims modulo a prime requires some careful but straightforward analysis of the probability that a random combination of rational numbers has denominator divisible by some fixed large prime.
+
+

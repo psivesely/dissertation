@@ -1,0 +1,167 @@
+\subsection{Integer Pseudo Reed Solomon (IPRS) codes}
+\label{ss:to_iprs}
+
+
+We introduce a new family of integer (or rational) codes, which we call \emph{Integer Pseudo Reed--Solomon} (IPRS) codes, and which have optimal distance (in the sense that they are Maximum Distance Separable (MDS)) and an efficient FFT-like encoding algorithm.  We believe that IPRS codes are of independent interest, and may find applications beyond the context of this work.
+
+
+The motivation behind IPRS codes  is the following: our schemes use an IOPP for linear codes over $\QQ$ or $\ZZ$ (as well as over $\FF_q$) to enable committing to multilinear polynomials with coefficients in $\QQ[X]$, $\ZZ[X]$, $\QQ$, $\ZZ$, etc. As with other code-based SNARKs over finite fields, the efficiency of our final compiled SNARK is highly dependent on the properties of this linear code. Concretely, prover efficiency is heavily affected by encoding time, and verifier speed and proof size are affected by the code's minimum relative distance (or by its Mutual Correlated Agreement error). In the context of SNARKs working over small fields, Reed--Solomon (RS) codes are a popular choice for the IOPP due to their optimal distance and efficient encoding via the FFT algorithm. When working over integers, rationals, or larger finite fields, the options are limited.
+
+For example, Zinc \cite{Zinc} used a lifted rational version  of Juxtaposed Expand-Accumulate (JEA) codes over a finite field. While enjoying efficient encoding, the proved minimal distance of these codes (both for their finite field and integer/rational versions) is significantly lower than that of RS codes \cite{jea_codes}. RAA codes \cite{blaze} are also an intriguing family of codes that can be easily lifted to $\ZZ$ or $\QQ$, and with similar encoding-distance profile as JEA codes (with encoding of RAA codes being especially lightweight). It is possible that both JEA and RAA have better minimum distance than what is currently proved, especially over large prime fields or over $\QQ$, but this remains to be seen.
+
+
+Below, given a vector $x\in \QQ^k$, we denote by $\norm{x}$ the \emph{norm} of $x$, i.e.\ $\norm{x}=\max_{i\in [k]}|x_i|$. The notation extends to sets as well. 
+
+
+\begin{remark}[Rational code, integer messages]
+\label{rem:rational-code}
+ Since a linear code is a linear subspace of a vector space, we define our codes over $\QQ$, and not~$\ZZ$. However, all codes discussed below admit an integer generator matrix, and so when encoding integer messages, the resulting codeword is integral as well.  In most of our envisioned applications, honest provers only encode integer messages. In this case, the rational formulation is needed only for the theoretical framework (e.g., our PIOP+IOPP results, cf.\ \cref{ss:to_zinc_plus_compiler,sec:crypto_zip}).
+\end{remark}
+
+\subsubsection{Two initial attempts}
+
+We start by describing two methods by which one could ``port'' RS codes from finite fields to $\QQ$.
+
+\subparagraph{Naive RS codes over $\QQ$ and their codeword bit-size blowout.} When looking for codes over $\QQ$ or $\ZZ$, one must account for a \emph{fundamental challenge} that does not exist over small finite fields: the code should not create large blowouts in the norm of codewords relative to the norm of the encoded message. I.e.\ the ratio
+%
+$$
+\norm{\Enc(x)}/\norm{x}
+$$
+%
+should be small for all or almost all messages $x$, where $\Enc$ is an encoding function of the code. Indeed, large ratios $\norm{\Enc(x)}/\norm{x}$ would lead to inefficient encoding, proof sizes, and verification. The reason this is a potential problem is that, of course,  $\QQ$ and $\ZZ$ do not enjoy modular reduction, and thus, as we see next, the relative norm of a codeword can grow exponentially in the code dimension if the code is not designed carefully.
+
+For example, consider a naive RS code over $\QQ$,  where codewords are defined simply as vectors of evaluations of polynomials from $\QQ^{<k}[X]$  over a fixed subset $S$ of $\ZZ$, i.e. say we define the code as
+%
+\begin{equation}\label{eq:naive_rs}
+\RS_{\mathsf{naive}}[S, k] = \{ (f(\alpha))_{\alpha \in S} \mid f \in \QQ^{<k}[X] \}.
+\end{equation}
+Even assuming that encoding can be computed efficiently for $\RS_{\mathsf{naive}}[S, k]$, the norm $\norm{\Enc(x)}$ is in general  on the order of $\norm{x}\cdot\norm{S}^{k-1}$. For practical degrees $k$, this can lead to codewords having entries with thousands or even millions of bits.
+
+
+\subparagraph{Naive lifts of RS codes over $\QQ$.} In search of alternatives, we note the following. Let $q$ be a prime, let $\mathcal{C}_q\subseteq\FF_q^n$ be a linear code of dimension $k$ over $\FF_q$, and let $M_q$ be a generator matrix of $\mathcal{C}_q$. Consider the linear subspace of $\QQ^n$ defined as
+%
+\begin{equation}\label{eq:lift_code}
+\mathcal{C}_\QQ[\hat{M}_q] = \left\{ \hat{M}_q \cdot x \ \left| \ x \in \QQ^k \right.\right\},
+\end{equation}
+where $\hat{M}_q$ is the integer matrix obtained by lifting each entry of $M_q$ to an integer representative (not necessarily in $\range{0}{q-1}$). We call $\mathcal{C}_\QQ[\hat{M}_q]$ a \emph{lift} of $\mathcal{C}_q$.
+
+\begin{lemma}[Lifts of linear codes preserve dimension and distance]\label{lem:to_lift_code}
+Under the notation above, $\mathcal{C}_\QQ[\hat{M}_q] \subseteq \QQ^n$ is a linear code over $\QQ$ (i.e.\ a linear subspace) of dimension $k$ and minimum distance at least the minimum distance of $\mathcal{C}_q$. 
+\end{lemma}
+We defer the proof to \cref{app:iprs_proofs}. The main idea is that it suffices to study the Hamming weight of \emph{integer codewords} that are not a multiple of $q$ (by clearing denominators and factoring out powers of $q$). In that case, the result follows because the Hamming weight can only decrease when reducing modulo $q$, and the reduction of such a nonzero codeword remains nonzero due to the full rank of $M_q$.
+
+
+
+In view of \cref{lem:to_lift_code}, one may try to lift any code over $\FF_q$ to $\QQ$. In particular, we could lift a standard RS code \begin{equation*}\RS[\FF_q,\mathcal{L},k]=\left\{f(\alpha)_{\alpha\in \mathcal{L}} \ \left| \ f \in \FF_q^{<k}[X] \right.\right\}\end{equation*} in this manner, using as generator matrix a Vandermonde matrix $V_q$ with entries reduced modulo $q$. Such a matrix has entries bounded by $q$, and thus the norm of the encoding of a message $x\in \QQ^k$ is at most $\norm{x}\cdot q\cdot k$.
+
+However, the code $\mathcal{C}_\QQ[V_q]$ does not have, a priori, efficient encoding. The FFT algorithm one would use in $\FF_q$ to multiply $V_q$ by a vector is no longer available when this operation is performed over the integers. Hence, a priori, encoding time for $\mathcal{C}_\QQ[V_q]$ reaches a prohibitive $O(nk)$.
+
+\subsubsection{A middle ground: IPRS codes}
+
+We next describe the IPRS construction. Prior to that, we briefly recall how the FFT encoding algorithm for RS codes works. Throughout this section we fix the radix to be $2$ for simplicity. The definitions and ideas apply to general radices as well in a straightforward manner. The full IPRS encoder for arbitrary radices is given in \cref{sec:iprs-appendix}.
+
+
+
+\subparagraph{FFT algorithm over $\FF_q$, radix $2$.} Let $\FF_q$ be a prime field, let $\omega\in\FF_q$ be a primitive $n$-th root of unity (assuming $n \mid q-1$), and consider the RS code $\RS[\FF_q,\mathcal{L},k]$ with evaluation domain $\mathcal{L} = (1,\omega,\ldots,\omega^{n-1})$. The radix-$2$ FFT algorithm takes as input a message $x\in\FF_q^k$ and outputs the codeword $(f(\omega^j))_{j=0}^{n-1}$, where $f(X)= \sum_{i=0}^{k-1} x_i \cdot X^{i}$. The algorithm first writes
+%
+\begin{equation}\label{eq:fft_split}
+f(\omega^j)= f_0(\omega^{2j}) + \omega^j \cdot f_1(\omega^{2j}),
+\end{equation}
+where $f_0(X)$ and $f_1(X)$ are polynomials of degree less than $k/2$, obtained by splitting $f$ into its even- and odd-indexed coefficients, respectively. Since $\mathcal{L}^2 = \{1,\omega^2,\omega^4,\ldots\}$ is a subgroup of $\FF_q$ of order $n/2$, the evaluations of $f_0$ and $f_1$ on $\mathcal{L}^2$ can be computed recursively with the FFT algorithm. Once this is done, the full codeword $(f(\omega^j))_{j=0}^{n-1}$ is assembled using \eqref{eq:fft_split}.
+
+The recursion stops at a base case, i.e.\ when the dimension $k'$ is below certain threshold. At this point, one computes the vector of evaluations of the corresponding polynomial $f'$ by naively multiplying a Vandermonde matrix by the vector of coefficients of $f'$.
+
+We call the number of recursive levels the \emph{depth} of the algorithm. The elements $\omega^j$ are called \emph{twiddle factors}.  We denote the resulting RS encoder by $\Enc_{\RS} : \FF_q^k \to \FF_q^n$.
+
+
+
+\subparagraph{IPRS codes.} We define IPRS codes  by ``lifting'' the FFT algorithm from $\FF_q$ to $\ZZ$ as follows. Let $x\in \QQ^k$ be the message to be encoded. We identify elements of $\FF_q$ with their \emph{centered} integer representatives (see \cref{rem:centered_representatives}) via $\iota : \FF_q \to \ZZ$, sending each element to the unique integer in $\{-(q-1)/2,\ldots,(q-1)/2\}$ congruent to it modulo $q$. We then execute the same radix-2 FFT algorithm as $\Enc_{\RS}$, but with every twiddle factor $\omega^j$ replaced by $\iota(\omega^j)\in\ZZ$, every base-case Vandermonde entry replaced by its lift via $\iota$, and the operations from \eqref{eq:fft_split} (as well as the base-case Vandermonde matrix-vector multiplication)  are performed over $\QQ$ (or $\ZZ$ when encoding integer messages) with \emph{no modular reduction}.
+
+Denote the resulting encoder by $\Enc_{\IPRS} : \QQ^k \to \QQ^n$. Then $\Enc_{\IPRS}$ has the same algorithmic structure as $\Enc_{\RS}$ but a completely different algebraic significance: $\Enc_{\IPRS}$ no longer computes evaluations of a polynomial $f(X) = \sum_{i=0}^{k-1} x_i X^i$ over some set. The  output of $\Enc_{\IPRS}$ is a vector whose entries are, in general, unrelated to polynomial evaluations.
+
+
+
+\begin{definition}[Integer Pseudo Reed--Solomon (IPRS) codes]\label{def:to_iprs}
+Given a prime $q$, a field $\FF_q$, an evaluation domain $\mathcal{L} = (1,\omega,\ldots,\omega^{n-1})$, and a dimension $k < n$, the \emph{IPRS code} is the image of the encoder $\Enc_{\IPRS}$:
+%
+\begin{equation}\label{eq:iprs_code}
+\IPRS[\FF_q,\mathcal{L},k] \;:=\; \bigl\{ \Enc_{\IPRS}(x) \mid x \in \QQ^k \bigr\} \;\subseteq\; \QQ^n.
+\end{equation}
+We call $\FF_q$ the \emph{base field} of the code. 
+\end{definition}
+
+
+\begin{theorem}[Properties of IPRS codes]
+\label{thm:iprs}
+The code $\IPRS[\FF,\mathcal{L},k]$ is a linear code over $\QQ$  of dimension $k$, blocklength $n$, and minimum relative distance $\delta = 1 - k/n + 1/n$. Moreover, for each $x\in \QQ^k$, the following norm bound holds\footnote{In practice, the norm growth is smaller than the above bound, due to the usage of centered integer representatives; see \cref{rem:centered_representatives}.}:
+%
+$$
+\norm{\Enc_{\IPRS}(x)} \leq \norm{x} \cdot (q/2)^{\mathsf{depth} +1} \cdot k.
+$$
+\end{theorem}
+The norm bound is a key practical cost driver: since proof size in hash-based SNARKs scales with the bit-length of codeword entries, keeping $(q/2)^{\mathsf{depth}+1}\cdot k$ small is essential for competitive proof sizes. In our target configurations ($q\approx 2^{16}$, depth~$1$--$2$, $k\leq 2^{10}$), the bound yields codeword entries of roughly $40$--$60$ bits---comparable to what field-native schemes achieve over $64$-bit fields, and far below the thousands of bits that naive integer RS codes would produce.
+
+We defer the proof to \cref{app:iprs_proofs} \albert{Review and improve}. The proof argument shows that $\IPRS[\FF,\mathcal{L},k]$ is a lift of the RS code $\RS[\FF,\mathcal{L},k]$, in the sense of \cref{lem:to_lift_code},  for some specific generator matrix $M_q$ of $\RS[\FF,\mathcal{L},k]$ different from the Vandermonde matrix. Then the result follows from  \cref{lem:to_lift_code}. 
+
+%\begin{remark}[Typical vs.\ worst-case norm growth]\label{rem:typical_norm_growth}
+%%The norm bound in \cref{thm:iprs} is a worst-case upper bound. In practice, the observed norm growth is significantly smaller, for two reasons. First, using centered integer representatives (cf.\ \cref{rem:centered_representatives}) causes cancellations during the FFT butterfly operations, because positive and negative twiddle factors partially compensate each other when accumulating products. Second, for the message distributions arising in our applications (e.g.\ entries in $\BitPolyset{32}$ or $\range{0}{2^{32}-1}$), the actual norm growth is far below the theoretical maximum. \albert{Is this actually true?} In our experiments with the parameters from \cref{sec:experiments} ($q = 2^{16}+1$, radix $8$, depth $1$--$2$), encoding messages of length $2^{10}$ with entries in $\BitPolyset{32}$ produces codewords whose norm is roughly $(q/2)^{1.2}$ to $(q/2)^{1.5}$ times the message norm, compared to the worst-case bound of $(q/2)^{2}\cdot k \approx (q/2)^{2}\cdot 2^{10}$. 
+%\end{remark}
+
+
+
+
+The table below compares IPRS codes with the two naive alternatives described earlier:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+Code construction &  Relative norm growth & FFT structure \\
+\midrule
+Integer RS code: $\RS_{\mathsf{naive}}[S,k]$, \eqref{eq:naive_rs} & $\leq k\cdot \norm{S}^k$ & ? \\
+Lifted Vandermonde matrix: $\mathcal{C}_\QQ[\hat{V}_q]$,  \eqref{eq:lift_code} & $\leq k\cdot q$ & No \\
+$\IPRS[\FF_q,\mathcal{L},k]$, \eqref{eq:iprs_code}  & $ \leq (q/2)^{\mathsf{depth}+1}\cdot k $ & Yes \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of integer RS-like code constructions. Relative norm growth measures the maximum ratio $\norm{\Enc(x)}/\norm{x}$, where $x$ is a message and $\Enc(x)$ is its encoding. In the three rows, $k$ denotes the code dimension.  $\mathsf{depth}$ is the number of recursive FFT levels used in the encoder defining $\IPRS[\FF_q,\mathcal{L},k]$. The norm growth in IPRS codes is most of the time significantly smaller due to using centered representatives, see \cref{rem:centered_representatives} for details. Regarding FFT structure for naive integer RS codes, one could consider additive FFTs over arithmetic integer progressions, but the norm blowout issue persists.}
+\label{tab:code_comparison}
+\end{table}
+
+\begin{remark}\label{rem:centered_representatives}In IPRS codes, using centered representatives, when encoding  with non-negative entries, one obtains codewords with, typically, smaller norm, due to integers subtracting one another during the encoding process. In our configurations we obtain a reduction in proof size of about $20\%$ for random messages. \albert{Review this}
+\end{remark}  
+
+
+\subsubsection{Performance}\label{ss:iprs_performance} The following table records the performance of IPRS codes in our PoC implementation. Further optimizations may apply.  \albert{rerun benchmarks}
+\begin{table}[ht]
+\centering
+\begin{tabular}{l *{6}{r}}
+\toprule
+
+  & $2^{8}$ & $2^{10}$ & $2^{12}$ & $2^{14}$
+  & $2^{16}$ & $2^{18}$ \\
+\midrule
+$\range{0}{2^{32}-1}$
+  & 37.7\,\textmu s & 72.4\,\textmu s
+  & 213.2\,\textmu s & 585.7\,\textmu s
+  & 2.83\,ms & 15.04\,ms \\
+$\BitPolyset{32}$
+  & 266.9\,\textmu s & 552.3\,\textmu s
+  & 2.44\,ms & 8.42\,ms
+  & 31.84\,ms & 176.85\,ms \\
+\bottomrule
+\end{tabular}
+\caption{Benchmark for encoding messages of various lengths using IPRS codes  on a MacBook Air M4 16GB, multithreaded. The first row corresponds to encoding messages with entries in $\range{0}{2^{32}-1}$, and the second row corresponds to encoding messages with entries in $\BitPolyset{32}$ (see below for a motivation and details on how this encoding is done). \newline 
+The IPRS codes use a radix-$8$ FFT algorithm, with rate $1/2$ and depths ranging from 1 to 4. The base fields range from the field with $2^{16}+1$ elements to the field with $5 \cdot 2^{25}+1$ elements.}
+\label{tab:encode-message-suite} 
+\end{table}
+
+ We often use IPRS codes to encode messages whose entries are not just rationals or integers, but polynomials of up to a certain degree $<w$, especially polynomials with binary coefficients. This later encoding is done in an interleaved manner, i.e.\ if the message $v$ belongs to, say, $\mainpolyring{\QQ}{\bitbound}{\degreebound_0}^k$, then we write $v=\sum_{i=0}^{w-1} v_i \cdot X^i$ with $v_i\in \QQ^k$, and the encoding of $v$ is the vector from $\mainpolyring{\QQ}{\bitbound}{\degreebound_0}^n$ obtained as $\Enc_{\IPRS}(v)=\sum_{i=0}^{w-1} \Enc_{\IPRS}(v_i) \cdot X^i$.
+
+For context, our SHA-256 compression arithmetization contains $10$ witness columns in $\BitPolyset{32}$ and $5$ witness columns in $\range{0}{2^{32}-1}$, all of length $2^6$. Hence the encoding cost of, say, \textbf{$16$ SHA-256 compressions is approximately $5.89$\,ms} (cf.\ \cref{sec:experiments}).  We report results for relatively small message lengths (compared to recent literature trends) because Zinc+ works naturally with small arithmetization sizes, i.e.\ with small message lengths (as demonstrated in our SHA-256 arithmetization and other examples). See \cref{rem:zincplus_comparisons,ss:efficiency-discussion} for more discussion on how to evaluate our scheme and its efficiency profile.
+
+\subsubsection{Open questions}
+
+In \cref{subsec:iprs-open-questions} we list some open questions about IPRS codes. We highlight the first one, which asks whether IPRS codes enjoy the Mutual Correlated Agreement (MCA) property up to the Johnson bound, as Reed-Solomon codes do \cite{HaboeckMCA, BCGM25}. A positive answer would directly improve proof sizes  in our proof system.
+
+
+

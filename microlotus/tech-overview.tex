@@ -1,0 +1,48 @@
+\subsection{Simulating ring arithmetic in native time}
+
+In~\cref{sec:arithmetization} we introduce several new protocols for simulating ring arithmetic over fields, giving asymptotic improvements over prior work. These algorithms are specifically tailored for the popular power-of-two degree cyclotomic rings with prime moduli ubiquitous in lattice-based cryptography constructions, and provide security even for small moduli via field extension techniques. Algorithms include Chinese remainder transform (CRT)\footnote{By CRT we mean the linear map from the power basis to the $\integers_q$-basis of $\ring_q$ where ring multiplication simplifies to computing the Hadamard product of the basis vectors. This is sometimes referred to as NTT, and CRT is used to describe a different per-coefficient basis for composite moduli, but we choose to stick with original naming conventions~\cite{EC:LyuPeiReg13}.}, multiplication, inner product (e.g., R-SIS), matrix-vector multiplication (e.g., M-SIS), and 
+
+%\pnote{optimistically enforcing norm bounds and ring switching}. \pnote{Maybe a comment about linear commitment cost.}
+
+In the following let $\ring = \integers[X]/\Phi_m(X)$ be the $m$th cyclotomic ring, which unless otherwise stated will be of the form $m=2^{n+1}$. Let $q$ a prime such that $q \equiv 1 \mod m$ (i.e., such that $\Phi_m$ splits fully over $\integers_q$), and let $n=\phi(m)$ the ring degree.
+
+\subsubsection{CRT transformation and a first multiplication attempt}
+For $a,b,c \in \ring$ we wish to reduce the relation $a \cdot b \equiv c \mod q$ to a sumcheck-friendly form over $\field_q$, where we are given $(a,b,c)$ in the integral power basis $\bm{a},\bm{b}, \bm{c} \in \integers_{q}^n$. In order to prove this in $O(n \log n)$ time over $\field_q$ we could check
+\begin{equation}
+    \label{eq:crt-ring-multiplication}
+\bm{c}  = \crt^{-1} (\crt \cdot \bm{a} \circ \crt \cdot \bm{b})
+\end{equation}
+where $\crt$ is the $n \times n$ Chinese remainder transform (CRT) matrix over $\integers^{*}_q$~\cref{def:crt}. This check can be performed in $O(n \log n)$ time natively. Liu, Xie, and Zhang~\cite{CCS:LiuXieZha21} give a sumcheck argument for the discrete Fourier transform $a_F = \dft \cdot a$  with the same complexity, where $\dft$ coincides with $\crt$ for prime $m$. In~\cref{app:odd-cyclotomics} we present a generalization of this result, which works for prime powers and supports the inverse CRT as well. Equipped with this, we could proceed as follows.
+
+Let $\tilde{F}, \widetilde{F^{-1}}, \tilde{a}, \tilde{b}, \tilde{c}$ be the multilinear extensions of $\crt,\crt^{-1},\bm{a},\bm{b},\bm{c}$. In order to avoid the quadratic cost of having to compute $\tilde{F}(i,j)$ over $\bits^{2v}$, the prover first sends oracles $\widetilde{a_F}, \widetilde{b_F}$  corresponding to $\crt \cdot a$, $\crt \cdot b$. For a verifier sampled $\bm{\alpha} \gets U(\extensionfield^v)$, where $\extensionfield / \field_q$ is an extension field determined by $\lambda$, the prover convinces the verifier the oracle is correct by using a sumcheck to show
+\[
+\widetilde{a_F}(\bm{\alpha}) = \sum_{\bm{z} \in \bits^{n}} \tilde{F}(\bm{\alpha},\bm{z}) \cdot \tilde{a}(\bm{z})
+\]
+and similarly for $\widetilde{b_F}$. Then for a random $\bm{\beta} \gets U(\extensionfield^n)$, the prover convinces a verifier that
+\[
+\tilde{c}(\bm{\beta}) = \sum_{\bm{z} \in \bits^n} \widetilde{F^{-1}}(\bm{\beta},\bm{k}) \cdot \widetilde{a_F}(\bm{z}) \cdot \widetilde{b_F}(\bm{z})
+\]
+holds using another sumcheck.
+
+While this approach achieves native asymptotic prover time, we show below how a constant factor speedup can be achieved by viewing the ring multiplication instead as a circulant matrix-vector field multiplication. Regardless, computing the CRT transformation is often necessary outside the context of multiplication in lattice-based cryptography, so our $O(n \log n)$ prover algorithm remains useful.
+
+\subsubsection{Cyclotomic ring multiplication as circulant matrix-vector multiplication}
+For power-of-two degree cyclotomic rings, multiplication in the integral power basis can be represented as a particular structured matrix-vector multiplication
+\[
+\vec{c} = Z_{-1}(\bm{a}) \cdot \bm{b}  = 
+    \begin{bmatrix*}
+        a_0 &  - a_{n-1}  & \dotsm & - a_1 \\
+        a_1 & a_0 & \ddots & \vdots \\
+        \vdots & \vdots & \ddots & - a_{n-1} \\
+        a_{n-1}  & a_{n-2} & \dotsm & a_0
+    \end{bmatrix*}
+    \begin{bmatrix*}
+        b_0 \\
+        \vdots \\
+        \vdots \\
+        b_{n-1}
+    \end{bmatrix*}
+\]
+where $Z_{-1}(\bm{a})$ denotes the $f$-circulant matrix given by $f=-1$ and $\bm{a}$ (see \cref{def:f-circulantmatrix}). Below we give an efficient argument for $f$-circulant matrix-vector multiplication, and therefore power-of-two cyclotomic ring multiplication.
+
+% It holds that $Z_{f}(\bm{a}) = \diag(\bm{\eta}) \cdot F^{-1}_{n} \cdot \diag(F \cdot \diag(\bm{\eta}) \cdot \bm{a}) \cdot F \cdot \diag(\bm{\eta})$, where $F$ is the DFT matrix and $\bm{\eta} := [1, f^\frac{1}{n}, \dotsc, f^{\frac{n-1}{n}}]$.

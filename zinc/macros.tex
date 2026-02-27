@@ -1,0 +1,1245 @@
+% Shorthand for \mathcal
+\defcommand{\mc}[1]{\mathcal{#1}}
+
+\defcommand{\gp}{\mathsf{gp}}
+\defcommand{\commit}{\mathsf{Commit}}
+\defcommand{\open}{\mathsf{Open}}
+\defcommand{\evaluation}{\mathsf{Evaluation}}
+\defcommand{\testingP}{\mathsf{Testing Phase}}
+\defcommand{\evaluationP}{\mathsf{Evaluation Phase}}
+\defcommand{\com}{\mathsf{com}}
+
+\defcommand{\ad}{\mathsf{AD}}
+
+\defcommand{\code}{\mathcal{C}}
+
+\defcommand{\polyspace}{(\QQ[X])[\vec Y]}
+
+
+\defcommand{\encode}{\mathsf{Enc}}
+
+
+\defcommand{\size}{2^\mu}
+\defcommand{\matrixU}{\mathbf{\hat{u}}}
+\defcommand{\matrixV}{\mathbf{V}}
+\defcommand{\vectorUi}{\mathbf{\hat{u}_i}}
+\defcommand{\oracleUi}{\llbracket\mathbf{\hat{u}}_i\rrbracket}
+
+\defcommand{\emath}[1]{\ensuremath{#1}}
+\defcommand{\defc}[2]{\defcommand{#1}{\ensuremath{#2}\xspace}}
+\defcommand{\defc}[2]{\defcommand{#1}{\ensuremath{#2}\xspace}}
+
+% allow in-line math breaks
+\defcommand{\CB}{\allowbreak}
+
+% such that in probability statements
+\defcommand{\pST}{\; \middle| \;}
+\defcommand{\Or}{\vee}
+\defcommand{\and}{\ \mathsf{AND} \ }
+\defcommand{\Not}{\neg}
+\defc{\defeq}{:=}
+\defcommand{\Union}{\cup}
+\defcommand{\defemph}[1]{\textbf{\emph{#1}}}
+
+% some math macros
+\defcommand{\List}[1]{\left[#1\right]}
+\defcommand{\SmallList}[1]{[#1]}
+\defcommand{\set}[1]{\ensuremath{\mleft\{#1\mright\}}}
+\defcommand{\Range}[2] {[#1 \, .. \, #2]}
+\defcommand{\OpenOpen}[2]{\left[#1, #2\right]}
+\defcommand{\OpenClosed}[2]{\left[#1, #2\right)}
+\defcommand{\ClosedOpen}[2]{\left(#1, #2\right]}
+\defcommand{\ClosedClosed}[2]{\left(#1, #2\right)}
+
+\defcommand{\Element}[3]{#1_{#2,#3}}
+
+% tuples with in-line math breaks
+\defcommand{\tuple}[2]{(#1 ,\CB \dots,\CB #2)}
+\defcommand{\pair}[2]{(#1 ,\CB #2)}
+\defcommand{\ppair}[2]{\left(#1 ,\CB #2\right)}
+\defcommand{\triple}[3]{(#1 ,\CB #2,\CB #3)}
+\defcommand{\ptriple}[3]{\left(#1 ,\CB #2,\CB #3\right)}
+\defcommand{\quadruple}[4]{(#1 ,\CB #2,\CB #3,\CB #4)}
+\defcommand{\pquadruple}[4]{\left(#1 ,\CB #2,\CB #3,\CB #4\right)}
+\defcommand{\quintuple}[5]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5)}
+\defcommand{\quintuplenp}[5]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5}
+\defcommand{\sextuple}[6]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6)}
+\defcommand{\sextuplenp}[6]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6}
+\defcommand{\septuple}[7]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7)}
+\defcommand{\septuplenp}[7]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7}
+\defcommand{\octuple}[8]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7,\CB #8)}
+\defcommand{\octuplenp}[8]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7,\CB #8}
+\defcommand{\nonuple}[9]{(#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7,\CB #8,\CB #9)}
+\defcommand{\nonuplenp}[9]{#1 ,\CB #2,\CB #3,\CB #4,\CB #5,\CB #6,\CB #7,\CB #8,\CB #9}
+
+% expectation
+\defcommand{\prob}[1]{\Pr\left[ #1 \right]}
+\defcommand{\Expectation}{\mathbb{E}}
+
+% random variable
+\defcommand{\RandomVariable}{X}
+
+% complexity classes
+\defcommand{\Class}[1]{\mathsf{#1}}
+\defcommand{\NP}{\Class{NP}}
+\defcommand{\DTIME}[1]{\Class{DTIME}(#1)}
+
+% types
+\defc{\bits}{\{0,1\}}
+\defc{\strings}{\bits^{*}}
+\defc{\naturals}{\mathbb{N}}
+\defc{\cmplx}{\mathbb{C}}
+\defc{\reals}{\mathbb{R}}
+\defc{\rationals}{\mathbb{Q}}
+\defc{\integers}{\mathbb{Z}}
+\defc{\integersq}{\mathbb{Z}_{\modulus}}
+\defc{\integersp}{\mathbb{Z}_{\pmodulus}}
+\defc{\integersalpha}{\mathbb{Z}_{\alpha}}
+\defcommand{\integerball}[1]{\integers(#1)}
+\defc{\preimagepowers}{P}
+
+\defcommand{\EmptyString}{\varepsilon}
+
+\defc{\field}{\mathbb{F}}
+\defc{\FF}{\mathbb{F}}
+\defc{\extend}{\mathsf{Extend}}
+\defc{\ff}{\mathbb{F}_{\pmodulus}}
+\defcommand{\Pairing}[2]{\PairingSymb(#1,\ #2)}
+\defcommand{\fixMSM}{\textrm{f-MSM}}
+\defcommand{\varMSM}{\textrm{v-MSM}}
+\defcommand{\FFT}{\mathsf{FFT}}
+\defcommand{\IFFT}{\textrm{IFFT}}
+
+\defcommand{\Max}{\mathsf{Max}}
+
+\defcommand{\innerproduct}[2]{\langle #1, \ #2 \rangle}
+
+\defc{\randpick}{\ {\gets}{\scriptstyle\$}\ }
+
+\defcommand{\Size}[1]{\abs{#1}}
+\defcommand{\Time}{t}
+
+\defc{\secparam}{\lambda}
+\defc{\soundnesserror}{\epsilon}
+\defc{\knowledgeerror}{\kappa}
+\defc{\extractiontime}{\mathsf{ext}}
+\defc{\rbrextractor}{\mathcal{E}_{\mathsf{rbr}}}
+\defc{\kstate}{\mathsf{KState}}
+\defc{\kswit}{\mathsf{w}}
+\defc{\provermsg}{\pi}
+\defc{\verifiermsg}{\rho}
+\defc{\provertime}{\mathsf{pt}}
+\defc{\verifiertime}{\mathsf{vt}}
+\defcommand{\Deg}{\mathrm{deg}}
+\defcommand{\VIEW}{\mathrm{View}}
+
+% attackers
+\defcommand{\QuerySampler}{\mathcal{Q}}
+\defc{\adversary}{\mathcal{A}}
+\defcommand{\adversaryb}{\mathcal{B}}
+\defcommand{\adversaryd}{\mathcal{D}}
+\defc{\experiment}{\mathsf{Exp}}
+\defcommand{\Simulator}{\mathcal{S}}
+\defcommand{\PCSimulator}{\mathcal{S}_{\PC}}
+\defcommand{\SPCSimulator}{\mathcal{S}_{\mathsf{s}}}
+\defcommand{\SqPCSimulator}{\mathcal{S}_{\mathsf{m}}}
+\defcommand{\Real}{\mathsf{Real}}
+\defcommand{\Ideal}{\mathcal{I}}
+\defc{\prim}{\mathsf{Prim}}
+\defc{\generator}{\pcvarstyle{j}}
+\defcommand{\principalideal}[1]{\langle \generator_{#1} \rangle}
+\defcommand{\primeideal}{\mathfrak{I}}
+\defc{\extractoradversary}{\mathcal{E}_{\adversary}}
+\defcommand{\Challenger}{\mathcal{C}}
+
+% oracles
+\defcommand{\HashOracle}{\rho}
+\defcommand{\Oracle}{\mathcal{O}}
+\defcommand{\OracleFamily}{\mathbb{O}}
+\defcommand{\SuccessOracles}{\mathsf{S}}
+
+% public parameters
+\defcommand{\CRS}{\mathsf{crs}}
+\defcommand{\td}{\mathsf{td}}
+\defcommand{\PK}{\mathsf{PK}}
+
+% relation, instance, witness
+\defcommand{\Relation}{\mathcal{R}}
+\defcommand{\Language}{\mathcal{L}}
+\defcommand{\Index}{\mathbb{i}}
+\defcommand{\Instance}{\mathbb{x}}
+\defcommand{\InstanceSizeBound}{\mathsf{N}}
+\defcommand{\RelationWithSizeBound}{\Relation_{\InstanceSizeBound}}
+
+\defcommand{\ValidInstance}{\Language(\Relation)}
+\defcommand{\ValidInstanceWithSizeBound}{\Language(\RelationWithSizeBound)}
+
+\defcommand{\AuxiliaryInp}{\mathbb{z}}
+\defcommand{\AuxiliaryInpDistri}{\mathcal{Z}}
+\defcommand{\aux}{\mathsf{aux}}
+
+
+\defcommand{\polylog}{\mathrm{polylog}}
+\defcommand{\hybrid}[1]{\ensuremath{\mathsf{Hyb}_{#1}\xspace}}
+
+\defcommand{\vhl}[1]{{\color{blue} #1}}
+\defcommand{\mhl}[1]{\text{\hl{$#1$}}}
+\defcommand{\iseq}{\overset{?}{=}}
+\defcommand{\isleq}{\overset{?}{\leq}}
+
+% Hash families
+\defcommand{\HashFamily}{\mathcal{H}}
+\defcommand{\HashIndex}{I}
+\defcommand{\HashKey}{I}
+\defcommand{\HashIndexSet}{\mathcal{I}}
+\defcommand{\Hash}{h}
+\defcommand{\HashKeySpace}{\mathcal{I}}
+
+% Transcripts
+\defcommand{\TranscriptSet}{\mathcal{X}}
+\defcommand{\challengeset}{\mathcal{H}}
+\defcommand{\State}{\mathsf{state}}
+\defcommand{\Transcript}{\tau}
+\defcommand{\Tree}{\textnormal{\textsc{tree}}}
+\defcommand{\EmptyTranscript}{\emptyset}
+\defcommand{\StatesMultiRounds}[1]{[\State_i]_{i=1}^{\PCRound}}
+\defcommand{\QueryTranscript}{\mathsf{qt}}
+\defcommand{\Query}{q}
+\defcommand{\NumQueries}{Q}
+\defcommand{\QuerySet}{\mathcal{Q}}
+\defcommand{\ChallengeSetSize}{p}
+\defcommand{\Image}{\mathsf{Image}}
+
+% Algebras
+\defc{\ring}{\mathcal{R}}
+\defc{\ideal}{\mathfrak{n}}
+\defc{\ringdegree}{n}
+\defc{\modulus}{q}
+\defc{\pmodulus}{M}
+\defc{\modq}{\bmod\modulus}
+\defc{\modp}{\bmod\pmodulus}
+\defc{\fring}{\ring_{\modulus}}
+\defc{\pring}{\ring_{\pmodulus}}
+\defc{\fringinvertiblesubset}{\ring_{\modulus}^{\times}}
+\defc{\fringmultgroup}{\fring^{\times}}
+\defc{\embedding}{\iota}
+\defcommand{\automorphism}[1]{\emath{\sigma_{-1}(#1)}}
+\defcommand{\ltwonorm}[1]{\norm{#1}_{2}}
+\defcommand{\linfinity}{\ell_\infty}
+\defcommand{\linfinitynorm}[1]{\norm{#1}_{\infty}}
+
+% Codes
+\defc{\dist}{\mathsf{dist}}
+\defc{\dim}{\mathsf{dim}}
+\defc{\blocklength}{\mathsf{n}}
+\defcommand{\reldist}[2]{\Delta\left(#1,#2\right)}
+
+%general formatting
+\defcommand{\pcvarstyle}[1]{\mathsf{#1}}
+\defcommand{\continue}{{\Huge{\hl{$\cdots$}}}}
+% \defcommand{\case}[1]{\medskip\noindent{\fbox{Case #1:}}}
+% \defcommand{\ncase}[1]{\medskip\noindent{\fbox{#1:}}}
+% \defcommand{\ngame}[1]{\medskip\noindent{\fbox{Game $\game{#1}$:}}}
+\defcommand{\mhyph}{\text{-}}
+\defcommand{\ncase}[1]{\medskip\noindent{\textbf{#1:}}}
+\defcommand{\ngame}[1]{\medskip\noindent{\textbf{Game $\game{#1}$:}}}
+\defcommand{\conclude}{\medskip\noindent{}}
+\defcommand{\myskip}{-0.16\baselineskip}
+
+% Make vectors bold
+\defcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
+
+% General mathematics
+\defcommand{\range}[2] {[#1 \, .. \, #2]}
+\defcommand{\SD}{\Delta}
+\defcommand{\smallset}[1] {\{#1\}}
+\defcommand{\bigset}[1] {\left\{#1\right\}}
+\defcommand{\GRP} {\mathbb{G}}
+\defcommand{\HRP} {\mathbb{H}}
+%\defcommand{\pair} {\hat{e}}
+\defcommand{\brak}[1] {\left(#1\right)}
+\defcommand{\sbrak}[1] {(#1)}
+\defcommand{\alg}[1] {\pcalgostyle{#1}}
+\defcommand{\image} {\operatorname{im}}
+\defcommand{\myland} {\,\land\,}
+\defcommand{\mylor} {\,\lor\,}
+\defcommand{\w}{\omega}
+\defcommand{\const}{\mathsf{const}}
+\defcommand{\p}[1]{\mathsf{#1}}
+\defcommand{\ptx}{\mathsf{t_{X^0}}}
+\defcommand{\ptxsim}{\mathsf{\tilde{t}_{X^0}}}
+\defcommand{\ev}[1]{\widetilde{\mathsf{#1}}}
+\defcommand{\maxconst}{\pcvarstyle{max}}
+\defcommand{\noofc}{\numberofconstrains}
+\defcommand{\noofw}{\pcvarstyle{m}}
+\defcommand{\dconst}{\pcvarstyle{d}}
+\defcommand{\multconstr}{\pcvarstyle{n}}
+\defcommand{\linconstr}{\pcvarstyle{Q}}
+\defcommand{\expected}[1]{\mathbb{E}\left[#1\right]}
+\defcommand{\infrac}[2]{#1 / #2}
+\defcommand{\eps}{\varepsilon}
+\defcommand{\maxdeg}{\pcvarstyle{max}}
+%polynomials
+\defcommand{\pf}{\mathsf{pf}}
+\defcommand{\pF}{\mathsf{F}}
+\defcommand{\pa}{\mathsf{a}}
+\defcommand{\pb}{\mathsf{b}}
+\defcommand{\pc}{\mathsf{c}}
+\defcommand{\pz}{\mathsf{z}}
+\defcommand{\pt}{\mathsf{t}}
+\defcommand{\pR}{\mathsf{R}}
+\defcommand{\pr}{\mathsf{r}}
+\defcommand{\ptlo}{\mathsf{t_{lo}}}
+\defcommand{\ptmid}{\mathsf{t_{mid}}}
+\defcommand{\pthi}{\mathsf{t_{hi}}}
+\defcommand{\pS}{\mathsf{S}}
+\defcommand{\pT}{\mathsf{T}}
+\defcommand{\pta}{\tilde{\mathsf{a}}}
+\defcommand{\ptb}{\tilde{\mathsf{b}}}
+\defcommand{\ptc}{\tilde{\mathsf{c}}}
+\defcommand{\ptz}{\tilde{\mathsf{z}}}
+\defcommand{\ptZH}{\tilde{\mathsf{Z_H}}}
+\defcommand{\vX}{\vec{X}}
+\defcommand{\vB}{\vec{B}}
+\defcommand{\va}{\vec{a}}
+\defcommand{\vb}{\vec{b}}
+\defcommand{\vc}{\vec{c}}
+\defcommand{\tzkproof}{\pi}
+
+%reduction
+\defcommand{\tb}{\tilde{b}} 
+\defcommand{\tw}{\tilde{w}} 
+
+% bilinear maps
+
+\defcommand{\bmap}[2] {\left[#1\right]_{#2}}
+\defcommand{\gone}[1] {\bmap{#1}{1}}
+\defcommand{\gtwo}[1] {\bmap{#1}{2}}
+\defcommand{\gi} {\iota}
+\defcommand{\gtar}[1] {\bmap{#1}{T}}
+\defcommand{\grpgi}[1] {\bmap{#1}{\gi}}
+\defcommand{\gnone}[1]{\left[#1\right]}
+
+\defcommand{\msg}[1]{\mathtt{#1}}
+
+% zero knowledge
+\defcommand{\oracleo}{\mathsf{O}}
+\defcommand{\oraclesrs}{\oracleo_{srs}}
+\defcommand{\oraclec}{\oracleo_\cdv}
+% for srs updatability
+\defcommand{\intent}{\msg{intent}}
+\defcommand{\update}{\msg{update}}
+\defcommand{\setup}{\msg{setup}}
+\defcommand{\final}{\msg{final}}
+\defcommand{\verifysrs}{\verify_{srs}}
+\defcommand{\srsupdate}{\pcalgostyle{Update}}
+\defcommand{\crs}{\pcvarstyle{crs}}
+\defcommand{\srs}{\pcvarstyle{srs}}
+%\defcommand{\td}{\pcvarstyle{td}}
+\defcommand{\ip}[2]{\left\langle #1, #2\right\rangle}
+\defcommand{\zkproof}{\pi}
+\defcommand{\proofsystem}{\pcschemestyle{\Psi}}
+\defcommand{\ps}{\proofsystem}
+\defcommand{\psfs}{\proofsystem_\fs}
+% \defcommand{\ps}{\proofsystem}
+\defcommand{\nuppt}{\pcmachinemodelstyle{NUPPT}}
+\defcommand{\ro}{\mathcal{H}}
+\defcommand{\rof}[2]{\mathbf{\Omega}_{#1, #2}}
+\defcommand{\trans}{\pcvarstyle{trans}}
+\defcommand{\tr}{\pcvarstyle{tr}}
+\defcommand{\instsize}{\pcvarstyle{n}}
+\defcommand{\KG} {\mathsf{K}}
+\defcommand{\kcrs} {\KG_{\crs}}
+\defcommand{\fs}{\pcalgostyle{FS}}
+\defcommand{\sigmaprot}{\pcalgostyle{\Sigma}}
+\defcommand{\se}{\pcvarstyle{se}}
+\defcommand{\snd}{\pcvarstyle{snd}}
+\defcommand{\zk}{\pcvarstyle{zk}}
+
+
+%rewinding---tree of transcripts
+\defcommand{\pcboolstyle}[1]{\mathtt{#1}}
+\defcommand{\treebuild}{\pcalgostyle{TreeBuild}}
+\defcommand{\tree}{\pcvarstyle{T}}
+\defcommand{\counter}{\pcvarstyle{counter}}
+
+
+%PLONK related
+\defcommand{\pcschemestyle}[1]{\mathsf{#1}}
+\defcommand{\plonkprot}{\pcschemestyle{P}}
+\defcommand{\plonkprotfs}{\pcschemestyle{P}_\fs}
+\defcommand{\sonicprot}{\pcschemestyle{S}}
+\defcommand{\sonicprotfs}{\pcschemestyle{S}_\fs}
+\defcommand{\marlinprot}{\pcschemestyle{M}}
+\defcommand{\marlinprotfs}{\pcschemestyle{M}_\fs}
+\defcommand{\selector}[1]{\pcvarstyle{q_{#1}}}
+\defcommand{\selmulti}{\selector{M}}
+\defcommand{\selleft}{\selector{L}}
+\defcommand{\selright}{\selector{R}}
+\defcommand{\seloutput}{\selector{O}}
+\defcommand{\selconst}{\selector{C}}
+\defcommand{\chz}{\mathfrak{z}}
+\defcommand{\ochz}{{\omega \mathfrak{z}}}
+\defcommand{\reduction}{\rdv}
+\defcommand{\tdv}{\pcadvstyle{T}}
+\defcommand{\ch}{\pcvarstyle{ch}}
+
+\defcommand{\game}[1]{\pcalgostyle{G}_{#1}}
+
+\defcommand{\lag}{\mathsf{L}}
+\defcommand{\pubinppoly}{\mathsf{PI}}
+
+\defcommand{\ZERO}{\mathsf{Z}}
+%\defcommand{\pcsetstyle}[1]{\mathrm{#1}}
+\defcommand{\HHH}{\mathsf{H}}
+\defcommand{\KKK}{\mathsf{K}}
+
+% general complexity theory
+% \defcommand{\RND}[1]{\pcalgostyle{RND}(#1)}
+\defcommand{\RND}[1]{\pcvarstyle{R}(#1)}
+\defcommand{\RELGEN}{\mathcal{R}}
+\defcommand{\REL}{\mathsf{REL}}
+\defcommand{\LANG}{\mathcal{L}}
+\defcommand{\inp}{\mathbb{x}}
+\defcommand{\impinp}{\mathbb{y}}
+\defcommand{\wit}{\mathbb{w}}
+\defcommand{\class}[1]{\mathfrak{#1}}
+\defcommand{\ig}{\pcalgostyle{IG}}
+\defcommand{\accProb}{\event{acc}}
+\defcommand{\waccProb}{\event{\widetilde{acc}}}
+\defcommand{\frkProb}{\event{frk}}
+\defcommand{\extProb}{\event{ext}}
+\defcommand{\ssndProb}{\event{ssnd}}
+\defcommand{\FS}{\pcalgostyle{FS}} % Fiat-Shamir transform
+\defcommand{\aux}{\pcvarstyle{aux}} %auxiliary input
+% \defcommand{\dlog}{\pcvarstyle{dlog}}
+\defcommand{\vereq}{\mathsf{ve}}
+
+%Commitment schemes
+\defcommand{\COM}{\pcschemestyle{C}}
+\defcommand{\PCOM}{\pcschemestyle{PC}}
+\defcommand{\PCOMp}{\pcschemestyle{PC}_{\plonkprot}}
+\defcommand{\PCOMs}{\pcschemestyle{PC}_{\sonicprot}}
+\defcommand{\com}{\pcalgostyle{Com}}
+\defcommand{\op}{\pcalgostyle{Op}}
+\defcommand{\open}{\op}
+
+\defcommand{\committer}{\pcalgostyle{C}}
+\defcommand{\receiver}{\pcalgostyle{R}}
+
+%Plonk and Sonic
+\defcommand{\ur}[1]{{#1\text{-}\mathsf{ur}}}
+
+\defcommand{\plonk}{\ensuremath{\textnormal{\textsf{Plonk}}}}
+\defcommand{\marlin}{{\ensuremath{\textnormal{\textsf{Marlin}}}}}
+\defcommand{\sonic}{{\ensuremath{\textnormal{\textsf{Sonic}}}}}
+\defcommand{\groth}{\ensuremath{\textsc{Groth16}}}
+\defcommand{\plonkmod}{\ensuremath{\plonk^\star}}
+\defcommand{\plonkint}{\ensuremath{\plonk^\star}}
+\defcommand{\polyprot}{\pcalgostyle{poly}}
+\defcommand{\plonkintpoly}{\plonkint_\polyprot}
+% \defcommand{\sonic}{\textsc{Sonic}}
+\defcommand{\maxdegree}{\pcvarstyle{N}}
+
+\defcommand{\dlog}{\pcvarstyle{dlog}}
+\defcommand{\ldlog}{\pcvarstyle{ldlog}}
+
+
+%reductions
+\defcommand{\extss}{\ext_\sfss}
+\defcommand{\extse}{\ext_\se}
+\defcommand{\extt}{\ext_{\pcvarstyle{tree}}}
+\defcommand{\compass}{\mathtt{C}}
+\defcommand{\ks}{\pcvarstyle{ks}}
+\defcommand{\sfss}{\pcvarstyle{ss}}
+\defcommand{\rdvks}{{\rdv_\ks}}
+\defcommand{\rdvs}{{\rdv_\pcvarstyle{s}}}
+\defcommand{\rdvdlog}{{\rdv_\dlog}}
+\defcommand{\rdvldlog}{{\rdv_\ldlog}}
+\defcommand{\rdvse}{{\rdv_\se}}
+\defcommand{\rdvss}{{\rdv_\sfss}}
+\defcommand{\rdvur}{\rdv_\pcvarstyle{ur}}
+
+\defcommand{\env}{\pcadvstyle{E}}
+\defcommand{\zdv}{\pcadvstyle{Z}}
+
+\defcommand{\advse}{\adv}
+\defcommand{\advss}{{\adv_\sfss}}
+\defcommand{\bdvfs}{\bdv_{\FS}}
+
+\defcommand{\epsss}{\eps_\pcvarstyle{f}}
+\defcommand{\epsur}{\eps_\pcvarstyle{ur}}
+\defcommand{\epsh}{\eps_{\pcvarstyle{hid}}}
+\defcommand{\epsk}{\eps_{\pcvarstyle{k}}}
+\defcommand{\epsbind}{\eps_\pcvarstyle{bind}}
+\defcommand{\epsbinding}{\eps_\pcvarstyle{bind}}
+\defcommand{\epsid}{\eps_{\pcvarstyle{id}}}
+\defcommand{\epsop}{\eps_\pcvarstyle{op}}
+\defcommand{\epss}{\eps_\pcvarstyle{s}}
+\defcommand{\epsfor}{\eps_\pcvarstyle{f}}
+\defcommand{\epsbatch}{\eps_\pcvarstyle{btch}}
+\defcommand{\epsdlog}{\eps_\dlog}
+\defcommand{\epsldlog}{\eps_\ldlog}
+\defcommand{\epsuber}{\eps_{\pcvarstyle{uber}}}
+\defcommand{\epszk}{\eps_{\pcvarstyle{zk}}}
+\defcommand{\epsro}{\eps_{\ro}}
+
+%selection polynomials
+\defcommand{\vql}{\vec{q_{L}}}
+\defcommand{\vqr}{\vec{q_{R}}}
+\defcommand{\vqm}{\vec{q_{M}}}
+\defcommand{\vqo}{\vec{q_{O}}}
+\defcommand{\vx}{\vec{x}}
+\defcommand{\vqc}{\vec{q_{C}}}
+
+%errors
+\defcommand{\err}{Err}
+\defcommand{\errur}{\err_{ur}}
+\defcommand{\errss}{\err_\sfss}
+\defcommand{\errfrk}{\err_\frkProb}
+
+
+%forking
+\defcommand{\forking}{\pcalgostyle{F}}
+\defcommand{\genforking}{\pcalgostyle{GF}}
+
+%moving proofs and instances
+\defcommand{\MoveInstanceForward}{\pcalgostyle{MoveInstanceForward}}
+\defcommand{\MoveInstanceBackward}{\pcalgostyle{MoveInstanceBackward}}
+\defcommand{\MoveProofForward}{\pcalgostyle{MoveProofForward}}
+\defcommand{\MoveProofBackward}{\pcalgostyle{MoveProofBackward}}
+
+%% Fields and other math
+\defcommand{\HH}{\mathbb{H}}
+\defcommand{\BB}{\{0,1\}}
+\defcommand{\G}{\mathbb{G}}
+\defcommand{\GT}{\mathbb{G}_T}
+%Luca's commands and macros
+\defcommand{\K}{\mathbb{K}}
+\defcommand{\Q}{\mathbb{Q}}
+\defcommand{\B}{\mathbb{B}}
+\defcommand{\F}{\mathbb{F}}
+
+%% hash, epsilons, protcools
+\defcommand{\HASH}{\pcalgostyle{Hash}}
+\defcommand{\vareps}{\varepsilon}
+\defcommand{\varepscommit}{\vareps_{\text{commit}}}
+\defcommand{\varepsquery}{\vareps_{\text{query}}}
+\defcommand{\prot}{\pcalgostyle{\Pi}}
+\defcommand{\protfs}{\pcalgostyle{\Pi}_{\FS}}
+\defcommand{\proverfs}{\prover_{\FS}}
+\defcommand{\verifierfs}{\verifier_{\FS}}
+
+%colors
+\definecolor{darkmagenta}{rgb}{0.5,0,0.5}
+\definecolor{lightmagenta}{rgb}{1,0.85,1}
+\definecolor{lightmagenta}{rgb}{0.9,0.9,0.9}
+\definecolor{darkred}{rgb}{0.7,0,0}
+\definecolor{blueish}{rgb}{0.1,0.1,0.5}
+\definecolor{pinkish}{rgb}{0.9,0.8,0.8}
+\definecolor{darkgreen}{rgb}{0,0.6,0}
+\definecolor{lightgreen}{rgb}{0.85,1,0.85}
+\definecolor{skyblue}{rgb}{0.3,0.9,0.99}
+\definecolor{nicepurple}{rgb}{0.40784, 0.05490, 0.29412}
+
+
+
+% English Abbreviations
+\defcommand{\ie}{\text{i.e.}}
+\defcommand{\etal}{\text{et al.}}
+\defcommand{\naive}{\text{na\"ive}}
+\defcommand{\wrt}{\text{w.r.t.}}
+\defcommand{\whp}{\text{w.h.p.}}
+\defcommand{\eg}{\text{e.g.}}
+\defcommand{\cf}{\text{cf.}}
+\defcommand{\visavis}{\text{vis-\`a-vis}}
+\defcommand{\aka}{\text{a.k.a.}}
+\defcommand{\ala}{\text{\`{a} la}}
+\defcommand{\iid}[0]{\text{i.i.d.}}
+
+
+\defcommand{\plonkytwoconstraint}{(\mathcal{P}_\inp, \mathcal{Q}_\inp, \sigma_\inp, \mathsf{PI}=\emptyset, \mathsf{r}_\inp, \mathsf{r}', \mathsf{\ell}_\inp, \mathsf{n}_\inp,\mathsf{t}, \FF, \mathbb{K})}
+
+\defcommand{\plonkytwoconstraintnox}{(\mathcal{P}, \mathcal{Q}, \sigma, \mathsf{PI}=\emptyset, \mathsf{r}, \mathsf{r}', \mathsf{\ell}, \mathsf{n},\mathsf{t}, \FF, \mathbb{K})}
+
+
+\defcommand{\partf}[2]{\bar{f}_{#1}(\omega^{#2})}
+\defcommand{\partfx}[1]{\bar{f}_{#1}(X)}
+\defcommand{\partfxk}[1]{\bar{f}_{k{#1}}(X)}
+\defcommand{\partfxkfull}[2]{\bar{f}_{{#2}{#1}}(X)}
+\defcommand{\partfxkfullx}[2]{\bar{f}_{{#2}{#1}}(x)}
+\defcommand{\partffull}[3]{\bar{f}_{#1}(\tau_{1{#3}}, \omega^{#2})}
+\defcommand{\partfxfull}[2]{\bar{f}_{#1}(\tau_{1{#2}},X)}
+
+
+\defcommand{\partg}[2]{\bar{g}_{#1}(\omega^{#2})}
+\defcommand{\partgx}[1]{\bar{g}_{#1}(X)}
+\defcommand{\partgxk}[1]{\bar{g}_{k{#1}}(X)}
+\defcommand{\partgxkfull}[2]{\bar{g}_{{#2}{#1}}(X)}
+\defcommand{\partgxkfullx}[2]{\bar{g}_{{#2}{#1}}(x)}
+\defcommand{\partgfull}[3]{\bar{g}_{#1}(\tau_{1{#3}}, \omega^{#2})}
+\defcommand{\partgxfull}[2]{\bar{g}_{#1}(\tau_{1{#2}},X)}
+
+\defcommand{\roundonemessage}{(\mathsf{a}_i(X), \mathsf{b}_i(X))_{i\in [\mathsf{r}]}}
+\defcommand{\roundonecha}{(\beta_i, \gamma_i)_{i\in [\mathsf{t}]}}
+\defcommand{\roundtwomessage}{(\mathsf{z}_k(X), \pi_{ki}(X))_{k\in [\mathsf{t}], i\in [\mathsf{s}-1]}}
+\defcommand{\roundtwocha}{(\alpha_i)_{i\in [\mathsf{t}]}}
+\defcommand{\roundonepartialtr}{ ((\mathsf{a}_i(X),)_{i\in [\mathsf{r}]}, (\beta_i, \gamma_i)_{i\in [\mathsf{t}]})}
+\defcommand{\roundonepartialtronebetagamma}[1]{ ((\mathsf{a}_i(X))_{i\in [\mathsf{r}]}, (\beta_{#1}, \gamma_{#1}))}
+\defcommand{\roundtwopartialtr}{ ((\mathsf{a}_i(X))_{i\in [\mathsf{r}]}, \roundonecha, \roundtwomessage, \roundtwocha)_{i\in [\mathsf{t}]})}
+\defcommand{\roundtwopartialtronealpha}[1]{ ((\mathsf{a}_i(X))_{i\in [\mathsf{r}]}, (\beta_i, \gamma_i)_{i\in [\mathsf{t}]}, (\mathsf{z}_k(X), \pi_{ki}(X))_{k\in [\mathsf{t}], i\in [\mathsf{s}-1]}, \alpha_{#1})}
+\defcommand{\polyroundtwofull}[1]{\mathsf{d}(\inp, \tau_{2{#1}}, X)}
+\defcommand{\polyroundtwofulleval}[2]{\mathsf{d}(\inp, \tau_{2{#1}}, {#2})}
+
+\defcommand{\pred}[1]{\mathsf{#1}}
+\defcommand{\RS}{\pred{RS}}
+\defcommand{\IPRS}{\pred{IPRS}}
+\defcommand{\bbF}{\FF}
+\defcommand{\defeq}[0]{\ensuremath{{\;\vcentcolon=\;}}\xspace}
+
+\defcommand{\idx}{\mathbb{i}}
+\defcommand{\permrelation}{\REL_{\mathbf{RPerm}}}
+\defcommand{\permindex}{(\mathsf{r},  \sigma)}
+
+\defcommand{\turboplonkrelation}{{\REL_{\mathbf{RTurboPlonk}}}}
+\defcommand{\plonkyrelation}{{\REL_{\mathbf{ROPlonky}}}}
+\defcommand{\plonkytworelation}{{\REL_{\mathbf{RPlonky2}}}}
+
+\defcommand{\oracle}[1]{\llbracket
+{#1}\rrbracket
+}
+\defcommand{\incompleteoracle}[1]{\{\{#1\}\}}
+
+\defcommand{\LT}{\mathsf{LT}}
+\defcommand{\turboplonkidx}{( \mathcal{P}, \mathcal{Q}, \sigma, \mathsf{PI}, \mathsf{r}, \mathsf{\ell})}
+\defcommand{\turboplonkconstraint}{\turboplonkidx}
+\defcommand{\plonkyindex}{( \mathcal{P}, \mathcal{Q}, H, \sigma, \mathsf{PI}, \mathsf{r},\mathsf{r}', \ell, \mathsf{t})}
+\defcommand{\plonkyindexexpanded}{(\FF, \mathbb{K}, \omega, \mathcal{P}, \mathcal{Q}, \sigma, \mathsf{PI}, \mathsf{r},\mathsf{r}', \mathsf{\ell},\mathsf{t},\hash)}
+
+\defcommand{\parttr}[1]{\mathcal{T}_{#1}}
+\defcommand{\idxmaxf}{\mathsf{idx_{max}}(F)}
+\defcommand{\idxmaxg}{\mathsf{idx_{max}}(G)}
+\defcommand{\idxminf}{\mathsf{idx_{min}}(F)}
+\defcommand{\idxming}{\mathsf{idx_{min}}(G)}
+\defcommand{\roundonechanoidx}{(\beta, \gamma)}
+\defcommand{\llex}{\leq_{\mathsf{llex}}}
+\defcommand{\pdiag}{\mathsf{pdiag}}
+
+
+\defcommand{\Ind}{\mathsf{Ind}}
+
+
+\defcommand{\plonky}{\mathsf{Plonky}}
+\defcommand{\plonkyindexer}{\Ind_{\plonky}}
+\defcommand{\plonkyprover}{\prover_{\plonky}}
+\defcommand{\plonkyverifier}{\verifier_{\plonky}}
+
+\defcommand{\plonkyldtoracle}{\mathsf{OPlonky}\xspace}
+\defcommand{\plonkyldtindexer}{\Ind_{\plonkyldtoracle}}
+\defcommand{\plonkyldtprover}{\prover_{\plonkyldtoracle}}
+\defcommand{\plonkyldtverifier}{\verifier_{\plonkyldtoracle}}
+
+\defcommand{\plonkyfs}[1]{\prot_{\mathsf{Plonky2}, \FS}({#1})}
+\defcommand{\plonkyproverfs}[1]{\prover_{\mathsf{Plonky2}, \FS}({#1})}
+\defcommand{\plonkyverifierfs}[1]{\verifier_{\mathsf{Plonky2}, \FS}({#1})}
+
+
+\defcommand{\plonkysmall}{\prot_{\mathsf{rounds123}}}
+\defcommand{\plonkysmallprover}{\prover_{\mathsf{rounds123}}}
+\defcommand{\plonkysmallverifier}{\verifier_{\mathsf{rounds123}}}
+
+
+
+\defcommand{\quotient}[3]{\mathsf{quotient}({#1},{#2},{#3})}
+
+\defcommand{\KK}{\mathbb{K}}
+
+% \defcommand{\ro}{\mathsf{H}}
+\defcommand{\zinc}{\mathsf{Zinc}}
+
+\defcommand{\batchedfri}{\mathsf{batchFRI}}
+\defcommand{\ldtrelation}{\mathbf{PerfLDT}}
+\defcommand{\ppp}{\mathsf{gp}}
+\defcommand{\pppc}{\mathsf{pp}_{\mathsf{Com}}}
+\defcommand{\idxacc}{\idx_{\mathsf{acc}}}
+\defcommand{\inpacc}{\inp_{\mathsf{acc}}}
+\defcommand{\witacc}{\wit_{\mathsf{acc}}}
+
+\defcommand{\permarg}{\prot_{\permrelation}}
+\defcommand{\permargprover}{\prover_{\permrelation}}
+\defcommand{\permargverifier}{\verifier_{\permrelation}}
+\defcommand{\permargindexer}{\Ind_{\permrelation}}
+
+\defcommand{\doomedldt}{\cD_{0}}
+\defcommand{\doomedldtprox}{\cD_{\delta}}
+\defcommand{\doomedldtks}{\cD_{0,\mathsf{ks}}}
+\defcommand{\doomedldtproxks}{\cD_{\delta,  \mathsf{ks}}}
+
+\defcommand{\union}{\ensuremath{\cup}\xspace}
+\defcommand{\intersect}{\ensuremath{\cap}\xspace}
+\defcommand{\pow}[1]{\ensuremath{^{(#1)}}\xspace}
+\defcommand{\fin}{\pred{f}}
+\defcommand{\tQ}{\ensuremath{\widetilde{Q}}\xspace}
+
+
+
+\defcommand{\polytranscripts}[1]{\text{PolyTr}(#1)}
+\defcommand{\mapstranscript}[1]{\text{Words}(#1)}
+\defcommand{\extmapstranscript}[1]{\text{ExtWords}(#1)}
+
+
+\defcommand{\epsfrirbr}{\ensuremath{\eps_{\mathsf{rbr}}^{\mathsf{FRI}}}\xspace}
+\defcommand{\epsbatchfrirbr}{\ensuremath{\eps_{\mathsf{rbr}}^{\mathsf{bFRI}}}\xspace}
+\defcommand{\epsfrirbrk}{\ensuremath{\eps_{\mathsf{rbr-k}}^{\mathsf{FRI}}}\xspace}
+\defcommand{\epsbatchfrirbrk}{\ensuremath{\eps_{\mathsf{rbr-k}}^{\mathsf{bFRI}}}\xspace}
+\defcommand{\epsfrifs}{\ensuremath{\eps_{\mathsf{fs}}^{\mathsf{FRI}}}\xspace}
+\defcommand{\epsbatchfrifs}{\ensuremath{\eps_{\mathsf{fs}}^{\mathsf{bFRI}}}\xspace}
+\defcommand{\epsfrifsq}{\ensuremath{\eps_{\mathsf{fs-q}}^{\mathsf{FRI}}}\xspace}
+\defcommand{\epsbatchfrifsq}{\ensuremath{\eps_{\mathsf{fs-q}}^{\mathsf{bFRI}}}\xspace}
+
+\defcommand{\?}{\ensuremath{\stackrel{?}{=}}\xspace}
+\defcommand{\oplonky}{\ensuremath{\plonkyldtoracle}\xspace}
+
+
+\defcommand{\oracleagreementdelta}{{\mathsf{OCoAgg}(\delta)}}
+\defcommand{\oracleagreementzero}{{\mathsf{OCoAgg}(0)}}
+\defcommand{\ldtrelationprox}[1]{{\mathbf{CoAgg({#1})}}}
+\defcommand{\ldtrelationproxplain}{{\mathbf{CoAgg}}}
+\defcommand{\protcoagg}[1]{\prot^{\mathsf{OCoAgg}({#1})}}
+\defcommand{\protcoaggactualrel}[1]{{\mathsf{CoAgg}({#1})}}
+
+\defcommand{\idxcorrelatedagreement}{(\FF, D, d, \delta, r)}
+
+
+  \defcommand{\protcompiled}{ \prot_{\mathsf{compiled}}  } \defcommand{\indexcompiled}{\Ind_{\mathsf{compiled}}}
+  \defcommand{\provercompiled}{\prover_{\mathsf{compiled}}}  \defcommand{\verifiercompiled}{\verifier_{\mathsf{compiled}}}
+
+  \defcommand{\plonkyhIOP}{\mathsf{Plonky2\-hIOP}}
+
+
+    \defcommand{\ca}{\mathsf{CA}}
+    \defcommand{\idxinp}{\idx,\inp}
+
+
+\defcommand{\rank}{\rho}
+\defcommand{\Free}{\mathbb{FR}_\rank}
+\defcommand{\Freenum}[1]{F_{#1}}
+\defcommand{\Id}{\mathsf{Id} }
+\defcommand{\mle}[1]{{\mathsf{mle}[{#1}]}}
+\defcommand{\hypercube}[1]{\{0,1\}^{#1}}
+\defcommand{\FCCSunrolled}{(\rho, I=(f_1, \ldots, f_k), m,n,\ell,t,q,d), (M_0,\ldots, M_{t-1}, c_0,\ldots, c_{q-1}))}
+
+%%ethSTARK
+\defcommand{\traceevaldomain}{\pcvarstyle{D}}
+
+
+\defcommand{\vect}[1]{\mathbf{#1}}
+\defcommand{\bigtable}{\vect{t}}
+\defcommand{\sizetable}{N}
+\defcommand{\smalltable}{\vect{a}}
+\defcommand{\smalltabletwo}{\vect{b}}
+\defcommand{\smalltablethree}{\vect{c}}
+\defcommand{\sizesmalltable}{m}
+%\defcommand{\setvec}[1]{\left\{ #1 \right\}}
+
+%%lookup tuples
+\defcommand{\sizes}{(\sizetable, \sizesmalltable)}
+
+\defcommand{\lookuptuple}{(\sizes, \bigtable; \smalltable)}
+
+\defcommand{\indxedlookuptuple}{(\sizes, \bigtable; \smalltable, \tau)}
+
+\defcommand{\indxedlookuptupleone}{(\sizes, \bigtable; \smalltable_1, \tau_1)}
+
+\defcommand{\indxedlookuptupletwo}{(\sizes, \bigtable; \smalltable_2, \tau_2)}
+
+\defcommand{\sizesnew}{(\sizetable+\sizesmalltable, \sizesmalltable)}
+
+\defcommand{\indxedlookuptupleprime}{(\sizesnew, \bigtable'; \smalltable, \tau')}
+
+\defcommand{\commatlooktuple}[1]{((N,m), \overline{M_{#1}}, \overline{\smalltable_{#1}}, \overline{\bigtable} ;  M_{#1}, \smalltable_{#1}, \bigtable)}
+
+%%relations
+
+\defcommand{\protsetequality}{\prot_{\mathsf{set-eq}}}
+\defcommand{\relsetequality}{\REL_{mathsf{set-equal}}}
+\defcommand{\protperm}{\prot_{\mathsf{perm}}}
+\defcommand{\relperm}{\REL_{\mathsf{perm}}}
+\defcommand{\tildepol}[1]{\widetilde{#1}}
+\defcommand{\ind}{\mathbb{I}}
+
+\defcommand{\Rccs}{\REL_{\mathsf{cR1CS}}}
+\defcommand{\Rcs}{\REL_{\mathsf{R1CS}}}
+\defcommand{\Rcrcs}{\REL_{\mathsf{acc}}}
+\defcommand{\Rcsa}{\Rcrcs(\textbf{r})}
+\defcommand{\Rms}{\REL_{\mathsf{ms}}}
+\defcommand{\Rsps}{\REL_{\mathsf{sps}}}
+
+%%variables
+\defcommand{\bb}{\vec{b}}
+\defcommand{\yy}{\vec{y}}
+\defcommand{\xx}{\vec{x}}
+\defcommand{\XX}{\vec{X}}
+\defcommand{\EE}{\mathbf{E}}
+\defcommand{\zz}{\vec{z}}
+\defcommand{\ZZ}{\mathbb{Z}}
+
+\defcommand{\ss}{\vec{s}}
+\defcommand{\rr}{\vec{r}}
+\defcommand{\YY}{\mathbf{Y}}
+\defcommand{\WW}{\mathbf{W}}
+
+%\defcommand{\lEE}{\lin(\mathbf{E})}
+
+\defcommand{\TT}{\mathbf{T}}
+\defcommand{\multilinmle}[1]{\widetilde{#1}}
+\defcommand{\multilin}{\mathsf{ml}}
+
+\defcommand{\bWW}{{\widebar{\WW}}}
+\defcommand{\bEE}{{\widebar{\EE}}}
+\defcommand{\bTT}{\widebar{\TT}}
+
+
+
+\defcommand{\MM}{\mathbf{M}}
+\defcommand{\bMM}{\widebar{\mathbf{M}}}
+%%lookup relations
+%%normal lookup
+\defcommand{\rellookup}{\REL_{\mathsf{Look}}}
+\defcommand{\relsoslookup}{\REL_{\mathsf{SOSLook}}}
+\defcommand{\relindexedlookup}{\REL_{\mathsf{IdxLook}}}
+%%algebraic lookup
+\defcommand{\relalookup}{\REL_{\mathsf{AlLook}}}
+\defcommand{\relalookupeq}{\REL_{\mathsf{EqAlLook}}}
+\defcommand{\relaindexedlookup}{\REL_{\mathsf{AlIdxLook}}}
+\defcommand{\relccl}{\REL_{\mathsf{ConstAlCmLook}}}
+%%committed lookup relations
+\defcommand{\relMlookupcom}{\REL_{\mathsf{CmMAlLook}}}
+%%shift relations
+\defcommand{\relshift}{\REL_{\mathsf{Shift}}}
+\defcommand{\relshifttwo}{\REL_{\mathsf{Shift2}}}
+\defcommand{\relshiftbatch}{\REL_{\mathsf{ShiftBatch}}}
+
+\defcommand{\cm}{\mathsf{cm}}
+
+\defcommand{\meq}{\multilinmle{\mathsf{eq}}}
+\defcommand{\miota}{\multilinmle{\iota}}
+\defcommand{\mtau}{\multilinmle{\tau}}
+\defcommand{\Racc}{\mathcal{R}_{\mathrm{acc}}}
+\defcommand{\Relax}{\mathcal{R}_{\mathrm{rR1CS}}}
+\defcommand{\Reval}{\mathcal{R}_{\mathrm{eval}}}
+\defcommand{\Rsmol}{\mathcal{R}_{\mathrm{decR1CS}}^b}
+\defcommand{\Fp}{\mathbb{F}_p}
+\defcommand{\nin}{n_{in}}
+\defcommand{\R}{\mathcal{R}}
+\defcommand{\Rp}{\mathcal{R}_p}
+\defcommand{\C}{\mathcal{C}}
+\defcommand{\assgn}{\xleftarrow{}}
+\defcommand{\flatten}[1]{#1^\flat}
+\defcommand{\deflatten}[1]{#1^\sharp}
+
+\defcommand{\norm}[1]{\left\lVert#1\right\rVert_{\infty}}
+\defcommand{\norminf}[1]{\norm{#1}_\infty}
+\defcommand{\normop}[1]{\norm{#1}_{\mathrm{op}}}
+\defcommand{\Ajt}{\mathcal{A}jt}
+\defcommand{\NTT}{\mathsf{NTT}}
+\defcommand{\RotSum}{\mathsf{RotSum}}
+\defcommand{\bsmol}{(1,\:b,\ldots,\:b^{k-1})}
+\defcommand{\vvec}{\mathsf{vec}}
+\defcommand{\draw}{\xleftarrow{\$}}
+\defcommand{\Csmall}{\mathcal{C}_{\mathrm{small}}}
+\defcommand{\stark}{2^{251}+17\cdot2^{192}+1}
+\defcommand{\circlep}{2^{31}-1}
+\defcommand{\babybear}{15 \cdot 2^{27} + 1}
+\defcommand{\goldilocks}{2^{64} - 2^{32}  + 1}
+
+\defcommand{\ronecs}{\mathsf{R1CS}}
+\defcommand{\cronecs}{\mathsf{cR1CS}}
+\defcommand{\crronecs}{\mathsf{crR1CS}}
+\defcommand{\red}{\mathsf{red}}
+\defcommand{\iop}{\mathsf{IOP}}
+\defcommand{\I}{\mathcal{I}}
+
+\defcommand{\Mod}[1]{\ (\mathrm{mod}\ #1)}
+\defcommand{\ord}{\mathrm{ord}}
+\defcommand{\N}{\mathbb{N}}
+\defcommand{\Z}{\mathbb{Z}}
+\defcommand{\inter}{\langle \Prover^*, \Verifier \rangle}
+\defcommand{\hinter}{\langle \Prover, \Verifier \rangle}
+
+
+
+\defcommand{\blue}[1]{\textcolor{blue}{#1}}
+\defcommand{\lin}{\mathcal{L}}
+
+\defcommand{\Requal}{\REL_{\mathsf{equal}}}
+
+
+\defcommand{\Prover}{\prover}
+\defcommand{\Verifier}{\verifier}
+
+
+\defcommand{\relsumcheck}{\REL_{\mathsf{sc}}}
+\defcommand{\releval}{\REL_{\mathsf{eval}}}
+
+
+\defcommand{\Rccsnew}{\REL_{\mathsf{cR1CS}}}
+\defcommand{\Rrccs}{\REL_{\mathsf{rcR1CS}}}
+\defcommand{\Rrcs}{\REL_{\mathsf{rR1CS}}}
+
+\defcommand{\gen}{\mathsf{Gen}}
+\defcommand{\pparams}{\mathsf{gp}}
+
+
+    \defcommand{\eabort}{\mathcal{E}_{\mathsf{abort}}}
+        \defcommand{\evalidwit}{\mathcal{E}_{\mathsf{valid-wit}}}
+    \defcommand{\pro}{\mathsf{Pr}}
+    \defcommand{\expectation}{\mathbb{E}}
+    \defcommand{\cE}{\mathcal{E}}
+            \defcommand{\cElines}{\cE_{\mathsf{lines}}}
+
+                \defcommand{\eone}{\mathcal{E}_{\mathsf{root}}^{\EE^{(1)}}}
+        \defcommand{\etwo}{\mathcal{E}_{\mathsf{good-run}}}
+
+
+            \defcommand{\UU}{\mathbf{U}}
+    \defcommand{\VV}{\mathbf{V}}
+		\defcommand{\cEzero}{\cE_{\mathsf{zero}}}
+		\defcommand{\cEnonzero}{\cE_{\mathsf{nonzero}}}
+		\defcommand{\cEbinding}{\cE_{\mathsf{binding}}}
+
+  \defcommand{\cEbadlines}{\mathcal{E}_{\mathsf{bad-lines}}}
+
+
+  \defcommand{\gp}{\mathsf{gp}}
+\defcommand{\vp}{\mathsf{vp}}
+\defcommand{\idxer}{\mathcal{I}}
+
+\defcommand{\oracle}[1]{[[{#1}]]}
+\defcommand{\loc}[1]{\ZZ_{(#1)}}
+\defcommand{\vv}{\mathbf{v}}
+\defcommand{\cC}{\mathcal{C}}
+\defcommand{\cR}{\mathcal{R}}
+
+\defcommand{\cL}{\mathcal{L}}
+\defcommand{\lift}{\pcvarstyle{lift}}
+\defcommand{\bounds}{\ppp}
+
+
+\defcommand{\cQ}{\mathcal{Q}}
+\defcommand{\cF}{\mathcal{F}}
+\defcommand{\soundness}{\mathsf{sound}}
+\defcommand{\boundedsoundness}{\mathsf{bound-sound}}
+
+\defcommand{\completeness}{\mathsf{comp}}
+\defcommand{\completenesserror}{\epsilon}
+%\defcommand{\multilin}{\mathsf{multilin}}
+
+\defcommand{\nummorph}{\eta}
+\defcommand{\cA}{\mathcal{A}}
+\defcommand{\valid}{\mathsf{wf}}
+\defcommand{\Enc}{\mathsf{Enc}}
+
+\defcommand{\codelength}{\mathsf{n}}
+\defcommand{\codedim}{\mathsf{dim}}
+\defcommand{\uu}{\mathbf{u}}
+\defcommand{\T}{\mathsf{T}}
+\defcommand{\bdsamplingset}{S}
+\defcommand{\cP}{\mathcal{P}}
+\defcommand{\qq}{\mathbf{q}}
+\defcommand{\local}[1]{\ZZ_{(#1)}}
+\defcommand{\bounded}{\mathsf{bounded}}
+\defcommand{\rate}{\rho}
+\defcommand{\test}{\mathsf{test}}
+\defcommand{\distance}{\mathsf{dist}}
+\defcommand{\dd}{\mathbf{d}}
+\defcommand{\accept}{\mathsf{accept}}
+\defcommand{\bdpoly}{\mathsf{bdpoly}}
+\defcommand{\aa}{\mathbf{a}}
+\defcommand{\Runtime}{\mathsf{Runtime}}
+\defcommand{\Encbinary}{\mathsf{Enc}_{\mathsf{binary}}}
+\defcommand{\wt}{\mathsf{wt}}
+\defcommand{\supp}{\mathsf{supp}}
+
+\defcommand{\Ber}{\mathsf{Ber}}
+\defcommand{\BP}{\mathsf{BP}}
+\defcommand{\rk}{\mathsf{rk}}
+\defcommand{\sgn}{\mathsf{sgn}}
+
+    \defcommand{\PC}{\mathsf{PC}}
+    \defcommand{\LA}{\mathsf{LA}}
+    \defcommand{\prove}{\mathsf{Prove}}
+
+
+    \defcommand{\advA}{\mathcal{A}}
+    \defcommand{\Commit}{\mathsf{Commit}}
+    \defcommand{\Open}{\mathsf{Open}}
+    \defcommand{\Eval}{\mathsf{Eval}}
+    \defcommand{\binding}{\mathsf{binding}}
+
+
+
+\defcommand{\lcm}{\text{lcm}}
+
+\defcommand{\Ext}{\mathsf{Ext}}
+
+\defcommand{\record}{\mathsf{Record}}
+%\defcommand{\ks}{\mathsf{ks}}
+\defcommand{\ww}{\mathbf{w}}
+%  \defcommand{\Span}{{\mathsf{span}}}
+\defcommand{\li}{\mathsf{l.i.}}
+\defcommand{\ld}{\mathsf{l.d.}}
+\defcommand{\boundgenerator}{\lVert M_\cC \rVert_\infty}
+\defcommand{\CCS}{\mathsf{CCS}}
+\defcommand{\RICS}{\mathsf{R1CS}}
+\defcommand{\ZZZ}{\mathbf{Z}}
+\defcommand{\WWW}{\mathbf{W}}
+\defcommand{\www}{\mathbf{w}}
+
+   % Define macros for the procedures
+    \defcommand{\Setup}{\mathsf{Setup}}
+    \defcommand{\Com}{\mathsf{Com}}
+    \defcommand{\ProveEvalMod}{\mathsf{ProveEvalMod}}
+    \defcommand{\VfyEvalMod}{\mathsf{VfyEvalMod}}
+    
+    % Define macros for common symbols
+    \defcommand{\opn}{\mathsf{opn}}
+    \defcommand{\cmt}{\mathsf{cm}}
+
+\defcommand{\BDtestsamplingprime}{{q_0}}
+\defcommand{\codelin}{{\cC_{\lambda}}}
+\defcommand{\boundq}{{B_{\mathsf{pt}}}}
+\defcommand{\boundp}{\boundq}
+
+\defcommand{\boundv}{{B_{\vv}}}
+
+\defcommand{\primeset}{{\cP}}
+\defcommand{\proj}{{\mathsf{proj}}}
+\defcommand{\total}{\mathsf{total}}
+
+\defcommand{\extraction}{\mathsf{extraction}}
+\defcommand{\time}{\mathsf{time}}
+
+\defcommand{\codelinplain}{\cC}
+\defcommand{\good}{\mathsf{good}}
+\defcommand{\len}{\mathsf{len}}
+\defcommand{\witnessbound}{{2\cdot\boundv + (6\codedim+2)\cdot \log(\BDtestsamplingprime\cdot \codedim)}}
+%\defcommand{\witnessbound}{{\boundv + \log(\BDtestsamplingprime^3\cdot \codedim)}}
+\defcommand{\witnessboundencoded}{\log(\norm{M_\codelin}\cdot \codedim) +\witnessbound }
+
+\defcommand{\pos}{\mathsf{pos}}
+\defcommand{\LANG}{\mathsf{LANG}}
+
+% Bit-vector helpers (used in Appendix/extended_preliminaries.tex)
+\defcommand{\Val}{\mathsf{Val}}
+\defcommand{\Next}{\mathsf{Next}}
+\defcommand{\hi}{\mathsf{hi}}
+\defcommand{\bx}{\mathbf{x}}
+\defcommand{\by}{\mathbf{y}}
+\defcommand{\bu}{\mathbf{u}}
+
+\defcommand{\cM}{\mathcal{M}}
+\defcommand{\relevalppp}{(\mu, \boundv, \boundp, \delta, \BDtestsamplingprime)}
+
+\defcommand{\words}{\mathsf{Words}}
+
+\defcommand{\thetaexpression}{\frac{2\cdot \codedim^2\cdot \left( \boundv +\log(\codedim)  + 2 \cdot \log(\BDtestsamplingprime)\right) + \boundv +\mu\cdot \boundp  + 3\mu+2}{\lambda\cdot |\primeset|}}
+
+\defcommand{\thetaexpressionnotreduced}{\frac{ 2\cdot\codedim^2\cdot \left( \log(\norm{\words(\hat{\uu}})) + 2 \cdot \log(\BDtestsamplingprime)\right) + \boundv +\mu\cdot \boundp  + 3\mu+2}{\lambda\cdot |\primeset|}}
+
+\defcommand{\lo}{{\mathsf{lo}}}
+
+\defcommand{\tot}{{\mathsf{to}}}
+\defcommand{\inpy}{\mathbb{y}}
+
+\defcommand{\ex}{{\mathsf{ex}}}
+%\defcommand{\size}{{\mathsf{size}}}
+\defcommand{\mul}{{\mathsf{mul}}}
+\defcommand{\samp}{{\mathsf{sample}}}
+\defcommand{\jea}{{\mathsf{JEA}}}
+\defcommand{\ns}{{\mathsf{ns}}}
+
+\defcommand{\cD}{\mathcal{D}}
+\defcommand{\tt}{\mathbf{t}}
+\defcommand{\Zinc}{\mathsf{Zinc}}
+\defcommand{\Zip}{\mathsf{Zip}}
+\defcommand{\zipp}{\textsf{Zip+}\xspace}
+
+
+
+\defcommand{\PIOP}{\mathsf{PIOP}}
+\defcommand{\IOP}{\mathsf{IOP}}
+
+\defcommand{\inproof}{\mathsf{IP}}
+\defcommand{\indexer}{\mathsf{I}}
+\defcommand{\vparams}{\mathsf{vp}}
+\defcommand{\gparams}{\mathsf{gp}}
+
+\defcommand{\bA}{\mathbf{A}}
+\defcommand{\bB}{\mathbf{B}}
+\defcommand{\bC}{\mathbf{C}}
+
+\defcommand{\pp}{\mathsf{pp}}
+
+\defcommand{\hint}{\mathsf{hint}}
+
+\defcommand{\weirdrationals}{\QQ}%$[\hat{\uu}]}
+
+\defcommand{\Irr}{\mathsf{Big}}
+
+ \defcommand{\symbolbigbound}{\mathsf{BoundEnc}}
+
+ \defcommand{\compiled}{\mathsf{compiled}}
+ \defcommand{\succinct}{\mathsf{succ}}
+ \defcommand{\vcom}{\mathsf{VC}}
+ \defcommand{\JEA}{\mathsf{JEA}}
+  \defcommand{\weight}{\mathsf{weight}}
+  \defcommand{\dom}{\mathcal{D}}
+  \defcommand{\eq}{\mathsf{eq}}
+  \defcommand{\gparamssigma}{\mathsf{gp}^{\Sigma}}
+
+%  \defcommand{\band}{\ \mathsf{AND}\ }
+\defcommand{\xor}{\ \mathsf{XOR}\ }
+%\defcommand{\eq}{\mathsf{eq}}
+
+
+\defcommand{\lookupset}{S}
+\defcommand{\lookupsets}{\mathcal{S}}
+\defcommand{\set}{\mathsf{set}}
+\defcommand{\bin}{\widetilde{\mathsf{\mathbf{bin}}}}
+
+\defcommand{\int}{\mathsf{int}}
+\defcommand{\lagrange}{\mathsf{Lag}}
+
+% Notation symbols (so \Word_n and \BitPoly_n work)
+\defcommand{\Word}{\mathsf{Word}}
+\defcommand{\BitPoly}{\mathsf{BitPoly}}
+
+% Optional “set-valued” versions (so you can write \Wordset{n}, \BitPolyset{n})
+\defcommand{\Wordset}[1]{\Range{0}{2^{#1}-1}}
+\defcommand{\BitPolyset}[1]{\bits^{<#1}[X]}
+% or: \defcommand{\BitPolyset}[1]{\set{\sum_{i=1}^{#1} b_i X^{i-1}\mid b_i\in\bits}}
+\defcommand{\rot}{\mathsf{ROT}}
+
+
+\defcommand{\megaQ}{\mathfrak{Q}}
+\defcommand{\ff}{\mathbf{f}}
+\defcommand{\cS}{\mathcal{S}}
+\defcommand{\gpunrolled}{(k, m, n, \mu, B, d, t)}
+
+\defcommand{\ucs}{\REL_{\mathsf{UCS}}}
+\defcommand{\witlen}{m}
+\defcommand{\inplen}{\ell}
+\defcommand{\degreebound}{d}
+\defcommand{\bitbound}{B}
+\defcommand{\polbounds}{(\degreebound,\bitbound)}
+\defcommand{\constraints}{\mathcal{C}}
+\defcommand{\primetuple}{\mathbf{q}}
+\defcommand{\constraintpol}{Q}
+\defcommand{\numconstraints}{|\constraints|}
+\defcommand{\degbounds}{\mathbf{d}}
+\defcommand{\numrows}{n}
+\defcommand{\rowvar}{K}
+\defcommand{\rowindex}{k}
+\defcommand{\primeindex}{i}
+\defcommand{\constraintindex}{t}
+\defcommand{\numprimes}{|\primetuple|}
+\defcommand{\colindex}{j}
+\defcommand{\inpvar}{\YY}
+\defcommand{\numcols}{c}
+
+\defcommand{\relmodN}{\REL_{\mathsf{MOD}}}
+\defcommand{\relNF}{\REL_{\mathsf{Ring}}}
+\defcommand{\evalconstraints}{\text{\emph{Eval}}}
+\defcommand{\mainQpolyring}{(\QQ[X]_{\leq B, d})}
+\defcommand{\mainpolyring}[3]{#1^{<{#3}, {#2}}[X]}
+\defcommand{\mainQpolyringmultilin}{(\QQ[X]_{\leq B, d})^{\multilin}}
+
+\defcommand{\UUU}{\mathbf{U}}
+\defcommand{\SSS}{\mathbf{S}}
+\defcommand{\MMM}{\mathbf{M}}
+\defcommand{\PPP}{\mathbf{P}}
+\defcommand{\QQQ}{\mathbf{Q}}
+\defcommand{\RRR}{\mathbf{R}}
+\defcommand{\AAA}{\mathbf{A}}
+\providecommand{\band}{\ \mathsf{AND}\ }
+
+\defcommand{\ROTR}{\mathsf{ROTR}}
+\defcommand{\SHR}{\mathsf{SHR}}
+\defcommand{\Ch}{\mathsf{Ch}}
+\defcommand{\Maj}{\mathsf{Maj}}
+
+
+\defcommand{\tab}{\mathbf{t}}
+\defcommand{\tablelen}{\tau}
+\defcommand{\relronecs}{\REL_{\mathsf{R1CS}}}
+\defcommand{\uair}{\REL_{\mathsf{UAIR+}}}
+\defcommand{\uairproj}{\REL_{\mathsf{UAIR+}}^{\mathsf{proj}}}
+
+\defcommand{\setintegers}{S}
+\defcommand{\numintegers}{2^s}
+\defcommand{\ones}{\mathbf{1}}
+\defcommand{\getsr}{\gets}
+
+\defcommand{\rem}{\mathsf{rem}}
+
+
+\defcommand{\rd}{\mathsf{rd}}
+\defcommand{\po}{\mathsf{p}}
+\defcommand{\rdp}{\rd_{\po}}
+\defcommand{\wh}{\widehat}
+\defcommand{\ucsalg}{\REL_{\mathsf{UCS-ALG}}}
+\defcommand{\ucsalgproj}{\REL_{\mathsf{UCS-ALG-PROJ}}}
+\defcommand{\Kk}{\mathbb{K}}
+\defcommand{\Qb}{\mathsf{Q}}
+\defcommand{\qs}{\mathsf{q}}
+\defcommand{\X}{\mathbf{X}}
+\defcommand{\sr}{\mathsf{sr}}
+\defcommand{\trsr}{\mathsf{tr}_{\mathsf{sr}}}
+
+
+\defcommand{\powertuples}{\bm{\ell}}
+\defcommand{\evalpoints}{\mathbf{a}}
+
+\defcommand{\proj}{\mathsf{proj}}
+\defcommand{\id}{\mathsf{id}}
+\defcommand{\Bad}{\mathsf{Bad}}
+
+\defcommand{\numchunks}{\mathsf{c}}
+\defcommand{\sizetable}{N}
+\defcommand{\bigtable}{\mathbf{t}}
+\defcommand{\den}{\mathsf{den}}%
+\defcommand{\num}{\mathsf{num}}%
+
+\defcommand{\protuair}{\Pi_{\mathsf{UAIR}^+}}
+
+% Commands moved from PIOP/
+\defcommand{\ucsm}{\mathsf{UCS}}
+\defcommand{\epsdef}{\eps_{\mathsf{def}}}
+\defcommand{\epswf}{\varepsilon_{\mathsf{wf}}}
+\defcommand{\epsproj}{\varepsilon_{\mathsf{proj}}}
+\defcommand{\acc}{\mathcal{E}_{\mathsf{acc}}}
+\defcommand{\rat}{\mathsf{rat}}
+\newcommand{\albert}[1]{}
+\newcommand{\kai}[1]{}
+
+\defc{\cha}{\mathsf{ch}}
+\defc{\wti}{\widetilde}
+\defc{\bz}{\mathbf{z}}
+\defc{\Ff}{\mathbb{F}}
+\defc{\bit}{\mathsf{bit}}
+\defc{\Qq}{\mathbb{Q}}
+\defc{\Zz}{\mathbb{Z}}
+\defc{\zrs}{\mathsf{RS}_{\mathbb{Z}}}
+\defc{\diag}{\mathbf{diag}}
+\defc{\agr}{\mathsf{agr}}
+\defc{\x}{\mathbf{x}}
+\defc{\bt}{\mathsf{bitlen}}
+\defc{\divs}{\mathsf{divs}}
+\defc{\pg}{\mathsf{pg}}
+\defc{\wk}{\mathsf{w}}
+\defc{\extra}{\mathsf{E}}
+\defc{\co}{\mathsf{code}}
+\defc{\ksf}{\mathsf{KState}}
+\defc{\ood}{\mathsf{ood}}
+\defc{\row}{\mathsf{row}}
