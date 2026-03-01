@@ -1,0 +1,56 @@
+\subsection{A faster verifier, larger proof size variant}
+\label{sec:logger-verifier}
+
+The $O(n)$ verifier cost in~\cref{prot:ringmul} arises entirely from the direct evaluation of $\tilde{C}(\alpha', \gamma)$ in the final check.
+We now describe a variant that reduces this to $O(\nu^2)$ by delegating the evaluation to the prover via a sequence of sumchecks, at the cost of increasing the proof size from $O(\mu + \nu)$ to $O(\mu + \nu^2)$ extension field elements.
+
+The starting point is the factored representation from the proof of~\cref{lem:m-eval}.
+Recall that $\tilde{C}(\alpha', \gamma) = \sum_{k \in \bits^\nu} \meq(\alpha', k) \cdot g(\omega^{2k+1})$ where $g(\omega^{2k+1}) = \prod_{j=0}^{\nu-1} f_j(k)$ and each $f_j(k) = (1-\gamma_j) + \gamma_j \omega^{(2k+1)2^j}$ has period $2^{\nu-j}$ in $k$.
+Define partial products accumulating factors from highest to lowest period:
+\begin{equation}\label{eq:partial-product-butterfly}
+    h^{(0)} \;:=\; 1, \qquad h^{(r)}(k) \;:=\; \prod_{j=\nu-r}^{\nu-1} f_j(k) \quad \text{for } r = 1, \ldots, \nu,
+\end{equation}
+so that $h^{(r)}$ has period $2^{r}$ in $k$ and $h^{(\nu)}(k) = g(\omega^{2k+1})$.
+The recurrence $h^{(r)}(k) = h^{(r-1)}(k) \cdot f_{\nu-r}(k)$ relates consecutive layers, and the target evaluation is
+\begin{equation}\label{eq:target-butterfly}
+    \tilde{C}(\alpha', \gamma) \;=\; \sum_{k \in \bits^\nu} \meq(\alpha', k) \cdot h^{(\nu)}(k).
+\end{equation}
+
+\paragraph{Protocol modification.} In~\cref{prot:ringmul}, Step~7 is replaced as follows.
+The prover sends $e_C$ claimed to equal $\tilde{C}(\alpha', \gamma)$, and the verifier checks $\sigma'' = e_C \cdot (e'_t + \xi \cdot e'_A + \xi^2 \cdot e'_s)$ using the oracle queries.
+It remains to verify the claim $e_C = \tilde{C}(\alpha', \gamma)$, which is done by the following sequence of sumchecks that ``unwind'' the partial products~\eqref{eq:partial-product-butterfly}.
+
+\paragraph{Layer-$r$ reduction (for $r = \nu, \nu-1, \ldots, 1$).} At the start of layer~$r$, the verifier holds a claim
+\[
+    e^{(r)} \;=\; \sum_{k \in \bits^r} \meq(v^{(r)}, k) \cdot h^{(r)}(k)
+\]
+for some $v^{(r)} \in \extensionfield^r$.
+For $r = \nu$, this is initialized with $e^{(\nu)} := e_C$ and $v^{(\nu)} := \alpha'$.
+Expanding the recurrence $h^{(r)}(k) = h^{(r-1)}(k) \cdot f_{\nu-r}(k)$, the prover and verifier run a sumcheck for
+\[
+    e^{(r)} \;=\; \sum_{k \in \bits^r} \meq(v^{(r)}, k) \cdot h^{(r-1)}(k) \cdot f_{\nu-r}(k).
+\]
+This sumcheck has $r$ variables.
+Naively, the integrand is a product of three multilinear polynomials ($\meq$, $\widetilde{h^{(r-1)}}$, $\widetilde{f_{\nu-r}}$), which would give individual degree~$3$.
+However, the multilinear extension of $f_{\nu-r}$ has a product-of-univariates structure:
+\[
+    \widetilde{f_{\nu-r}}(k) \;=\; (1-\gamma_{\nu-r}) + \gamma_{\nu-r}\, \omega^{2^{\nu-r}} \prod_{i=0}^{r-1}\Big[1 + k_i\big(\omega^{2^{\nu-r+i+1}} - 1\big)\Big],
+\]
+and can therefore be absorbed into the $\meq$ weights.
+Define $w^{(r)}(k) := \meq(v^{(r)}, k) \cdot \widetilde{f_{\nu-r}}(k)$; since each factor of $\widetilde{f_{\nu-r}}$ depends on a single variable~$k_i$, the function $w^{(r)}$ is multilinear in~$k$ (the product of two univariate-in-$k_i$ terms remains degree~$1$ in~$k_i$).
+The sumcheck is then over the degree-$2$ integrand $w^{(r)}(k) \cdot \widetilde{h^{(r-1)}}(k)$, requiring $3$ extension field elements per round, $3r$ per layer.
+
+After sumcheck challenges $u^{(r)} \in \extensionfield^r$, the claim reduces to
+\[
+    \sigma^{(r)} \;=\; w^{(r)}(u^{(r)}) \cdot \widetilde{h^{(r-1)}}(u^{(r)}).
+\]
+The verifier evaluates $w^{(r)}(u^{(r)}) = \meq(v^{(r)}, u^{(r)}) \cdot \widetilde{f_{\nu-r}}(u^{(r)})$ in $O(r)$ time using the product formulas above.
+The prover sends $e^{(r-1)}$ claimed to equal $\widetilde{h^{(r-1)}}(u^{(r)})$, and the verifier checks $\sigma^{(r)} = w^{(r)}(u^{(r)}) \cdot e^{(r-1)}$.
+The next layer begins with the claim $e^{(r-1)} = \sum_{k \in \bits^{r-1}} \meq(v^{(r-1)}, k) \cdot h^{(r-1)}(k)$ for appropriate $v^{(r-1)}$ derived from $u^{(r)}$.
+
+At the base case $r = 0$, we have $h^{(0)} = 1$ and the claim $e^{(0)} = 1$ is checked directly.
+
+\paragraph{Complexity.} The total transcript for the butterfly delegation is $\sum_{r=1}^{\nu} (3r + 1) = \frac{3\nu(\nu+1)}{2} + \nu = O(\nu^2)$ extension field elements (the $+1$ per layer accounts for the prover's claim $e^{(r-1)}$).
+Combined with the main protocol's $3\mu + 3\nu + 2$ elements (from the two sumchecks and the claims $e_t, e_A$) plus the additional claim $e_C$, the total proof size is $3\mu + 3\nu + 3 + O(\nu^2) = O(\mu + \nu^2)$.
+The verifier's cost is $\sum_{r=1}^{\nu} O(r) = O(\nu^2)$ for the butterfly checks plus $O(\tau + \mu)$ for the main sumchecks, giving $O(\nu^2 + \tau + \mu) = O(\log^2 n + \log NM)$.
+The prover's asymptotic cost is unchanged at $O(NMn)$: the sumcheck tables $[h^{(r)}(k)]_{k \in \bits^r}$ for $r = 1, \ldots, \nu$ are byproducts of the iterative algorithm in~\cref{lem:m-eval} and require no additional work to produce.

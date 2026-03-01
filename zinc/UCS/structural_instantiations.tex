@@ -1,0 +1,173 @@
+\subsection{Lookup and permutation constraints as UCS constraints}\label{ss:ucs_lookup}
+
+In this section and in \cref{ss:ucs_r1cs}, we show how several common relations and constraints---namely lookups, permutations, R1CS, CCS, and AIR---can be written as UCS constraints. For clarity, we present these reductions in isolation; however, in practice one can combine multiple constraint types within a single UCS instance. See our UAIR$^+$ relation in \cref{s:uair} for an example.
+
+
+We begin with lookup relations.
+The construction follows Section~4.4 of~\cite{Zinc}, which proves the result for any integral domain; we include it here for completeness but omit a detailed proof.
+We work over rings $R$ of the form $\mainpolyring{\QQ}{\bitbound}{\degreebound}$ or
+$\FF_q^{< \degreebound}[X]$ for some prime power $q$, bit-size bound $\bitbound$, and degree bound
+$\degreebound$.
+
+We define the \emph{lookup relation} over $R$ as:
+\[
+\rellookup \;=\;
+\left\{(\idx,\inp;\wit)\ \middle|\ 
+\begin{aligned}
+&\idx=(\witlen,\tablelen,\tab,R),\\
+&\witlen, \tablelen\ge 0,\ \tab \in R^{\tablelen},\\
+&\inp=\emptyset,\ \wit=\ww \in R^{\witlen},\\
+& \ww_i\in\{\tab_{j}\mid j\in [\tablelen]\} \text{ for all }  i\in [\witlen].
+\end{aligned}
+\right\}.
+\]
+Let $\idx_{\mathsf{Look}}\defeq(\witlen,\tablelen,\tab,R)$ denote an index for $\rellookup$.
+We now construct a UCS index $\idx_{\mathsf{UCS}}$ such that
+$(\idx_{\mathsf{Look}},\emptyset;\ww)\in \rellookup$ if and only if
+$(\idx_{\mathsf{UCS}},\emptyset;\wit')\in \ucs$ for an explicit transformation $\wit'$ of $\ww$.
+
+We set $\numrows\defeq \witlen$ and $\numconstraints\defeq 1$.
+Recall that the \emph{Lagrange basis polynomial} for $i\in[N]$ is
+\begin{equation}\label{e: lagrange_basis}
+\lagrange_{[N],i}(T) \defeq \prod_{j\neq i}\frac{T-j}{i-j}.
+\end{equation}
+It is well-defined over $\QQ$ or any $\FF_q$ with $q>N$.
+Define
+\begin{equation}\label{eq:L_lookup}
+L(\rowvar,\ZZZ)\ \defeq\  
+\sum_{k\in [\witlen]}\ZZZ_{k}\cdot \lagrange_{[\witlen],k}(\rowvar)
+\end{equation}
+so that $L(k,\zz)=\zz_{k}$ for all $k\in [\witlen]$.
+Define
+\begin{equation}
+\label{eq:Q_lookup}
+Q_{\mathsf{Look}}(\rowvar,\ZZZ)
+\ \defeq\
+\prod_{j\in[\tablelen]}\big(L(\rowvar,\ZZZ)-\tab_{j}\big).
+\end{equation}
+%
+If $R=\mainpolyring{\QQ}{\bitbound}{\degreebound}$, define
+$\idx_{\mathsf{UCS}}=(\witlen,\inplen{=}0,\numrows,\primetuple{=}\emptyset,\bitbound,\degbounds{=}\degreebound,\constraints)$ with
+$\constraints=(Q_{0,1},\primeideal_{0,1}):=(Q_{\mathsf{Look}},(0))$.
+Here the subscript $(0,1)$ denotes prime-index $\primeindex=0$ (the $\QQ[X]$-part) and constraint-index $\constraintindex=1$ (the single constraint).
+
+If $R=\FF_q^{<\degreebound}[X]$, define
+$\idx_{\mathsf{UCS}}=(\witlen,\inplen{=}0,\numrows,\primetuple{=}q,\bitbound,\degbounds{=}(0,\degreebound),\constraints)$
+with $\constraints=((Q_{0,1},\primeideal_{0,1}),(Q_{1,1},\primeideal_{1,1}))$ where
+$Q_{0,1}\equiv 0$, $\primeideal_{0,1}=(0)\subseteq\QQ[X]$, $\primeideal_{1,1}=(0)\subseteq\FF_q[X]$, and
+$Q_{1,1}(\rowvar,\inpvar,\ZZZ_1,\ZZZ_2)\defeq Q_{\mathsf{Look}}(\rowvar,\ZZZ_2)$.
+\begin{lemma}[Lookup as UCS]
+\label{lem:lookup_as_ucs}
+Let $\idx_{\mathsf{Look}}$ and $\idx_{\mathsf{UCS}}$ be defined as above.
+For every $\ww\in R^{\witlen}$, letting $\inp=\emptyset$, we have:
+\begin{itemize}[leftmargin=*]
+\item If $R=\mainpolyring{\QQ}{\bitbound}{\degreebound}$ then
+$(\idx_{\mathsf{Look}},\emptyset;\ww)\in\rellookup$ if and only if
+$(\idx_{\mathsf{UCS}},\emptyset;\ww)\in\ucs.$
+\item If $R=\FF_q^{<\degreebound}[X]$ then, writing $\mathbf{0}$ for the all-zero $\QQ$-witness
+component of length $\witlen$,
+$(\idx_{\mathsf{Look}},\emptyset;\ww)\in\rellookup$ if and only if
+$(\idx_{\mathsf{UCS}},\emptyset;(\mathbf{0},\ww))\in\ucs.$
+\end{itemize}
+\end{lemma}
+The proof is straightforward and we omit it. The key observation is that $R$ is an integral domain (both $\mainpolyring{\QQ}{\bitbound}{\degreebound}$ and $\FF_q^{<\degreebound}[X]$ are polynomial rings over fields, hence have no zero divisors).
+Thus $Q_{\mathsf{Look}}(i,\ww)=\prod_{j}(\ww_i - \tab_j)=0$ if and only if $\ww_i\in\{\tab_j\}$. 
+
+\begin{remark}[Degree blowup and practical lookup arguments]
+The polynomial $Q_{\mathsf{Look}}$ in \eqref{eq:Q_lookup} has degree $\tablelen$ in the selector
+value $L(\rowvar,\ZZZ)$.
+The purpose of the above construction is to exhibit lookups as UCS instances, so that generic UCS
+compilers and soundness statements apply.
+In protocols, we will not prove \eqref{eq:Q_lookup} via a high-degree polynomial identity;
+instead, we will use lookup arguments that exploit the lookup semantics directly, following the
+approach of~\cite{Zinc}. 
+\end{remark}
+
+\begin{remark}[Lookup constraints on polynomial expressions of witness entries]
+\label{rem:lookup_algebraic_combinations}
+The lookup relation $\rellookup$ defined above requires each entry of a witness vector $\ww$ to belong to a table $\tab$.
+In applications, one sometimes needs to constrain \emph{polynomial expressions} of witness entries to belong to a lookup table.
+Concretely, given a witness vector $\ww\in R^{\witlen}$ and a polynomial $P\in R[\ZZZ]$, one may require that 
+\[
+  P(\ww_i)
+  \;\in\; \{\tab_j \mid j\in[\tablelen]\}
+  \quad\text{for all } i\in[\witlen].
+\]
+The extension to this setting is straightforward: one replaces the selector polynomial $L(\rowvar,\ZZZ)$ in~\eqref{eq:L_lookup} with
+\[
+  L'(\rowvar,\ZZZ)
+  \ \defeq\
+  P\Bigl(\sum_{i\in[\witlen]} \ZZZ_i \cdot \lagrange_{[\witlen],i}(\rowvar)\Bigr),
+\]
+and defines $Q'_{\mathsf{Look}}$ analogously.
+This generalization is needed in our definition of the relation UAIR$^+$ (\cref{def:uairplus}) and in some of our applications in \cref{s:examples}, notably in the SHA-256 arithmetization (\cref{ss:sha256_64_rounds}); see \cref{rem:uair_lookup_combinations} for further discussion.
+\end{remark}
+
+\begin{remark}[Well-definedness as a lookup constraint]
+\label{rem:well_defined_as_lookup}
+\label{sss:well_defined_condition}
+Recall that \cref{def:ucs} includes a well-definedness condition~\eqref{eq:ucs_welldefinedness} requiring $\ff_0\in(\mainpolyring{\local{q_1\cdots q_{\numprimes}}}{\bitbound}{\degreebound_0})^{\witlen}$.
+This is simply a lookup constraint: the table is $\tab\defeq\mainpolyring{\local{q_1\cdots q_{\numprimes}}}{\bitbound}{\degreebound_0}$, and each entry of $\ff_0$ must belong to this finite set. Thus, the well-definedness condition can be enforced via a $\QQ[X]$-constraint in UCS and does not require separate syntax in the definition of UCS.
+\begin{definition}[Well-formed UCS index]
+\label{def:ucs_well_formed_index}
+A UCS index $\idx$ is \emph{well-formed} if it includes a $\QQ[X]$-constraint that enforces the well-definedness condition~\eqref{eq:ucs_welldefinedness}.
+\end{definition}
+
+In many applications, other lookup constraints placed on $\ff_0$ already subsume the well-definedness condition (see \cref{s:examples}), so it does not need to be explicitly included.
+Note that while $\tab$ may be very large (or even infinite in the limit), in practice the table size is bounded by the constraint parameters.
+\end{remark}
+
+
+
+
+\begin{remark}[Permutation constraints as UCS instances]
+\label{rem:perm_as_ucs}
+So-called \emph{copy constraints} of the form $\uu_i = \vv_{\sigma(i)}$, where the permutation $\sigma:[n]\to[n]$ is fixed by the index, can also be encoded as UCS instances.
+Such constraints capture copy relations that arise from wiring in arithmetizations such as Plonk~\cite{GWC19}.
+We define the \emph{permutation relation} over a ring $R$ as
+\[
+\relperm
+\;=\;
+\left\{(\idx,\inp;\wit)\ \middle|\ 
+\begin{aligned}
+&\idx=(n,\sigma,R),\\
+&\inp=\emptyset,\quad \wit=(\uu,\vv)\in R^{n}\times R^{n},\\
+&\uu_i=\vv_{\sigma(i)}\text{ for all }i\in[n].
+\end{aligned}
+\right\}.
+\]
+To write this relation as a UCS instance, we view the witness as a length-$2n$ vector $\ww = (\uu || \vv)$ and define the selector polynomial
+\[
+Q_{\mathsf{Perm}}(\rowvar,\ZZZ)\ \defeq\
+\sum_{i\in[n]}
+\bigl(\ZZZ_{i}-\ZZZ_{n+\sigma(i)}\bigr)\cdot \lagrange_{[n],i}(\rowvar).
+\]
+Then evaluating at $\rowvar = i\in [n]$ yields $Q_{\mathsf{Perm}}(i,\ww) = \uu_i - \vv_{\sigma(i)}$.
+Thus, $Q_{\mathsf{Perm}}(i,\ww) = 0$ for all $i \in [n]$ if and only if $(\uu,\vv) \in \relperm$.
+The UCS construction then proceeds exactly as in \cref{lem:lookup_as_ucs}: for $R = \mainpolyring{\QQ}{\bitbound}{\degreebound}$, one sets $\constraints = (Q_{\mathsf{Perm}}, (0))$; for $R = \FF_q^{<\degreebound}[X]$, one places the constraint in the finite-field component with $Q_{1,1}(\rowvar,\inpvar,\ZZZ_1,\ZZZ_2) \defeq Q_{\mathsf{Perm}}(\rowvar,\ZZZ_2)$.
+\end{remark}
+
+\subsection{R1CS, CCS, and AIR as UCS instances}\label{ss:ucs_r1cs}
+
+In this section we explain how several standard relations---R1CS, CCS, AIR (over fields, rationals, or polynomial rings)---can be written as $\ucs$ relations. 
+Since the rings $\mainpolyring{\QQ}{\bitbound}{\degreebound}$ and $\FF_q^{<\degreebound}[X]$ are integral domains, the constructions and proofs follow directly from~\cite[Section~4.4]{Zinc}, which establishes the result for arbitrary integral domains; we summarize the key ideas below.
+
+All transformations below work in a \emph{strictly algebraic regime}: for every constraint we set $\primeideal_{i\constraintindex}=(0)$, so that a constraint $Q_{i\constraintindex}(\cdots)\in\primeideal_{i\constraintindex}$ reduces to the polynomial identity $Q_{i\constraintindex}(\cdots)=0$.
+
+\paragraph{R1CS.}
+Recall that the R1CS relation over a ring $R$ requires $(M_A\cdot\zz)\circ(M_B\cdot\zz)-(M_C\cdot\zz)=\mathbf{0}$, where $M_A,M_B,M_C\in R^{\numrows\times(\inplen+\witlen)}$ are constraint matrices and $\zz=(\yy||\ww)$ concatenates the public input and witness.
+The transformation to UCS proceeds as follows: first, use bivariate Lagrange interpolation to encode each matrix $M\in\{M_A,M_B,M_C\}$ as a polynomial $\hat M(\rowvar,Z)$; then define a linear selector $L_M(\rowvar;\inpvar,\ZZZ_1)$ that evaluates to the $\rowindex$-th entry of $M\cdot\zz$ when $\rowvar=\rowindex$; finally, set the UCS constraint polynomial to
+\[
+Q_{\ronecs}(\rowvar,\inpvar,\ZZZ_1)
+\;\defeq\;
+L_{M_A}\cdot L_{M_B} - L_{M_C}.
+\]
+For R1CS over $\mainpolyring{\QQ}{\bitbound}{\degreebound}$, the UCS index has $\primetuple=\emptyset$ and a single $\QQ[X]$-constraint $(Q_{\ronecs},(0))$.
+For R1CS over $\FF_q^{<\degreebound}[X]$, one instead uses an $\FF_q[X]$-constraint with a trivial $\QQ[X]$-part.
+The equivalence $(\idx_{\mathsf{R1CS}},\inp;\wit)\in\relronecs \Leftrightarrow (\idx_{\mathsf{UCS}},\inp;\wit')\in\ucs$ follows from the defining property of Lagrange interpolation; see~\cite[Section~4.4]{Zinc} for the full proof.
+
+\paragraph{CCS and AIR.}
+CCS relations~\cite{ccs} admit an analogous transformation as R1CS relations. Further, 
+since AIR relations~\cite{ethstark} can be written as CCS relations~\cite{ccs}, they too can be instantiated as UCS instances.
+For an AIR-like instantiation tailored to the UCS framework, see~\cref{s:uair}.
+

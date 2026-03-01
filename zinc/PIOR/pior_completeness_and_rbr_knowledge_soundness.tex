@@ -1,0 +1,334 @@
+\parhead{Completeness and round-by-round knowledge soundness}
+Let $\bitbound_\primeset$ be a lower bound on the bit length of primes in $\primeset$. Recall that the $\ell_0$-norm of a polynomial indicates the number of nonzero rational coefficients.
+
+As constraint polynomials are often very sparse, our completeness bound is written in terms of a completeness parameter $\xi$. After setting an upper bound on the density of the constraint polynomials, one may pick $\primeset$ that meets their desired completeness guarantees for all circuits that may be defined by such constraint polynomials. That said, it may still turn out $\primeset$ needs to be even larger to guarantee $\lambda$ bits of security.
+
+\begin{theorem}[Completeness of the Zinc$+$ PIOR]
+\label{thm:zincplus-pior-completeness}
+Let 
+\[
+|\primeset| (\bitbound_{\primeset}-1) \geq 2^\xi (\bitbound -1) \left(\degreebound_0 \cdot (\inplen + \witlen) + \sum_{\constraintindex \in [\numconstraints]} \|\generator_{0\constraintindex}\|_0 + \|\constraintpol_{0\constraintindex} \|_0\right),
+\]
+and let $\extend(q) = q^k$ pick $k$ such that $q^k \geq 2^{2\xi} \cdot (8(\xi+1))^2$. Then $\Pi_{\ucsm}$ (\cref{prot:zincplus-ucs-pior}) is complete (\cref{def:ior-completeness}) with error $\completenesserror < (\numprimes+2)/2^{\xi}$.
+\end{theorem}
+\begin{proof}
+First we show that unless the protocol halts in step 3 or 6 that $(\idx',\inp',\wit') \in \wedge_{\primeindex \in [0,\numprimes]} \ucsalg(\tilde{q}_\primeindex)$. Then we bound the probability of this happening. We begin with $(\idx,\inp,\wit) \in \ucs$, where
+\begin{align*}
+\idx&=(\witlen,\inplen,\numrows=2^\mu,\primetuple,\bitbound,\degbounds,\constraints = [(Q_{\primeindex\constraintindex}, \langle j_{\primeindex\constraintindex} \rangle)]_{\primeindex \in [0,\numprimes], \constraintindex \in [\numconstraints]}),\enspace
+\inp=(\yy)\in(\mainpolyring{\local{\qq}}{\bitbound}{\degreebound_0})^{\inplen} \\
+\wit &= (\ff_0,\ff_1,\ldots,\ff_{\numprimes}), \ \ff_0 \in \mainpolyring{\QQ}{\bitbound}{\degreebound_0}^{\witlen},\ \ff_i \in \FF_{q_i}^{<\degreebound_i}[X]^{\witlen}\text{ for } i\in[\numprimes].
+\end{align*}
+In step~1, the prover sends the oracles for $\tilde{f}_0 \in (\QQ^{<\degreebound_0,\bitbound}[X])[\WWW]$ and $\tilde{f}_{1},\dotsc,\tilde{f}_{\numprimes} \in (\FF^{<\degreebound_i}_{q_i}[X])[\WWW]$, which are the MLEs of the corresponding witness vectors. In step~4, the prover sends
+\[
+\begin{array}{lll}
+  e_{0\constraintindex} &= \sum_{\bb\in\BB^\mu} \phi_{q_0}(Q_{0\constraintindex})(\bb,\phi_{q_0}(\yy),\phi_{q_0}(\ff_0)) \cdot \meq(\bb,\rr_0) & \in \FF_{q_0}[X] \\
+  e_{\primeindex\constraintindex} &= \sum_{\bb\in\BB^\mu} \embedding_{\tilde{q}_\primeindex}(Q_{\primeindex\constraintindex})(\bb,\phi_{\tilde{q}_\primeindex}(\yy),\phi_{\tilde{q}_\primeindex}(\ff_0),\embedding_{\tilde{q}_\primeindex}(\ff_\primeindex)) \cdot \meq(\bb,\rr_\primeindex) & \in \FF_{\tilde{q}_\primeindex}[X] \\
+\end{array}
+\]
+for $\primeindex \in [\numprimes], \constraintindex \in [\numconstraints]$. The verifier defines
+\[
+\begin{array}{lll}
+    Q'_{0\constraintindex} = \sum_{\bb\in\BB^\mu} \psi_{q_0,a_0}(Q_{0\constraintindex})(\bb,\inpvar,\ZZZ_1) \cdot \meq(\bb,\rr_0)- e_{0\constraintindex}(a_0) \in \FF_{q_0}[\inpvar,\ZZZ_1] \\
+    Q'_{\primeindex\constraintindex} = \sum_{\bb\in\BB^\mu} \psi_{q_i,a_i}(Q_{\primeindex\constraintindex})(\bb,\inpvar,\ZZZ_1,\ZZZ_2) \cdot \meq(\bb,\rr_\primeindex) - e_{\primeindex\constraintindex}(a_i) \in \FF_{\tilde{q}_\primeindex}[\inpvar,\ZZZ_1,\ZZZ_2] \\
+\end{array}
+\]
+Then plugging in $\yy'_i = \psi_{q_i,a_i}(\yy)$, $\ff'_{i0} = \psi_{q_i,a_i}(\ff_{0})$, $\ff'_{i1} = $ we obtain
+\[
+\begin{array}{rl}
+    Q'_{0\constraintindex} =& \sum_{\bb\in\BB^\mu} \left(\psi_{q_0,a_0}(Q_{0\constraintindex})(\bb,\psi_{q_0,a_0}(\yy),\psi_{q_0,a_0}(\ff_{0})) \cdot \meq(\bb,\rr_0) \right)\\
+    &- \left(\sum_{\bb\in\BB^\mu} \phi_{q_0}(Q_{0\constraintindex})(\bb,\phi_{q_0}(\yy),\phi_{q_0}(\ff_0)) \cdot \meq(\bb,\rr_0)\right)(a_0) \\
+    =& \sum_{\bb\in\BB^\mu} \meq(\bb,\rr_0) \cdot \big[\psi_{q_0,a_0}(Q_{0\constraintindex})(\bb,\psi_{q_0,a_0}(\yy),\psi_{q_0,a_0}(\ff_{0})) \\
+    &\phantom{of the opera}\qquad\qquad - \phi_{q_0}(Q_{0\constraintindex})(\bb,\phi_{q_0}(\yy),\phi_{q_0}(\ff_0))(a_0) \big] = 0,
+\end{array}
+\]
+and similarly
+\[
+\begin{array}{rl}
+    Q'_{\primeindex\constraintindex} =& \sum_{\bb\in\BB^\mu} \left(\psi_{q_\primeindex,a_\primeindex}(Q_{\primeindex\constraintindex})(\bb,\psi_{q_\primeindex,a_\primeindex}(\yy),\psi_{q_\primeindex,a_\primeindex}(\ff_{0}), \psi_{q_i,a_i}(\ff_{i})) \cdot \meq(\bb,\rr_\primeindex) \right)\\
+    &- \left(\sum_{\bb\in\BB^\mu} \embedding_{\tilde{q}_\primeindex}(Q_{\primeindex\constraintindex})(\bb,\phi_{\tilde{q}_\primeindex}(\yy),\phi_{\tilde{q}_\primeindex}(\ff_0),\embedding_{\tilde{q}_\primeindex}(\ff_\primeindex)) \cdot \meq(\bb,\rr_\primeindex)\right)(a_\primeindex) \\
+    =& \sum_{\bb\in\BB^\mu} \meq(\bb,\rr_\primeindex) \cdot \big[\psi_{q_\primeindex,a_\primeindex}(Q_{\primeindex\constraintindex})(\bb,\psi_{q_\primeindex,a_\primeindex}(\yy),\psi_{q_\primeindex,a_\primeindex}(\ff_{\primeindex}), \psi_{q_i,a_i}(\ff_{i})) \\
+    &\phantom{of the opera}\qquad\qquad - \embedding_{\tilde{q}_\primeindex}(Q_{\primeindex\constraintindex})(\bb,\phi_{\tilde{q}_\primeindex}(\yy),\phi_{\tilde{q}_\primeindex}(\ff_0),\embedding_{\tilde{q}_\primeindex}(\ff_\primeindex))(a_\primeindex) \big] = 0.
+\end{array}
+\]
+Finally, we conclude our claim of conditional correctness section with the observation that since each $a_i \in \prim(\FF_{\tilde q_i})$ by hypothesis, it holds by~\cref{lem:mle_lifted_projection} that $\incompleteoracle{\tilde{f}'_{\primeindex0}}$ and $\oracle{\tilde{f}'_{\primeindex1}}$ are (complete) polynomial oracles for the MLEs of the corresponding witness vectors.
+
+Now it's left to bound the probability the protocol terminates early. The total number of rational coefficients we apply $\phi_{q_0}$ to is at most $N_{\mathrm{rat}} = \degreebound_0 \cdot (\inplen + \witlen + \numconstraints + \sum_{\constraintindex \in [\numconstraints]} \|\constraintpol_{0\constraintindex} \|_0)$, where $\|\constraintpol \|_0$ denotes the size of the support of $\constraintpol$ as a polynomial in $\rowvar,\inpvar,$ and $\ZZZ_1$. Then using~\cref{lemma:prime-division-bound} and the union bound we can conclude the probability $q_0$ divides the denominator of any of these rational coefficients is less than
+\[
+\frac{N_{\mathrm{rat}} (\bitbound-1)}{|\primeset|(\bitbound_\primeset-1)}.
+\]
+So given our hypothesis on $|\primeset|(\bitbound_\primeset - 1)$ this happens with probability at most $2^{-\xi}$. Similarly, given our hypothesis on $\extend$ we have that the event $E_i$ that $a_i \not\in \prim(F_{\tilde{q}})$ occurs with probability at most $2^{-\xi}$ (by \cref{lemma:primitive-element-sampling}). Taking the union bound over all $E_i$ and also the event $q_0$ divides some denominator gives our completeness bound.
+\end{proof}
+
+\begin{theorem}[Round-by-round knowledge soundness of the Zinc$+$ PIOR]
+\label{thm:zincplus-pior-knowledge}
+Let the following hold for all $\primeindex \in [\numprimes], \constraintindex \in [\numconstraints]$:
+\[
+\begin{array}{ll}
+|\primeset| (\bitbound_\primeset-1) &\geq 2^{\lambda+4} \degreebound_{0}^{2}\bitbound, \\
+\bitbound_\primeset &\geq \lambda + \log(\witlen \cdot \inplen \cdot \degreebound_0 \cdot \mathsf{deg}(\constraintpol_{0\constraintindex})), \\
+|\prim(\FF_{\tilde{q}_\primeindex})| &\geq 2^{\lambda+1} \witlen \cdot \inplen \cdot \degreebound_\primeindex \cdot \mathsf{deg}(\constraintpol_{\primeindex\constraintindex}).
+\end{array}
+\]
+Then $\Pi_{\ucsm}$ (\cref{prot:zincplus-ucs-pior}) has round-by-round knowledge soundness (\cref{def:rbr-knowledge}) with errors $\knowledgeerror_1 = \knowledgeerror_2 = 2^{-\lambda}$.
+\end{theorem}
+
+\begin{proof}
+We make the simplifying assumption that $(\idx',\inp') \not\in \Relation'$ unless $\incompleteoracle{\tilde{f}'_{00}}$ is complete, which effectively forces $\ff_0 \in \local{q}[X]$. We believe this is justified based on the fact this can be enforced via asking for a single random evaluation of $\incompleteoracle{\tilde{f}'_{00}}$, which will abort with probability greater than $1-\nu/2^{\bitbound_{\primeset}}$ unless complete.
+
+First we define the extractor and knowledge state function, then we upper bound the round-by-round knowledge soundness errors. Throughout we use
+\begin{align*}
+\idx&=(\witlen=2^\nu,\inplen,\numrows=2^\mu,\primetuple,\bitbound,\degbounds,\constraints = [(Q_{\primeindex\constraintindex}, \langle j_{\primeindex\constraintindex} \rangle)]_{\primeindex \in [0,\numprimes], \constraintindex \in [\numconstraints]}),\enspace
+\inp=(\yy)\in(\mainpolyring{\local{\qq}}{\bitbound}{\degreebound_0})^{\inplen},
+\end{align*}
+and assume $\idx$ is well-formed.
+
+\noindent\textbf{Extractor.} For any transcript $\tr$ where the verifier is about to move, the extractor $\extractor$ queries each polynomial oracle $\oracle{\tilde{f}_i}$ at each point in the $\log m$-dimensional hypercube, and outputs the resulting vectors $(\ff_{0},\ff_1,\dotsc,\ff_{\numprimes})$, where $\ff_{0} \in (\QQ^{<\degreebound_0,\bitbound}[X])^{\witlen}$ and $\ff_{i} \in (\FF_{q_i}^{<\degreebound_i}[X])^{\witlen}\text{ for } i\in[\numprimes]$.
+
+\medskip
+
+\noindent\textbf{Knowledge state function.} We define the knowledge state function's behavior in each round:
+\begin{enumerate}[nosep]%\setcounter{enumi}{-1}
+    % \item \textbf{Initial transcript:} We set $\kstate(\idx,\inp,\emptyset) = 1$ if and only if the following hold:
+    % \begin{itemize}[nosep]
+    %     \item Well-formedness: $\kswit = (\ff_0,\ff_1,\ldots,\ff_{\numprimes})$, where $\ff_0 \in (\mainpolyring{\local{\qq}}{\bitbound}{\degreebound_0})^{\witlen}$ and $\ff_i \in (\FF_{q_i}^{<\degreebound_i}[X])^{\witlen}\text{ for } i\in[\numprimes]$
+    %     \item Constraint checks: for $\primeindex \in [\numprimes], \constraintindex \in [\numconstraints]$
+    %     \[
+    %     \begin{array}{rl}
+    %     Q_{0 \constraintindex}\left(\rowindex, \yy, \ff_0\right) &\in \langle \generator_{0\constraintindex} \rangle \subseteq \QQ[X] \\
+    %     Q_{\primeindex \constraintindex}\left( \rowindex, \phi_{q_\primeindex}(\yy), \phi_{q_\primeindex}(\ff_{0}), \ff_{\primeindex} \right) &\in \langle \generator_{\primeindex\constraintindex} \rangle \subseteq \FF_{q_i}[X].
+    %     \end{array}
+    %     \]
+    % \end{itemize}
+    \item \textbf{Ring projection and ideal batching randomness:} At this stage the transcript $\tr$ has the form $\mathrm{tr} = \CB (\oracle{\tilde{f}_0}\|\dotsm\|\oracle{\tilde{f}_{\numprimes}})$. The verifier samples a random prime $q_0\getsr \primeset$ and field elements $\rr_i\getsr \FF_{\tilde q_i}^\mu$ for all $i\in[0,\numprimes]$. We set $\kstate(\idx,\inp,\tr\|q_0\|\rr) = 1$ if and only if running the extractor returns $(\ff_{0},\ff_1,\dotsc,\ff_{\numprimes})$ such that $\ff_0 \in (\ZZ_{(q_0)}[X])^{\witlen}$ and for $\primeindex \in [\numprimes], \constraintindex \in [\numconstraints]$:
+    \begin{equation}
+    \label{eq:ideal-batching}
+    \begin{array}{lll}
+    \sum_{\bb\in\BB^\mu} \phi_{q_0}\left(Q_{0\constraintindex}(\bb,\yy,\ff_{0})\right) \cdot \meq(\bb,\rr_0) &\in \langle \phi_{q_0}(\generator_{0\constraintindex}) \rangle &\subseteq \FF_{q_0}[X], \\
+    \sum_{\bb\in\BB^\mu} \embedding_{\tilde{q}_\primeindex}(Q_{\primeindex\constraintindex})(\bb,\phi_{\tilde{q}_\primeindex}(\yy),\phi_{\tilde{q}_i}(\ff_{0}),\phi_{\tilde{q}_i}(\ff_{i})) \cdot \meq(\bb,\rr_\primeindex) &\in \langle \embedding_{\tilde{q}_i}(\generator_{\primeindex\constraintindex}) \rangle &\subseteq \FF_{\tilde{q}_i}[X].
+    \end{array}
+    \end{equation}
+    Recall that since the index is well-formed this also implies $\ff_0 \in (\ZZ_{(q_1,\dotsc,q_{\numprimes})}[X])^{\witlen}$.
+
+    \item \textbf{Field projection randomness:} At this stage the transcript $\tr$ has the form $\mathrm{tr} = (\oracle{\tilde{f}_0}\|\dotsm\|\oracle{\tilde{f}_{\numprimes}},\allowbreak q_0\|\rr,[e_{\primeindex\constraintindex}]_{\primeindex \in [0,\numprimes],\constraintindex \in [\numconstraints]})$. The verifier samples random field elements $a_i \getsr \FF_{\tilde q_i}$, for $i\in[0,\numprimes]$. We set $\kstate(\idx,\inp,\tr\|q_0\|\rr) = 1$ if and only if running the extractor returns $(\ff_{0},\ff_1,\dotsc,\ff_{\numprimes})$ such that $\ff_0 \in (\ZZ_{(q_0)}[X])^{\witlen}$ and for $\primeindex \in [\numprimes], \constraintindex \in [\numconstraints]$:
+    \begin{equation}
+        \label{eq:kstate-projection}
+    \begin{array}{ll}
+    \left(\sum_{\bb\in\BB^\mu} \phi_{q_0}(Q_{0\constraintindex})(\bb,\phi_{q_0}(\yy),\phi_{q_0}(\ff_{0})) \cdot \meq(\bb,\rr_0) - e_{0\constraintindex} \right)(a_0) = 0 & \textnormal{over } \FF_{q_0} \\
+    \left(\sum_{\bb\in\BB^\mu} \embedding_{\tilde{q}_\primeindex}(Q_{\primeindex\constraintindex})(\bb,\phi_{\tilde{q}_\primeindex}(\yy),\phi_{\tilde{q}_i}(\ff_{0}),\phi_{\tilde{q}_\primeindex}(\ff_{\primeindex})) \cdot \meq(\bb,\rr_\primeindex) - e_{\primeindex\constraintindex} \right)(a_\primeindex) = 0 & \textnormal{over } \FF_{\tilde{q}_\primeindex}
+    \end{array}
+    \end{equation}
+    
+    \item \textbf{Full transcript:} It remains to show for a full transcript $\tr=(\oracle{\tilde{f}_0}\|\dotsm\|\oracle{\tilde{f}_{\numprimes}},q_0\|\rr,\mathbf{e},\mathbf{a})$ that $\kstate(\idx,\inp,\tr)=1$ if and only if $\verifier\bigl(\idx,\inp,\tr\bigr)$ outputs $(\idx',\inp')$ such that there exists $\wit$' with $(\idx',\inp',\wit')\in \Relation'$.
+    
+    First assume $\verifier\bigl(\idx,\inp,\tr\bigr)$ outputs $(\idx',\inp')$ such that there exists $\wit$' with $(\idx',\inp',\wit')\in \Relation'$. Since $(\idx',\inp') \not\in \Language(\Relation')$ unless $\incompleteoracle{\tilde{f}'_{00}}$ is complete by assumption, we have that $\ff_0 \in \local{q_0}$. The $\wit$' is by definition of UCS and by~\cref{lem:mle_lifted_projection} comprised of the vectors obtained by applying $\psi$ to the $\ff_i$ as in an honest run of the protocol. Then ~\cref{eq:kstate-projection} is exactly checking if that unique $\wit$' satisfies $(\idx',\inp',\wit')\in \Relation'$, outputting $\kstate(\idx,\inp,\tr)=1$ if so.
+    
+    Next assume $\kstate(\idx,\inp,\tr)=1$. In this case it is straightforward to see we can explicitly produce a $\wit$' such that $(\idx',\inp',\wit')\in \Relation'$ using the extracted vectors.
+\end{enumerate}
+
+\medskip
+\noindent\textbf{RBR knowledge soundness.} We upper bound the round-by-round knowledge soundness errors based on the knowledge state function and extractor described above.
+\begin{enumerate}[nosep]
+    \item \textbf{Ring projection and ideal batching randomness:} We show that
+    \[
+    \Pr_{q_0,\rr}\left[
+    \begin{array}{l}
+    \kstate(\idx,\inp,(\oracle{f_i})_{i =0}^{\numprimes}\Vert(q_0,\rr))=1 \\
+    \wedge\ (\idx,\inp,\extractor(\idx,\inp,(\oracle{f_i})_{i =0}^{\numprimes})) \not\in \Relation
+    \end{array}
+    \right]
+    \ \le\ 2^{-\lambda}.
+    \]
+    By~\cref{lemma:phi-collision} we have that
+    \[
+    \Pr_{q_0 \gets \primeset}\left[\phi_{q_0}\left(\constraintpol_{0\constraintindex}(\rowindex,\yy,\ff_0)\right) \in \langle \phi_{q_0}(\generator_{0\constraintindex}) \rangle \ \wedge\  \constraintpol_{0\constraintindex}(\rowindex,\yy,\ff_0) \not\in \langle \generator_{0\constraintindex} \rangle\right] < \frac{8\degreebound_{0}^{2}\bitbound}{|\primeset| (\bitbound_\primeset-1)} < 2^{-\lambda-1}.
+    \]
+    We note applying the canonical embedding cannot result in an unsatisfied constraint over $\FF_{q_i}$ being satisfied in $\FF_{\tilde{q}_i}$.
+    
+    Else suppose for some $(k, \primeindex, \constraintindex)$ a constraint doesn't hold over $\FF_{q_0}$ or $\FF_{\tilde{q}_i}$. In this case~\cref{lem:ideal-batching} tells us that~\cref{eq:ideal-batching} will hold with probability at most $\mu/|\FF_{\tilde{q}_i}| \leq 2^{-\lambda-1}$. A union bound over these two cases gives $\knowledgeerror_1 = 2^{-\lambda}$.
+    
+    We now turn to the second source of randomness, namely the field-projection points~$\evalpoints$, and bound the probability that the knowledge state transitions from~$0$ to~$1$ in this round.
+    
+    \item \textbf{Field projection randomness:} We show that for all transcripts of the form $\tr = (\oracle{f_i})_{i =0}^{\numprimes}\|(q_0,\rr)\|[e_{\primeindex\constraintindex}]_{\primeindex\constraintindex}$ that
+    \[
+    \Pr_{\evalpoints}\left[
+    \begin{array}{l}
+    \kstate(\idx,\inp,\tr) =0 \\
+    \wedge\ \kstate(\idx,\inp,\tr\|\evalpoints)=1 \\
+    \wedge\ (\idx,\inp,\extractor(\idx,\inp,\tr)) \not\in \Relation
+    \end{array}
+    \right]
+    \ \le\ 2^{-\lambda}.
+    \]
+    To do this we must consider the case that for some $\primeindex \in [0,\numprimes], \constraintindex \in [\numconstraints]$ \cref{lem:ideal-batching} doesn't hold, but when projected to $\FF_{\tilde{q}_i}$ via $\psi_{a_i}$ it does. This happens with probability at most $2 m \ell d_i \mathsf{deg}(\constraintpol_{it}) /|\prim(\FF_{\tilde{q}_i})| \leq 2^{-\lambda} = \knowledgeerror_2$.
+\end{enumerate}
+\end{proof}
+
+\parhead{Supplementary lemmas}
+Here we include some lemmas we draw on in our proofs of completeness and RBR knowledge.
+
+\begin{lemma}
+    \label{lemma:prime-division-bound}
+    Let $\bitbound > \bitbound_\primeset$. For any $a \in \ZZ^{<\bitbound} \setminus \{0\}$ of bit length less than $\bitbound$, the number of primes of bit length at least $B_\primeset$ dividing it is less than $(\bitbound-1)/(\bitbound_\primeset-1)$.
+\end{lemma}
+\begin{proof}
+Say $t$ primes $p_1,\dotsc,p_t$ divide $a$. By assumption $|a| < 2^{\bitbound-1}$ and that $p_i \geq 2^{\bitbound_\primeset-1}$ for all $i \in [t]$. Then we have $2^{t(\bitbound_\primeset-1)} \leq |a| < 2^{\bitbound-1}$, which implies $t < (\bitbound-1)/(\bitbound_\primeset-1)$.
+\end{proof}
+
+\begin{lemma}
+\label{lemma:phi-collision}
+Let $f,\generator \in \QQ^{<\degreebound,<\bitbound}[X]$, $\degreebound \ge 1$, $\bitbound > \bitbound_\primeset \ge 2$.
+Then
+\[
+\Pr_{p \getsr \primeset}\left[\phi_p(f) \in \langle \phi_p(\generator) \rangle \ \wedge\ f \not\in \langle \generator \rangle \pST f,\generator \in \ZZ_{(p)}\right]
+< \frac{8 d^2 B}{|\primeset|(\bitbound_\primeset-1)}.
+\]
+\end{lemma}
+\begin{proof}
+Let $(q,r) \in \QQ[X]\times \QQ[X]$ be the unique quotient--remainder pair given by Euclidean division in $\QQ[X]$:
+\[
+f = \generator q + r,
+\qquad
+\deg(r) < \deg(\generator).
+\]
+Then $f \in \langle \generator\rangle$ if and only if $r=0$.
+
+Write $r$ in lowest terms as $r=n_r/d_r$, where $n_r\in \ZZ[X]$ and $d_r\in \ZZ^{+}$ satisfy $\gcd(d_r,c)=1$, where $c = \mathsf{cont}(n_r)$ is the content of $n_r$. Similarly write $a$, the leading coefficient of $\generator$, in lowest terms $a = n_a/d_a$. Define $N := c \cdot n_a$. We show that for every prime $p$,
+\[
+\left(\phi_p(f) \in \langle \phi_p(\generator) \rangle \ \wedge\ f \not\in \langle \generator \rangle \ \wedge\ f,\generator \in \ZZ_{(p)}\right)
+\Longrightarrow p \mid N.
+\]
+Fix $p$ and assume $\phi_p(f) \in \langle \phi_p(\generator) \rangle$, $f \not\in \langle \generator \rangle$, and $f,\generator \in \ZZ_{(p)}$.
+Define $N := c \cdot n_a$. We show $p \mid N$. First assume $p \nmid n_a$. Then the leading coefficient of $\generator$ is a unit in $\ZZ_{(p)}$, so Euclidean division of $f$ by $\generator$ can be performed in $\ZZ_{(p)}[X]$. Let $(q_p,r_p)\in \ZZ_{(p)}[X]\times \ZZ_{(p)}[X]$ be the resulting quotient--remainder pair, so
+\[
+f = \generator q_p + r_p,
+\qquad
+\deg(r_p) < \deg(\generator).
+\]
+By uniqueness of Euclidean division in $\QQ[X]$, we have $r_p=r$, and in particular $r\in \ZZ_{(p)}[X]$. Applying $\phi_p$ gives
+\[
+\phi_p(f) = \phi_p(\generator)\cdot \phi_p(q_p) + \phi_p(r).
+\]
+Since $p \nmid n_a$, we have $\deg(\phi_p(\generator))=\deg(\generator)$, hence $\deg(\phi_p(r))<\deg(\phi_p(\generator))$.  Together with $\phi_p(f)\in \langle \phi_p(\generator)\rangle$, this implies $\phi_p(r)=0$. Because $r\in \ZZ_{(p)}[X]$, we have $\phi_p(r)=0$ if and only if $p \mid \mathsf{cont}(n_r)=c$. Hence $p \mid c$, and therefore $p \mid N$.
+
+Next assume $p \nmid c$. If also $p \nmid n_a$, then the same argument shows $r\in \ZZ_{(p)}[X]$ and $\phi_p(r)=0 \Longleftrightarrow p \mid c$, so $p \nmid c$ implies $\phi_p(r)\neq 0$ while $\deg(\phi_p(r))<\deg(\phi_p(\generator))$. A nonzero polynomial of degree strictly less than $\deg(\phi_p(\generator))$ cannot lie in $\langle \phi_p(\generator)\rangle$, contradicting $\phi_p(f)\in \langle \phi_p(\generator)\rangle$.  Therefore $p \mid n_a$, and hence $p \mid N$.
+
+Let $\primeset_\textnormal{bad} = \{p \in \primeset : p \mid N\}$. The above implication yields
+\[
+\Pr_{p \getsr \primeset}\left[\phi_p(f) \in \langle \phi_p(\generator) \rangle \ \wedge\ f \not\in \langle \generator \rangle \pST f,\generator \in \ZZ_{(p)}\right]
+\le \frac{|\primeset_\textnormal{bad}|}{|\primeset|}.
+\]
+Let $\bitbound_N = \lceil \log(|N|+1) \rceil$. If $\bitbound_N \le \bitbound_\primeset$ then $|\primeset_\textnormal{bad}|=0$.
+Otherwise, by~\cref{lemma:prime-division-bound},
+\[
+|\primeset_\textnormal{bad}| < \frac{\bitbound_N-1}{\bitbound_\primeset-1},
+\]
+so
+\begin{equation}
+\label{eq:abstract-phi-collision-bound}
+\Pr_{p \getsr \primeset}[\cdots]
+< \frac{\bitbound_N-1}{|\primeset|(\bitbound_\primeset-1)}.
+\end{equation}
+
+We now bound $\bitbound_N$. Since the coefficients of $f$ and $\generator$ have bitlength $<B$, we may write each coefficient in lowest
+terms with numerator and denominator of magnitude $<2^B$. Let $\Delta\in \ZZ^{+}$ be the product of all coefficient denominators appearing
+in $f$ and $\generator$. Then $\Delta < 2^{2dB}$, and the polynomials
+\[
+F := \Delta f \in \ZZ[X], \qquad J := \Delta \generator \in \ZZ[X]
+\]
+satisfy $\|F\|_\infty,\|J\|_\infty < 2^B \Delta < 2^{(2d+1)B}$.
+
+Let $m := \deg(F)$ and $n := \deg(J)$, so $m,n < d$. Let $b$ be the leading coefficient of $J$. By pseudo-division, there exist
+$Q',R' \in \ZZ[X]$ with $\deg(R')<n$ such that
+\begin{equation}\label{eq:pseudodiv_finish}
+b^{m-n+1} F = J Q' + R'.
+\end{equation}
+Dividing \eqref{eq:pseudodiv_finish} by $\Delta$ and comparing with $f=\generator q + r$ shows that
+\[
+r = \frac{R'}{b^{m-n+1}\Delta}.
+\]
+In particular, there exists $\alpha\in\ZZ^{+}$ such that $R'=\alpha n_r \in \ZZ[X]$ and $b^{m-n+1}\Delta=\alpha d_r \in \ZZ\setminus\{0\}$,
+hence
+\[
+c = \mathsf{cont}(n_r) \le \|n_r\|_\infty \le \|R'\|_\infty.
+\]
+Each coefficient of $R'$ can be expressed as a determinant of a matrix of dimension at most $m+n < 2d$ whose entries are coefficients of $F$
+and $J$. By Hadamard's inequality,
+\[
+\|R'\|_\infty \le (2d)^d \cdot \bigl(\max(\|F\|_\infty,\|J\|_\infty)\bigr)^{2d}
+< (2d)^d \cdot \left(2^{(2d+1)B}\right)^{2d}
+= (2d)^d \cdot 2^{(4d^2+2d)B}.
+\]
+Therefore $c < (2d)^d \cdot 2^{(4d^2+2d)B}$. Since $|n_a|<2^B$, we have
+\[
+|N| < (2d)^d \cdot 2^{(4d^2+2d+1)B}.
+\]
+It follows that
+\[
+\bitbound_N = \lceil \log(|N|+1) \rceil \le (4d^2+2d+1)B + d\log(2d) + 1 < 8 d^2 B.
+\]
+Substituting this bound into~\cref{eq:abstract-phi-collision-bound} completes the proof.
+\end{proof}
+
+\begin{lemma}
+\label{lemma:primitive-element-sampling}
+Let $q$ be a prime power, $k\ge 2$ an integer. Let $\extend(q) = q^k$ pick $k$ such that $q^k \geq 2^{2\xi} \cdot (8(\xi+1))^2$. Define $\prim(\FF_{q^k}) = \{\alpha\in \FF_{q^k} \ \mid \ \FF_q(\alpha)=\FF_{q^k}\}$. Then
+\[
+\frac{|\prim(\FF_{q^k})|}{q^k} \ge 1-2^{-\xi}.
+\]
+\end{lemma}
+\begin{proof}
+An element $\alpha\in \FF_{q^k}$ fails to generate $\FF_{q^k}$ over $\FF_q$ if and only if
+$\alpha$ lies in a proper intermediate subfield $\FF_{q^d}$ for some divisor $d\mid k$ with $d<k$.
+Thus
+\[
+\FF_{q^k}\setminus \prim(\FF_{q^k}) \subseteq \bigcup_{\substack{d\mid k\\ d<k}} \FF_{q^d}.
+\]
+Taking cardinalities and applying the union bound yields
+\[
+|\FF_{q^k}\setminus \prim(\FF_{q^k})|
+\le \sum_{\substack{d\mid k\\ d<k}} |\FF_{q^d}|
+= \sum_{\substack{d\mid k\\ d<k}} q^d.
+\]
+Dividing by $q^k$ gives
+\[
+1-\frac{|\prim(\FF_{q^k})|}{q^k}
+\le \sum_{\substack{d\mid k\\ d<k}} q^{d-k}.
+\]
+Let $\ell$ denote the smallest prime divisor of $k$. Then every proper divisor $d$ of $k$ satisfies
+$d\le k/\ell$, so $q^{d-k}\le q^{k/\ell-k}=q^{-(k-k/\ell)}$. Since $k$ has at most $k-1$ proper divisors,
+\[
+1-\frac{|\prim(\FF_{q^k})|}{q^k}
+\le (k-1)\,q^{-(k-k/\ell)}.
+\]
+Using $\ell\ge 2$, we have $k-k/\ell \ge k/2$, hence
+\[
+(k-1)\,q^{-(k-k/\ell)} \le (k-1)\,q^{-k/2}.
+\]
+Write $N := q^k$. Then $q^{-k/2}=N^{-1/2}$, so the previous equation becomes
+\[
+1-\frac{|\prim(\FF_{q^k})|}{q^k}
+\le (k-1)\,N^{-1/2}.
+\]
+Moreover, since $q\ge 2$ and $k\ge 2$, we have $N=q^k\ge 2^k$, and thus $k-1\le \log_2 N$.
+Therefore
+\[
+1-\frac{|\prim(\FF_{q^k})|}{q^k}
+\le \frac{\log_2 N}{\sqrt{N}}.
+\]
+By the hypothesis $N=q^k \ge 2^{2\xi}\cdot (8(\xi+1))^2$, we have
+$\sqrt{N}\ge 2^\xi\cdot 8(\xi+1)$. Also,
+\[
+\log_2 N
+\le \log_2\!\Big(2^{2\xi}\cdot (8(\xi+1))^2\Big)
+= 2\xi + 2\log_2(8(\xi+1))
+\le 8(\xi+1),
+\]
+where the last inequality uses $\xi\ge 1$ and $\log_2(8(\xi+1))\le 3+(\xi+1)$.
+Combining the above bounds gives
+\[
+\frac{\log_2 N}{\sqrt{N}}
+\le \frac{8(\xi+1)}{2^\xi\cdot 8(\xi+1)}
+= 2^{-\xi}.
+\]
+Hence $1-\frac{|\prim(\FF_{q^k})|}{q^k}\le 2^{-\xi}$, which is equivalent to the claimed bound.
+\end{proof}

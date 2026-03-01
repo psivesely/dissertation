@@ -1,0 +1,47 @@
+\subsection{Strictly algebraic UCS}
+\label{sec:zincplus-ucs-alg}
+
+We introduce the strictly algebraic UCS relation, defined over a single prime-power field, which we will reduce UCS to. More precisely, Zinc$+$ reduces UCS to the joint relation $\wedge_{i \in [0,\numprimes]} \ucsalg(\tilde{q}_i)$, where the new index-instance is of the form $\idx' = (\idx'_0,\dotsc,\idx'_{\numprimes})$, $\inp' = (\inp'_0,\dotsc,\inp'_{\numprimes})$ and
+\[
+(\idx',\inp') \in \Language\left(\wedge_{i \in [0,\numprimes]} \ucsalg(\tilde{q}_i)\right) \Longleftrightarrow (\idx'_i,\inp'_i) \in \Language(\ucsalg(\tilde{q}_i)) \ (\forall i \in [0,\numprimes]).
+\]
+By combining the Zinc$+$ PIOR with PIOPs for each $\ucsalg(\tilde{q}_i)$ (or a single field-agnostic PIOP that can work for any prime-power), we obtain a PIOP for UCS.
+
+\begin{definition}[The relation $\ucsalg(q)$]
+\label{def:ucs_alg_qi}
+Let $q$ be a prime power. The \emph{strictly algebraic UCS relation} $\ucsalg(q)\subseteq \ucs$ is the subset of $\ucs$ formed by all triples $(\idx,\inp;\wit)\in\ucs$ where all constraints are set over the same finite field and every ideal appearing in the index is the zero ideal.
+\begin{equation*}
+\begin{aligned}
+\ucsalg(q)
+=\left\{
+\left(\begin{aligned}
+  &\idx,\\
+  &\inp,\\
+  &\wit
+\end{aligned}\right)
+\ \middle|\
+\begin{aligned}
+&\textbf{Index}\\
+&\quad \idx=
+\bigl(\witlen = 2^\nu,\inplen,\constraints\bigr), \enspace
+\constraints=[Q_{\constraintindex}]_{\constraintindex\in[\numconstraints]},\enspace
+Q_{\constraintindex}\in \FF_{q}[\inpvar,\ZZZ_1,\ZZZ_2],\\
+&\quad |\inpvar|=\inplen,\enspace |\ZZZ_1|=|\ZZZ_2|=\witlen \\
+&\textbf{Input}\\
+&\quad \inp=(\yy, \oracle{\tilde{f}_1}, \oracle{\tilde{f}_2}),\ \yy \in \FF_{q}^{\inplen},\ \tilde{f}_1, \tilde{f}_2 \in \FF_{q}[\WWW],\ |\WWW| = \nu \\
+&\textbf{Witness}\\
+&\quad \wit=(\ff_1,\ff_2)\in
+\FF_{q}^{\witlen}\times
+\FF_{q}^{\witlen},\\[0.5mm]
+&\textbf{Algebraic constraints over $\FF_{q}$}\\
+&\quad Q_{\constraintindex}\left(\yy,[\tilde{f}_1(\www)]_{\www \in \bits^\nu},[\tilde{f}_2(\www)]_{\www \in \bits^\nu}\right)=0 \text{ for } \constraintindex \in [\numconstraints]
+\end{aligned}
+\right\}.
+\end{aligned}
+\end{equation*}
+\end{definition}
+
+\begin{remark}[Mapping from UCS witnesses to $\ucsalg$ witnesses]
+\label{rem:ucsalg-witness-mapping}
+The two witness vectors $\ff_1,\ff_2\in\FF_q^{\witlen}$ in $\ucsalg(q)$ arise from the Zinc$+$ PIOR (Protocol~\ref{prot:zincplus-ucs-pior}) as follows.  For the $i$-th target field $\FF_{\tilde{q}_i}$, the PIOR sets $\ff_1 = \psi_{q_i,a_i}(\ff_0)$, which is the shared integer witness projected to~$\FF_{\tilde{q}_i}$, and $\ff_2 = \psi_{q_i,a_i}(\ff_i)$, which is the dedicated $\FF_{q_i}[X]$-witness projected to~$\FF_{\tilde{q}_i}$. For the $\QQ[X]$-part ($i=0$), the constraints involve only~$\ff_1$ (i.e., only the projected shared witness), and $\ff_2$ is unused.
+\end{remark}

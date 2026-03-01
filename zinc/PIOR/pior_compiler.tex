@@ -1,0 +1,58 @@
+\subsection{Zinc$+$ Compiler}
+\label{sec:zincplus-ucs-pior}
+
+In this section, we present the Zinc$+$ PIOR, which together with a field-agnostic PIOP for $\ucsalg$ gives us a PIOP for $\ucs$. We then prove its completeness and round-by-round knowledge soundness. Below we sometimes write $\tilde{q}_0$ to mean $q_0$ for the sake of compactness.
+
+\paragraph{The well-defined condition in $\ucs$ as a $\QQ[X]$-constraint}
+\label{rem:zincplus_welldefinedness_in_qpart}
+Recall that $\ucs$ specifies a well-defined constraint, which states that one of the witness vectors, namely $\ff_0$, lies in the intersection of certain localization rings (\cref{def:ucs}, specifically~\cref{eq:ucs_welldefinedness}). As demonstrated in \cref{sss:well_defined_condition}, this condition can be written in the form of an algebraic constraint over $\QQ[X]$. When such a constraint is included in the index, we call it a \emph{well-formed} index, and only specify Zinc$+$ to work with well-formed $\ucs$ instances.
+
+\begin{figure}[h!]
+\caption{Protocol $\Pi^{\mathsf{UCS}}=(\prover_\ucsm, \verifier_\ucsm)$: Zinc$+$ PIOR from $\ucs$ to $\wedge_{i \in [0,\numprimes]} \ucsalg(\tilde{q}_i)$}
+\label{prot:zincplus-ucs-pior}
+\begin{algorithm}[H]
+\textbf{Input:} A well-formed index (\cref{def:ucs_well_formed_index}) and input $(\idx,\inp)$ for $\ucs$ (\cref{def:ucs}). $\prover_\ucsm$ additionally receives a witness $\wit$ such that $(\idx,\inp,\wit)\in\ucs$.  Write 
+\begin{align*}
+\idx&=(\witlen=2^\nu,\inplen,\numrows=2^\mu,\primetuple,\bitbound,\degbounds,\constraints = [(Q_{\primeindex\constraintindex}, \langle j_{\primeindex\constraintindex} \rangle)]_{\primeindex \in [0,\numprimes], \constraintindex \in [\numconstraints]}),\enspace
+\inp=(\yy)\in(\mainpolyring{\local{\qq}}{\bitbound}{\degreebound_0})^{\inplen}, \\
+\wit &= (\ff_0,\ff_1,\ldots,\ff_{\numprimes}), \ \ff_0 \in (\mainpolyring{\local{\qq}}{\bitbound}{\degreebound_0})^{\witlen},\ \ff_i \in (\FF_{q_i}^{<\degreebound_i}[X])^{\witlen}\text{ for } i\in[\numprimes].
+\end{align*}
+
+\begin{algorithmic}[1]
+\STATE $\prover_\ucsm$ sends polynomial oracles $\oracle{\tilde{f}_0},\ldots,\oracle{\tilde{f}_{\numprimes}}$, where $\tilde{f}_0 \in (\QQ^{<\degreebound_0,\bitbound}[X])[\WWW]$, $\tilde{f}_{1},\dotsc,\tilde{f}_{\numprimes} \in (\FF^{<\degreebound_i}_{q_i}[X])[\WWW]$, and $|\WWW| = \nu$.
+\STATE $\verifier_\ucsm$ sends a random prime $q_0\getsr \primeset$ and field elements $\rr_0 \getsr \FF_{q_0}^\mu$, $\rr_i\getsr \FF_{\tilde q_i}^\mu$ for $i\in[\numprimes]$.
+\STATE If $Q_{0\constraintindex} \not\in (\ZZ_{(q_0)}[X])[\rowvar,\inpvar,\ZZZ_1]$ or $\generator_{0\constraintindex}, \yy, \ff_0 \not\in \integers_{(q_0)}[X]$ for any $\constraintindex \in [\numconstraints]$, the protocol aborts.
+\STATE $\prover_\ucsm$ sends for $\primeindex \in [\numprimes], \constraintindex \in [\numconstraints]$:
+\[
+\begin{array}{lll}
+  e_{0\constraintindex} &= \sum_{\bb\in\BB^\mu} \phi_{q_0}\left(Q_{0\constraintindex}(\bb,\yy,\ff_0)\right) \cdot \meq(\bb,\rr_0) & \in \FF_{q_0}[X] \\
+  e_{\primeindex\constraintindex} &= \sum_{\bb\in\BB^\mu} \embedding_{\tilde{q}_\primeindex}(Q_{\primeindex\constraintindex})(\bb,\phi_{\tilde{q}_\primeindex}(\yy),\phi_{\tilde{q}_\primeindex}(\ff_0),\embedding_{\tilde{q}_\primeindex}(\ff_\primeindex)) \cdot \meq(\bb,\rr_\primeindex) & \in \FF_{\tilde{q}_\primeindex}[X] \\
+\end{array}
+\]
+\STATE $\verifier_\ucsm$ rejects if  $e_{0\constraintindex} \not\in \langle\phi_{q_0}(\generator_{0\constraintindex})\rangle$ or $e_{\primeindex\constraintindex} \not\in \langle\embedding_{\tilde{q}_\primeindex}(\generator_{\primeindex\constraintindex})\rangle$ for any $\primeindex \in [\numprimes],\constraintindex \in [\numconstraints]$.
+\STATE $\verifier_\ucsm$ sends $\evalpoints=(a_0,a_1,\ldots,a_{\numprimes})$ by sampling $a_i \getsr \FF_{\tilde q_i}$ for $i\in[0,\numprimes]$, aborting if any $a_i \not\in \prim(\FF_{\tilde q_i})$.
+\FOR{$i \in [0,\numprimes]$}
+  \STATE Let
+  \[
+  \begin{array}{l}
+    Q'_{0\constraintindex} = \sum_{\bb\in\BB^\mu} \psi_{q_0,a_0}(Q_{0\constraintindex})(\bb,\inpvar,\ZZZ_1) \cdot \meq(\bb,\rr_0)- e_{0\constraintindex}(a_0) \in \FF_{q_0}[\inpvar,\ZZZ_1] \\
+    Q'_{\primeindex\constraintindex} = \sum_{\bb\in\BB^\mu} \psi_{q_i,a_i}(Q_{\primeindex\constraintindex})(\bb,\inpvar,\ZZZ_1,\ZZZ_2) \cdot \meq(\bb,\rr_\primeindex) - e_{\primeindex\constraintindex}(a_i) \in \FF_{\tilde{q}_\primeindex}[\inpvar,\ZZZ_1,\ZZZ_2] \\
+    \yy'_0 = \psi_{q_0,a_0}(\yy) \in \FF_{q_0}^\inplen, \ \yy'_i = \psi_{q_i,a_i}(\yy) \in \FF_{\tilde{q}_i}^\inplen \\
+    \incompleteoracle{\tilde{f}'_{\primeindex0}} = \psi_{q_i,a_i}(\oracle{\tilde{f}_{0}(\psi^{-1}_{q_i,a_i}(\WWW))}),\ \oracle{\tilde{f}'_{\primeindex1}} = \psi_{q_i,a_i}(\oracle{\tilde{f}_{\primeindex}(\psi^{-1}_{q_i,a_i}(\WWW))}) \in \FF_{\tilde{q}_\primeindex}[\WWW] \\
+    \ff'_{i0} = \psi_{q_i,a_i}(\ff_0),\ \ff'_{i1} = \psi_{q_i,a_i}(\ff_i) \in (\FF_{\tilde{q}_\primeindex})^\witlen
+  \end{array}
+  \]
+  \STATE $\verifier_\ucsm$ outputs for $\primeindex \in [\numprimes]$:
+  \[
+  \begin{array}{llll}
+    \idx'_0 &= \left(\witlen,\inplen,q_0,\constraints'_0 = [Q'_{0\constraintindex}]_{\constraintindex \in [\numconstraints]}\right)
+    & \inp'_0 = \left(\yy_0,\ \incompleteoracle{\tilde{f}'_{00}}\right) \\
+    \idx'_\primeindex &= \left(\witlen,\inplen,\tilde{q}_\primeindex,\constraints'_\primeindex = [Q'_{\primeindex\constraintindex}]_{\constraintindex \in [\numconstraints]}\right)
+    & \inp'_\primeindex = \left(\yy'_i,\ \incompleteoracle{\tilde{f}'_{\primeindex0}},\ \oracle{\tilde{f}'_{\primeindex1}}\right)
+  \end{array}
+  \]
+  \STATE $\prover_\ucsm$ outputs $\wit'_i = (\ff'_{i0},\ff'_{i1})$.
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+\end{figure}

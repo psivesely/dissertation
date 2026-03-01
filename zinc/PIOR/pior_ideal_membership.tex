@@ -1,0 +1,67 @@
+\subsection{Batching ideal membership checks and projecting to finite fields}
+\label{sec:zincplus-ideal-batching}
+
+In this section, we provide lemmas for reducing ideal membership constraints in $\ucs$ to strict equalities in $\QQ[X]$ and $\FF_{q_i}[X]$, and subsequently to zerocheck-type polynomial relations over fields $\FF_{q_0}$ and $\FF_{\tilde{q}_i}$.
+
+\parhead{Ideal batching}
+We first give our ideal batching lemma, which captures the fact that \whp a vector $\vv$ belongs to an ideal $\primeideal$ if the evaluation of the multilinear extension of $\vv$ at a random point belongs to $\primeideal$. This is a consequence of the Schwartz-Zippel lemma over rings (\cref{lem:sz_exceptional_sets}), which follows by looking at membership in $\primeideal$ as equality to zero over an appropriate quotient by $\primeideal$.
+
+\begin{lemma}[Testing ideal membership in {$\KK[X]$} via one random MLE evaluation]
+\label{lem:ideal-batching}
+Let $\KK$ be a field, and let $\primeideal\subseteq \KK[X]$ be an ideal such that $\primeideal\cap \KK=(0)$.
+Let $\mu\ge 1$, let $\vv:\BB^\mu\to \KK[X]$ be a vector indexed by $\BB^\mu$, and let
+$\multilinmle{\vv}(\YY)\in (\KK[X])[\YY]$ be its multilinear extension (as in \eqref{e: MLE}).
+The following hold:
+\begin{enumerate}
+\item If $\vv(\xx)\in\primeideal$ for all $\xx\in\BB^\mu$, then $\multilinmle{\vv}(\rr)\in\primeideal$ for every
+$\rr\in \KK^\mu$.
+\item If there exists $\xx_0\in\BB^\mu$ such that $\vv(\xx_0)\notin\primeideal$, then, for every nonempty finite set
+$\setintegers\subseteq \KK$,
+\[
+  \Pr_{\rr\getsr \setintegers^\mu}\!\big[\multilinmle{\vv}(\rr)\in\primeideal\big]
+  \ \le\
+  \frac{\mu}{|\setintegers|}.
+\]
+\end{enumerate}
+\end{lemma}
+\noindent The proof is deferred to \cref{app:ideal-batching}.
+
+
+\parhead{Extend map}
+Let $\PP$ be the set of all prime powers. Throughout the rest of the section, we fix the extend map
+\[
+\extend: \PP \to  \PP
+\]
+that will parameterize our protocols and definitions. This map is defined so that, given a prime power $q$, $\extend(q) = q^\ell$ is a sufficiently large power of $q$ (where precise requirements in terms of the security parameter are given in the round-by-round knowledge proof of Zinc$+$). We will generally write $\tilde{q}$ to mean the output of $\extend(q)$.
+
+\parhead{Projecting from rings to fields}
+We now show how to sample a random projection from rings $\QQ[X]$ and $\FF_{q}[X]$ to sufficiently large finite fields.
+
+\begin{definition}[Evaluation projections]
+\label{def:psi_i_alpha}
+Let $q = p^e$ be a prime power, $\tilde{q} = q^\ell$. Let $a \in \prim(\FF_{\tilde q})$ such that $\langle a \rangle = \FF_{\tilde q}$. We define the surjective ring homomorphism 
+\[
+\psi_{q,a}: \FF_q[X]\to\FF_{\tilde q},\qquad f(X) \mapsto \embedding_{\tilde{q}}(f)(a),
+\]
+where the canonical embedding is first applied coefficient-wise to $f$ to lift it to the extension ring $\FF_{\tilde q}$ and then the resulting polynomial is evaluated at $a$. We also define the right-inverse
+\[
+\psi_{q,a}^{-1}: \FF_{\tilde q} \to \FF_{q}^{<\ell}[X]
+\]
+which sends $v \in \FF_{\tilde{q}}$ to the unique $g \in \FF_{q}^{<\ell}[X]$ such that $\psi_{q,a}(g) = v$. To compute this explicitly, one can fix an irreducible degree $\ell$ polynomial $b$ and represent elements of $\FF_{\tilde q}$ as polynomials in $\FF_{q}[X]/(b(X)) \cong \FF_{\tilde q}$, where the coefficients in this representation are exactly the coefficients of $g$. We stress that $g$ is unique and choice of $b$ only affects arithmetic efficiency. While $\psi_{q,a} \circ \psi_{q,a}^{-1}$ is the identity function $\mathsf{id}_{\FF_{\tilde q}}$ on $\FF_{\tilde q}$, we have that $\psi_{q,a}^{-1} \circ \psi_{q,a}$ is only the identity function on the restricted domain $\FF^{<\ell}_{q}[X] \subset \FF_{q}[X]$.
+ 
+Next, let $q_0$ be a prime, $a \in \FF_{q_0}$. We extend $\psi_{q_0,a}$ to a surjective ring homomorphism
+\[
+\psi_{q_0,a}: \local{q_0}[X]\to\FF_{q_0}, \qquad f(X) \mapsto \phi_{q_0}(f)(a),
+\]
+where first we apply the ring homomorphism $\phi_{q_0}$ coefficient-wise to $f$ to project it to $\FF_q$ and then evaluate at $a$. We also define the right-inverse
+\[
+\psi_{q_0,a}^{-1}: \FF_{q_0} \to \local{q_0}[X]
+\]
+which simply returns $v \in \FF_{q_0}$ as a constant integral polynomial in $\local{q_0}[X]$.
+\end{definition}
+
+\begin{lemma}\label{lem:mle_lifted_projection}
+  Let $\psi:\cR\to\cR'$ be a surjective ring homomorphism. Let $n=2^\mu$ and let $\vv\in \cR^n$ be a vector and $\tilde{\vv}$ its multilinear extension. Let $\widetilde{\psi(\vv)}$ be the multilinear extension of $\psi(\vv)\in \cR'{}^n$. Then, for any \emph{inverse map} $\psi^{-1}:\cR'\to\cR$, i.e.\ any map such that $\psi\circ\psi^{-1}$ is the identity map on $\cR'$, we have
+$$\psi(\tilde{\vv}(\psi^{-1}(\uu))) = \widetilde{\psi(\vv)}(\uu) \qquad \text{for all } \uu\in \cR'{}^\mu.$$ Note that an inverse map $\psi^{-1}$ exists since $\psi$ is surjective.
+\end{lemma}
+The proof is deferred to \cref{subsec:ucs-pior-security}.

@@ -436,6 +436,7 @@ Let $\preimagepowers \defeq \integerball{\secretinputdim} \setminus\set{0}$. We 
 \end{table}
 
 \vspace{1em}
+\begin{singlespace}
 \noindent
 % $\underline{\setup(1^{\secparam}, 1^{\publicinputdim}, 1^{\secretinputdim}) \to \commitmentkey}$ \\
 \underline{$\setup(1^{\secparam}, 1^{\secretinputdim}) \to \commitmentkey$} \\
@@ -466,6 +467,7 @@ Output $1$ if the following conditions all hold (else $0$): \\
 $\linfinitynorm{\output} \leq \normboundoutput;\enspace \linfinitynorm{\proofknowledge} \leq \normboundproofknowledge; \enspace\linfinitynorm{\proofopening} \leq \normboundproof$ \\
 $\innerproduct{\publicsisvector_1}{\proofknowledge} \equiv \commitment \cdot \vart \modq$ \\
 $\innerproduct{\publicsisvector_0}{\proofopening} \equiv \vkf \cdot \commitment - \output \modq$ \\
+\end{singlespace}
 
 
 \noindent We next prove that \sys satisfies correctness, extractability, and succinctness.

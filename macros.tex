@@ -1,3 +1,6 @@
+% Make \emph meaningful in italic environments (e.g., when using \theoremstyle{plain})
+\renewcommand\eminnershape{\itshape\sffamily}
+
 \theoremstyle{plain} % italics
 \newtheorem{itheorem}{Theorem}%[section]
 \newtheorem{icorollary}{Corollary}%[section]
@@ -330,72 +333,44 @@
 
 \makeatother
 
-% FINAL PATCH (compile-tested + visually inspected)
-% Requires:
-%   \usepackage{etoolbox}
-%   \usepackage{setspace}
-% Put after those packages are loaded.
-
-% --- 1) All array-based structures: make row spacing single-ish globally ---
-% This covers:
-%   array, matrix, bmatrix, pmatrix, vmatrix, Vmatrix, cases,
-%   tabular, tabular*, longtable
+% Covers:  array, matrix, bmatrix, pmatrix, vmatrix, Vmatrix, cases,    tabular, tabular*, longtable
 \renewcommand{\arraystretch}{0.60}
 
-% --- 2) Table floats: single-space surrounding table text/caption context ---
-\BeforeBeginEnvironment{table}{\begingroup\singlespacing}
-\AfterEndEnvironment{table}{\endgroup}
+\BeforeBeginEnvironment{table}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{table}{\end{singlespace}\noindent\ignorespaces}
+\BeforeBeginEnvironment{longtable}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{longtable}{\end{singlespace}\noindent\ignorespaces}
 
-% --- 3) longtable is not inside a table float, so wrap it explicitly ---
-\BeforeBeginEnvironment{longtable}{\begingroup\singlespacing}
-\AfterEndEnvironment{longtable}{\endgroup}
+\BeforeBeginEnvironment{align}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{align}{\end{singlespace}\noindent\ignorespaces}
+\BeforeBeginEnvironment{align*}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{align*}{\end{singlespace}\noindent\ignorespaces}
 
-% --- 4) Displayed equations: single-spaced internally, no extra blank space above/below ---
-\newcommand{\tightdisplaymath}{%
-  \begingroup
-  \singlespacing
-  \setlength{\abovedisplayskip}{0pt}%
-  \setlength{\belowdisplayskip}{0pt}%
-  \setlength{\abovedisplayshortskip}{0pt}%
-  \setlength{\belowdisplayshortskip}{0pt}%
-}
-\newcommand{\tightdisplaymathend}{\endgroup}
+\BeforeBeginEnvironment{alignat}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{alignat}{\end{singlespace}\noindent\ignorespaces}
+\BeforeBeginEnvironment{alignat*}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{alignat*}{\end{singlespace}\noindent\ignorespaces}
 
-\BeforeBeginEnvironment{equation}{\tightdisplaymath}
-\AfterEndEnvironment{equation}{\tightdisplaymathend}
-\BeforeBeginEnvironment{equation*}{\tightdisplaymath}
-\AfterEndEnvironment{equation*}{\tightdisplaymathend}
+\BeforeBeginEnvironment{flalign}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{flalign}{\end{singlespace}\noindent\ignorespaces}
+\BeforeBeginEnvironment{flalign*}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{flalign*}{\end{singlespace}\noindent\ignorespaces}
 
-\BeforeBeginEnvironment{align}{\tightdisplaymath}
-\AfterEndEnvironment{align}{\tightdisplaymathend}
-\BeforeBeginEnvironment{align*}{\tightdisplaymath}
-\AfterEndEnvironment{align*}{\tightdisplaymathend}
+\BeforeBeginEnvironment{gather}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{gather}{\end{singlespace}\noindent\ignorespaces}
+\BeforeBeginEnvironment{gather*}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{gather*}{\end{singlespace}\noindent\ignorespaces}
 
-\BeforeBeginEnvironment{alignat}{\tightdisplaymath}
-\AfterEndEnvironment{alignat}{\tightdisplaymathend}
-\BeforeBeginEnvironment{alignat*}{\tightdisplaymath}
-\AfterEndEnvironment{alignat*}{\tightdisplaymathend}
+\BeforeBeginEnvironment{multline}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{multline}{\end{singlespace}\noindent\ignorespaces}
+\BeforeBeginEnvironment{multline*}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{multline*}{\end{singlespace}\noindent\ignorespaces}
 
-\BeforeBeginEnvironment{flalign}{\tightdisplaymath}
-\AfterEndEnvironment{flalign}{\tightdisplaymathend}
-\BeforeBeginEnvironment{flalign*}{\tightdisplaymath}
-\AfterEndEnvironment{flalign*}{\tightdisplaymathend}
-
-\BeforeBeginEnvironment{gather}{\tightdisplaymath}
-\AfterEndEnvironment{gather}{\tightdisplaymathend}
-\BeforeBeginEnvironment{gather*}{\tightdisplaymath}
-\AfterEndEnvironment{gather*}{\tightdisplaymathend}
-
-\BeforeBeginEnvironment{multline}{\tightdisplaymath}
-\AfterEndEnvironment{multline}{\tightdisplaymathend}
-\BeforeBeginEnvironment{multline*}{\tightdisplaymath}
-\AfterEndEnvironment{multline*}{\tightdisplaymathend}
-
-% Optional, only if you still use eqnarray anywhere:
-\BeforeBeginEnvironment{eqnarray}{\tightdisplaymath}
-\AfterEndEnvironment{eqnarray}{\tightdisplaymathend}
-\BeforeBeginEnvironment{eqnarray*}{\tightdisplaymath}
-\AfterEndEnvironment{eqnarray*}{\tightdisplaymathend}
+% Optional, only if you still use eqnarray:
+\BeforeBeginEnvironment{eqnarray}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{eqnarray}{\end{singlespace}\noindent\ignorespaces}
+\BeforeBeginEnvironment{eqnarray*}{\begin{singlespace}\vspace*{-\baselineskip}}
+\AfterEndEnvironment{eqnarray*}{\end{singlespace}\noindent\ignorespaces}
 
 % Wrap any section/block in this to force single spacing inside it
 \newenvironment{singlespacedblock}

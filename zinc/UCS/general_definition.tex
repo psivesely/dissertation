@@ -1,0 +1,174 @@
+\section{Universal Constraint Systems (UCS)}
+We start this section by presenting the main relation we are interested in proving, which we call the \emph{universal constraint system} (UCS) relation.  After that, we discuss some structural semantics of UCS, namely how one can write lookup and permutation constraints within a UCS.
+
+\subsection{General UCS definition}\label{s:general_ucs_definition}
+
+In this section we define the \emph{universal constraint system} (UCS) relation~$\ucs$. This relation combines algebraic constraints over $\QQ[X]$ with algebraic constraints over finite-field polynomial rings $\FF_{q_\primeindex}[X]$ (or, simply, finite fields~$\FF_{q_\primeindex}$).
+
+
+\begin{definition}[Universal constraint system (UCS)]
+\label{def:ucs}
+The relation $\ucs$ is the set of all triples $(\idx,\inp;\wit)$ of the following form. 
+
+\smallskip\noindent\textbf{Index.}
+An index is a tuple
+\[
+\idx=(\witlen,\inplen,\numrows,\primetuple,\bitbound,\degbounds,\constraints),
+\]
+where $\witlen\ge 0$ is the \emph{witness length}, $\inplen\ge 0$ is the \emph{input length}, $\numrows\ge 0$ is the \emph{number of rows}, $\primetuple=(q_1,\ldots,q_{\numprimes})$ is a tuple of prime powers, $\bitbound\ge 0$ is a \emph{bit-size bound}, $\degbounds=(\degreebound_0,\ldots,\degreebound_{\numprimes})$ is a tuple of \emph{degree bounds}, and $\constraints$ is a family of \emph{constraints} (defined below).
+Let $\rowvar$ be a formal variable (interpreted as ranging over rows in $[\numrows]$), let $\inpvar$ be a tuple of $\inplen$ formal variables (interpreted as placeholders for public input entries), and let
+$\ZZZ_1,\ZZZ_2$ be tuples of $\witlen$ formal variables (interpreted as placeholders for witness vectors). $\ZZZ_1$ serves as placeholder for a witness with entries in $\mainpolyring{\QQ}{\bitbound}{\degreebound}$ and $\ZZZ_2$ for witnesses with entries in $\FF_{q_i}^{<\degreebound_i}[X]$. Additionally,  in the finite-field constraints, $\ZZZ_1$ serves as well as a placeholder for the projected integer witness $\phi_{q_\primeindex}(\ff_0)$.
+
+The constraint family $\constraints$ is a tuple
+\[
+\constraints=
+\Bigl( (Q_{0\constraintindex},\primeideal_{0\constraintindex})_{\constraintindex\in[\numconstraints]},\ (Q_{\primeindex\constraintindex},\primeideal_{\primeindex\constraintindex})_{\primeindex\in[\numprimes],\constraintindex\in[\numconstraints]}\Bigr),
+\]
+where, for every $\constraintindex\in[\numconstraints]$ and every $\primeindex\in[\numprimes]$,
+\[
+Q_{0\constraintindex}\in \bigl(\mainpolyring{\QQ}{\bitbound}{\degreebound_0}\bigr)[\rowvar,\inpvar,\ZZZ_1],\qquad
+Q_{\primeindex\constraintindex}\in \bigl(\FF_{q_\primeindex}[X]\bigr)[\rowvar,\inpvar,\ZZZ_1,\ZZZ_2],
+\]
+and $\primeideal_{0\constraintindex} = \principalideal{0\constraintindex}$ and $\primeideal_{\primeindex\constraintindex} = \principalideal{\primeindex\constraintindex}$ are ideals given by generators
+\[
+\generator_{0\constraintindex} \in \QQ^{<\degreebound_0,\bitbound}[X],
+\qquad
+\generator_{\primeindex\constraintindex} \in \FF_{q_\primeindex}[X].
+\]
+We call $(Q_{\primeindex\constraintindex}, \primeideal_{\primeindex\constraintindex})$ a $\QQ[X]$ (or $\FF_{q_\primeindex}[X]$) \emph{constraint}.
+
+\smallskip\noindent\textbf{Input and witness.}
+The public input is $\inp=\yy$ with
+\[
+\yy\in (\mainpolyring{\local{q_1\cdots q_{\numprimes}}}{\bitbound}{\degreebound_0})^{\inplen},
+\] 
+(recall that $\local{q_1\cdots q_{\numprimes}}$ denotes the intersection localization ring from \cref{e: multi_localization}).
+The witness is $\wit=(\ff_0,\ff_1,\ldots,\ff_{\numprimes})$ with
+\begin{equation}\label{eq:witness_typing}
+\ff_0\in\bigl(\mainpolyring{\QQ}{\bitbound}{\degreebound_0}\bigr)^{\witlen},
+\qquad
+\ff_{\primeindex}\in\bigl(\FF_{q_\primeindex}^{<\degreebound_\primeindex}[X]\bigr)^{\witlen}\ \text{ for all }\ \primeindex\in[\numprimes].
+\end{equation}
+
+\smallskip\noindent\textbf{Constraints.}
+We say that $(\idx,\inp;\wit)\in\ucs$ if all of the following conditions hold.
+
+\begin{enumerate}[label=(\roman*),leftmargin=*,itemsep=2pt]
+\item \textbf{$\QQ[X]$-constraints.}
+For every $\rowindex\in[\numrows]$ and every $\constraintindex\in[\numconstraints]$,
+\[
+Q_{0\constraintindex}(\rowindex,\yy,\ff_0)\in \primeideal_{0\constraintindex}\subseteq \QQ[X].
+\]
+
+\item \textbf{$\FF_{q_\primeindex}[X]$-constraints.}
+For every $\primeindex\in[\numprimes]$, every $\rowindex\in[\numrows]$, and every
+$\constraintindex\in[\numconstraints]$,
+\[
+Q_{\primeindex\constraintindex}\bigl(\rowindex,\phi_{q_\primeindex}(\yy),\phi_{q_\primeindex}(\ff_0),\ff_{\primeindex}\bigr)
+\in \primeideal_{\primeindex\constraintindex}\subseteq \FF_{q_\primeindex}[X].
+\]
+
+\item \textbf{Well-definedness of $\phi_{q_\primeindex}$.}
+The homomorphisms $\phi_{q_\primeindex}$ from \cref{sec:local-rings} are defined only on the
+intersection localization ring $\local{q_1\cdots q_{\numprimes}}$. Since the previous item applies
+$\phi_{q_\primeindex}$ to $\ff_0$, we require the following well-definedness condition:
+\begin{equation}\label{eq:ucs_welldefinedness}
+\ff_0\in\bigl(\mainpolyring{\local{q_1\cdots q_{\numprimes}}}{\bitbound}{\degreebound_0}\bigr)^{\witlen}.
+\end{equation}
+When $\numprimes=0$, this condition is vacuous. We show in \cref{ss:ucs_lookup} that the well-definedness condition can be expressed as a
+$\QQ[X]$-constraint.
+\end{enumerate}
+\end{definition}
+
+When an ideal $\primeideal_{\primeindex\constraintindex}$ is zero, the corresponding constraint
+$Q_{\primeindex\constraintindex}(\cdots)\in\primeideal_{\primeindex\constraintindex}$ reduces to the
+equality $Q_{\primeindex\constraintindex}(\cdots)=0$. When $\numprimes=0$, the tuple $\primetuple$ is empty and UCS reduces to a purely $\QQ[X]$-constraint system with no $\FF[X]$-constraints.
+
+\begin{remark}[Separation of PIOP and IOPP enforcement]
+\label{rem:piop_iopp_separation}
+The satisfaction conditions in \cref{def:ucs} (Items~(i)--(iii)) will be enforced at the \emph{PIOP level}, while the typing constraints for the witness~\eqref{eq:witness_typing} will be enforced at the \emph{IOPP} (or \emph{PCS}) \emph{level}.
+More precisely, we design PIOPs that prove the $\QQ[X]$-constraints, the $\FF_{q_\primeindex}[X]$-constraints, and the well-definedness constraint, under the assumption that malicious provers send oracles of the correct type---i.e., oracles to multilinear polynomials with coefficients in $\mainpolyring{\QQ}{\bitbound}{\degreebound_0}$ or $\FF_{q_\primeindex}^{<\degreebound_\primeindex}[X]$, respectively. 
+Enforcing that the oracles are actually of this declared type will be the job of the IOPP (or PCS) compiler. 
+
+We remark that, in particular, the well-definedness condition~\eqref{eq:ucs_welldefinedness} is not enforced at the IOPP level, but rather at the PIOP level (cf.\ \cref{ss:ucs_lookup}).
+\end{remark}
+
+\begin{remark}[The well-definedness condition]
+  We show in \cref{ss:ucs_lookup} that the well-definedness condition~\eqref{eq:ucs_welldefinedness} can be written as a $\QQ[X]$-constraint. Hence, \eqref{eq:ucs_welldefinedness} does not require its own separate syntax, as long as one of the $\QQ[X]$-constraints in the UCS instance enforces it.  
+
+In practice, the computations we are interested in proving already require constraining $\ff_0$ in a way that guarantees the well-definedness condition automatically. For example, in all examples from \cref{s:examples}, the witness $\ff_0$ is constrained to belong to some subset of $\ZZ^{<\degreebound}[X]^\witlen$ (via a $\QQ[X]$-constraint). This constraint implies the well-definedness condition for any choice of primes $q_1,\ldots,q_{\numprimes}$.
+\end{remark}
+
+For ease of reference, we restate the definition of $\ucs$ below.
+\begin{equation*}
+\begin{aligned}
+  \ucs = \left\{ \left(\begin{aligned}&\idx,\\& \inp;\\&\wit\end{aligned}\right) \left| \ \begin{aligned}
+  &\textbf{Index-input-witness}\\
+  &\quad \textbf{Index}\\
+  &\quad\quad \idx=(\witlen, \inplen, \numrows, \primetuple, \bitbound, \degbounds, \constraints),\\
+  &\quad\quad \primetuple=(q_1, \ldots, q_{\numprimes}),\quad \degbounds=(\degreebound_0, \ldots, \degreebound_{\numprimes}),\\
+  &\quad\quad \constraints=((Q_{0\constraintindex}, \primeideal_{0\constraintindex} = \principalideal{0\constraintindex}), (Q_{\primeindex \constraintindex}, \primeideal_{\primeindex\constraintindex} = \principalideal{\primeindex\constraintindex}))_{\primeindex \in [\numprimes], \constraintindex\in [\numconstraints]},\\
+  &\quad\quad \generator_{0\constraintindex}\in \QQ^{<\degreebound_0,\bitbound}[X], \ \generator_{\primeindex \constraintindex}\in \FF_{q_\primeindex}[X], \\
+  &\quad\quad Q_{0\constraintindex}\in (\mainpolyring{\QQ}{\bitbound}{\degreebound_0})[\rowvar,\inpvar, \ZZZ_1], \ Q_{\primeindex \constraintindex}\in (\FF_{q_\primeindex}[X])[\rowvar, \inpvar, \ZZZ_1, \ZZZ_2], \\
+    &\quad\quad |\ZZZ_1| = |\ZZZ_2|=\witlen\\
+       &\quad \textbf{Input}\\
+    &\quad \quad \inp=(\yy) \in (\mainpolyring{\local{q_1\cdots q_{\numprimes}}}{\bitbound}{\degreebound_0})^{\inplen}\\ 
+          &\quad 
+          \textbf{Witness}\\
+      &\quad \quad \wit = (\ff_0, \ff_1,\ldots, \ff_{\numprimes}),\ \ff_{i}\in (\FF_{q_i}^{<\degreebound_i}[X])^{\witlen}  \ \text{ for all } i\in [\numprimes]\\ &\quad \quad   \ff_{0}\in (\mainpolyring{\QQ}{\bitbound}{\degreebound_0})^{\witlen},\\ 
+    &\\
+    &\textbf{Constraints}\\
+      &\quad\textbf{Algebraic constraints over $\QQ[X]$ mod ideals}\\
+      &\quad\quad Q_{0 \constraintindex}\left(\rowindex, \yy, \ff_0\right) \in \primeideal_{0\constraintindex} \quad \text{for all }  \rowindex\in [\numrows], \ \constraintindex\in [\numconstraints]\\
+      &\\
+    &\quad\textbf{Algebraic constraints over $\FF_{q_\primeindex}[X]$}\\
+    &\quad\quad Q_{\primeindex \constraintindex}\left( \rowindex, \phi_{q_\primeindex}(\yy), \phi_{q_\primeindex}(\ff_{0}), \ff_{\primeindex} \right)\in \primeideal_{\primeindex\constraintindex}, \\ &\quad\quad\quad\quad\quad \text{for all} \ \rowindex\in [\numrows], \ \primeindex\in [\numprimes],\ \constraintindex\in [\numconstraints].\\
+    &\quad\textbf{Well-definedness}\\
+    &\quad\quad \ff_0\in (\mainpolyring{\local{q_1\cdots q_{\numprimes}}}{\bitbound}{\degreebound_0})^{\witlen}.
+  \end{aligned} \right.\right\}
+\end{aligned}
+\end{equation*}
+
+\paragraph{Design choices.} We discuss some of the design choices behind the definition of UCS.
+
+\medskip
+\noindent{\underline{\emph{Why are witness and input entries typed in polynomial rings~$R^{<w}[X]$ (e.g.\ $R=\ZZ, \FF_q$) rather than in~$R$ (or some other rings)?}}} One may instead try to reinterpret~$R^{<w}[X]$ as~$w$ copies of~$R$ and treat each witness entry as an element of~$R^w$. We see three advantages in preserving the ring structure of~$R[X]$:
+
+First, $R[X]$ makes ideal membership constraints natural and efficient to reason about. It is not clear how to translate ideal membership predicates into~$R^w$ without resorting to lookups, and even when lookups are available, the translation loses the algebraic structure of the ideals. Our PIOP framework leverages this algebraic structure by resolving ideal membership predicates with a single MLE randomized check, analogously to how standard proof systems check strict equalities.
+
+Second, $R[X]$ enables multiple ideal membership predicates in the same relation. If there were only one ideal~$\primeideal$, one could work over~$R[X]/\primeideal$ directly. In the presence of membership predicates involving more than one ideal, staying in~$R[X]/\primeideal$ would complicate the arithmetization of all but one of the predicates. Working in~$R[X]$ glues together constraints that would otherwise be separated into different quotient rings. For example, in the previous example from \cref{s:crypto_ucs} we have ideal membership constraints simultaneously in~$(X-2)$ and~$(X^w-1)$ (Example~1), and in~$(X-1)$ and~$(\Phi(X))$ (Example~2).
+
+Third, our PIOP projects constraints over $\mainpolyring{\QQ}{\bitbound}{\degreebound}$ and  $\FF_q^{<w}[X]$ onto a random finite field  by, respectively: 1) ($\QQ$ case)  replacing $X$ by a random integer $a\in \ZZ$ and then reducing modulo a random prime; 2) ($\FF_q$ case) replacing $X$ by a random element $a$ in $\FF_q$ or a field extension of $\FF_q$. 
+When $R^{<w, B}[X]$ is  large (for $R\in \{\QQ,\FF_q\}$) this projection provides equally large compression benefits, in that elements from  $R^{<w, B}[X]$, which may be thousands of bits long (for example, in lattice-based settings), become 128--256 bits long.
+
+Overall, it is possible to reformulate our definition of UCS as one operating over $\QQ$ and $\FF_q$ rather than $\mainpolyring{\QQ}{\bitbound}{\degreebound_0}$ and $\FF_q^{<\degreebound_\primeindex}[X]$, but we think that the polynomial-ring formulation is more natural and better captures the algebraic structure of the computations we are interested in proving. 
+
+\medskip
+
+\noindent{\emph{\underline{Why allow integers? Why not work entirely over~$\FF_q$ or~$\FF_q[X]$ for a sufficiently large prime~$q$?}}}
+
+A plausible alternative to having constraints over $\ZZ$ or $\ZZ[X]$ is to work over~$\FF_q$ or~$\FF_q[X]$ for $q$ larger than any value that the integer computation ever produces (let's call such a value the \emph{computation norm}), and avoid modular overflow via lookups or range checks.  We see several advantages of staying over~$\ZZ$/$\ZZ[X]$, though some use-cases may benefit from working on $\FF_q$ or $\FF_q[X]$.
+
+First, by the same reasoning as the second point above, staying in~$\ZZ$ or~$\ZZ[X]$ allows projecting onto fields and rings~$\FF_q$ or~$\FF_q[X]$ for different values of~$q$ within the same relation. For example, our SHA-256 (+ECDSA verification) arithmetization showcases simultaneous constraints modulo~$2^{32}$, $2$, and $p$ for a 256-bit prime $p$.
+
+Second, the third point above also applies: in applications such as verifiable FHE (e.g.\ the CKKS scheme) or RSA cryptography, one would require working with a very large prime $q$ (i.e.\ the computation norm in such applications is large). The random-projection technique may provide significant compression benefits in these cases.
+
+Third, when~$q$ is large, one faces the familiar overhead of field arithmetic in~$\FF_q$ or~$\FF_q[X]$ throughout the proof. For instance, Reed--Solomon encoding becomes expensive over large fields. Our Integer Pseudo Reed--Solomon (IPRS) codes operate over~$\ZZ$ or $\QQ$ and show promising practical performance (\cref{ss:iprs_performance}). We think that specifically designed IPRS codes can be set up with good distance over~$\FF_q$ for a fixed large~$q$, but we lack theoretical guarantees for this; we pose this as an open question in \cref{subsec:iprs-open-questions}.
+  
+When the computation norm $q$ is small, say of $32$ bits, then working over $\FF_q[X]$ would be a better option. But in most applications it is not the case that $32$ bits suffices to capture all integer values without overflowing the modulus. (Unless one pays arithmetization overheads by decomposing into limbs, etc.\ which is what we want to avoid in the first place.)
+
+\paragraph{Technical observations.} We make some technical observations about the definition of UCS.
+\medskip 
+\noindent\emph{\underline{Lookup constraints.}} In our examples \cref{s:crypto_ucs,ss:sha256_64_rounds} we extensively rely on constraining witness elements in certain sets, e.g.\ $\BitPolyset{w}$ and $\Wordset{w}$. Our definition of UCS is expressive enough to subsume such constraints. See \cref{ss:ucs_lookup} for an explanation of how to express lookup constraints in a UCS instance.
+
+\noindent\emph{\underline{Rationals and Integers.}} In our examples, our witness vectors were either typed in $\ZZ^{<d}[X]$ or in $\FF_q^{<d}[X]$. On the other hand, in our definition of UCS we used $\QQ^{<d}[X]$ rather than $\ZZ^{<d}[X]$ as typing choice. Besides the possible independent interest of typing witnesses in $\QQ^{<d}[X]$, this choice is motivated by technical reasons related to the proof system.  
+
+The main idea is that our IOPP (or PCS) is only capable of extracting witnesses in $\QQ^{<d}[X]$, and not in $\ZZ^{<d}[X]$. It is not clear to us how to build an IOPP or PCS that 1) guarantees typing $\ZZ^{<d}[X]$, and 2) does not incur large performance losses in doing so. Indeed, the only integer-based PCSs we are aware of \cite{Zartan,BlockDARK} leverage hidden-order-group and expensive repeated checks (besides the one we mention below).  Here we make the design choice of allowing rational coefficients in the witness, and delegate the task of enforcing integrality to the PIOP through a lookup PIOP. This subtlety is explained at length in the technical overview of the Zinc paper \cite{Zinc}. Because it is not novel, we do not dwell on it further. 
+
+We note that combining an IOPP (or PCS) for $\mainpolyring{\QQ}{\bitbound}{\degreebound_0}$ with a lookup PIOP for $\ZZ^{<d}[X]$ provides an IOPP (or PCS) for $\mainpolyring{\ZZ}{\bitbound}{\degreebound_0}$, and hence our work provides that.
+
+
+\medskip
+
+\noindent\emph{\underline{Modular reductions of rationals}}
+Observe that the $\FF_{q_\primeindex}[X]$-constraints involve the reduction of the vector $\ff_{0}$ modulo $q_\primeindex$ (via the map $\phi_q$). However, the entries of $\ff_0$ are polynomials with rational coefficients. The reduction of a rational $a/b$ modulo a prime $q$ is only well-defined when $b$ is not zero modulo $q$, and in that case it is defined as $a\cdot b^{-1} \mod q$ where $b^{-1}$ is the modular inverse of $b$ \cref{sec:preliminaries}.  We understand the triple $(\idx,\inp;\wit)$ to be invalid if some modular reduction is not well-defined.  This is not a problem for our proof system, as the reduction can be performed by the prover and the verifier can check that the reduction was done correctly by checking that the difference between the reduced and non-reduced polynomials belongs to the ideal generated by $q_\primeindex$ in $\QQ[X]$.

@@ -13,7 +13,7 @@ Any linear $[b,k,\lambda]$-code of block length $b$, message length $k$, and rel
 We simply lift the generator matrix $G' \in \integers_{q}^{b \times k}$ to the matrix $G \in \integers_{q}^{b \times k}$ of constant polynomials.
 \begin{itemize}[nosep]
     \item \emph{Linearity}: it is easy to see for $r,s,m_1,m_2 \in \ring$ that $G(r m_1 + s m_2) = rGm_1 +sGm_2$.
-    \item \emph{Distance preservation}: assume by contradiction there is a $m \in \ring_{q}^{k}\setminus\set{0^n}$ such that $\Delta(Gm) \le \lambda$. By assumption there is some entry $m_{w} \in m$ whose power basis coefficient $c_w$ is nonzero. Let $w \in \ring_{q}^{k}\setminus\set{0^n}$ the vector of the $w$th coefficients in $m$. Then the $\Delta(G'w) \leq \lambda$.
+    \item \emph{Distance preservation}: assume by contradiction there is a $m \in \ring_{q}^{k}\setminus\set{0^n}$ such that $\Delta(Gm) \le \lambda$. By assumption there is some entry $m_{w} \in m$ whose power basis coefficient $c_w$ is nonzero. Let $w \in \ring_{q}^{k}\setminus\set{0^n}$ be the vector of the $w$th coefficients in $m$. Then the $\Delta(G'w) \leq \lambda$.
 \end{itemize}
 \end{proof}
 
