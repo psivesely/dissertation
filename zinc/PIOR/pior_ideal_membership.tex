@@ -24,7 +24,35 @@ $\setintegers\subseteq \KK$,
 \]
 \end{enumerate}
 \end{lemma}
-\noindent The proof is deferred to \cref{app:ideal-batching}.
+\begin{proof}
+Let $\cR\defeq \KK[X]/\primeideal$ and let $\pi:\KK[X]\to \cR$ be the natural projection map.
+Since $\primeideal\cap\KK=(0)$, the induced map $\KK\hookrightarrow \cR$ is injective.
+
+For Item~1, assume $\vv(\xx)\in\primeideal$ for all $\xx\in\BB^\mu$ and fix $\rr\in\KK^\mu$.
+By definition of the multilinear extension and closure of $\primeideal$ under $\KK[X]$-linear combinations,
+\[
+  \multilinmle{\vv}(\rr)
+  \,=\,
+  \sum_{\xx\in\BB^\mu} \vv(\xx)\cdot \meq(\xx;\rr)
+  \ \in\ \primeideal,
+\]
+because each coefficient $\meq(\xx;\rr)$ lies in $\KK\subseteq \KK[X]$.
+
+For Item~2, assume $\vv(\xx_0)\notin\primeideal$ for some $\xx_0\in\BB^\mu$.
+Define $\bar\vv:\BB^\mu\to \cR$ by $\bar\vv(\xx)\defeq \pi(\vv(\xx))$.
+Then $\bar\vv(\xx_0)\neq 0$, so the multilinear polynomial $\multilinmle{\bar\vv}(\YY)\in \cR[\YY]$ is nonzero.
+
+Let $S\defeq \setintegers\subseteq \KK\subseteq \cR$.
+For distinct $a,b\in S$, the difference $a-b$ is a nonzero element of the field $\KK$, and hence a unit in $\cR$.
+Therefore $S$ is an exceptional set in $\cR$, and Lemma~\ref{lem:sz_exceptional_sets} yields
+\[
+  \Pr_{\rr\getsr S^\mu}\big[\multilinmle{\bar\vv}(\rr)=0\big]\ \le\ \frac{\mu}{|S|}.
+\]
+Finally, for every $\rr\in\KK^\mu$, coefficient-wise application of $\pi$ gives
+$\multilinmle{\bar\vv}(\rr)=\pi(\multilinmle{\vv}(\rr))$.
+Thus $\multilinmle{\bar\vv}(\rr)=0$ holds if and only if $\multilinmle{\vv}(\rr)\in\primeideal$, which proves the
+claimed bound.
+\end{proof}
 
 
 \parhead{Extend map}

@@ -1,0 +1,69 @@
+\section{Tower Arithmetic}
+\label{sec:odd-prime-tower}
+
+For odd primes we can construct the following tower of fields
+\[
+\begin{array}{lll}
+&\tau_0 = \field_p \\
+&\tau_1 = \tau_0[X_0]/(X_{0}^2-\alpha) &\cong \field_{p^2} \\
+(\forall \iota \geq 2) & \tau_\iota = \tau_{\iota-1}[X_{\iota-1}]/(X_{\iota-1}^2-X_{\iota-2}) &\cong \field_{p^{2^\iota}}
+\end{array}
+\]
+where $\alpha$ is any nonsquare in $\field_p$, guaranteed to exist by the condition $p \equiv 1 \mod 2$.
+
+\parhead{Choice of $\alpha$}
+Since multiplication by $\alpha$ appears in every reduction step of the tower, $\alpha$ should be chosen as small as possible (e.g.\ $\alpha = 3$ for $p = 257$) so that it can be implemented via a short addition chain. We call such multiplications by compile-time constants \emph{soft}, in contrast to \emph{hard} multiplications between two runtime-variable $\field_p$ elements.\footnote{Furthermore, for primes of the form $p=2^n+1$ (e.g., $p=257=2^8+1$), elements fit in $(n+1)$-bit words and reduction modulo $p$ is a single conditional subtraction. With $w$-bit accumulators for $w \gg n$, all intermediate additions in the Karatsuba recursion can be accumulated without modular reduction.}
+
+\parhead{Tower multiplication}
+Write elements of $\tau_\iota$ as $a + bX_{\iota-1}$ with $a,b \in \tau_{\iota-1}$. Karatsuba multiplication computes $z_1 = aa'$, $z_2 = bb'$, $z_3 = (a+b)(a'+b')-z_1-z_2$ in $\tau_{\iota-1}$, then reduces via $X_{\iota-1}^2 = X_{\iota-2}$:
+\[
+(a+bX_{\iota-1})(a'+b'X_{\iota-1}) = (z_1 + z_2 X_{\iota-2}) + z_3 X_{\iota-1}.
+\]
+The product $z_2 X_{\iota-2}$ in $\tau_{\iota-1}$ is a permutation of tower coefficients plus one soft $\alpha$-multiply (since at each level $X_j^2 = X_{j-1}$ reduces to a swap, bottoming out at $X_0^2 = \alpha$). The recurrence $M(\iota) = 3M(\iota-1)+1$ with $M(0)=1$ gives
+\[
+M(\iota) = \frac{3^{\iota+1}-1}{2} = \floor*{1.5 \cdot k^{\log_2 3}} \quad \field_p\text{-multiplications}
+\]
+for a degree-$k$ extension ($k = 2^\iota$), of which $M_h(\iota)=3^\iota=k^{\log_2 3}$ are hard and $M_s(\iota)=(3^\iota-1)/2$ are soft.
+
+\parhead{Squaring}
+We adapt the Gauss complex-multiplication trick. Compute $u = ab$, $w = X_{\iota-2}\cdot b$ (soft), and $v = (a+b)(a+w)$. Expanding:
+\[
+v = a^2 + X_{\iota-2}\cdot b^2 + (1+X_{\iota-2})\cdot u
+\]
+so $(a+bX_{\iota-1})^2 = (v - u - X_{\iota-2}\cdot u) + 2u\cdot X_{\iota-1}$, where $X_{\iota-2}\cdot u$ is soft. This uses two recursive multiplications instead of two squarings plus a multiplication, giving $S(\iota) = 2M(\iota-1)+2+2^{\iota-1}$ with hard/soft costs:
+\[
+S_h(\iota) = \tfrac{2}{3}\,k^{\log_2 3}, \qquad S_s(\iota) = 3^{\iota-1}+2^{\iota-1}+1
+\]
+where the $2^{\iota-1}$ term accounts for the coefficient-wise $\times 2$ scaling of $u$.
+
+\parhead{Inversion}
+Using the norm $\delta = a^2 - b^2 X_{\iota-2} \in \tau_{\iota-1}$, we have
+\[
+(a+bX_{\iota-1})^{-1} = a\delta^{-1} - b\delta^{-1} X_{\iota-1}.
+\]
+This requires two squarings and two multiplications in $\tau_{\iota-1}$ plus one recursive inversion, giving the recurrence $I_h(\iota) = I_h(\iota-1) + 2S_h(\iota-1) + 2M_h(\iota-1)$ with $I_h(0) = 0$ (plus one $\field_p$-inversion), so that $I_h(\iota) \to \frac{5}{3}\,M_h(\iota)$ for large $\iota$.
+
+\parhead{Concrete costs}
+Table~\ref{tab:tower-costs} summarizes costs for small tower heights.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{c|c|cc|cc|cc}
+\toprule
+$\iota$ & $k=2^\iota$ & \multicolumn{2}{c|}{Multiplication} & \multicolumn{2}{c|}{Squaring} & \multicolumn{2}{c}{Inversion${}^*$} \\
+ & & hard & soft & hard & soft & hard & soft \\
+\midrule
+1 & 2   &    3 &   1 &    2 &   3 &     4 &    1 \\
+2 & 4   &    9 &   4 &    6 &   6 &    14 &   10 \\
+3 & 8   &   27 &  13 &   18 &  14 &    44 &   31 \\
+4 & 16  &   81 &  40 &   54 &  36 &   134 &   86 \\
+5 & 32  &  243 & 121 &  162 &  98 &   404 &  239 \\
+6 & 64  &  729 & 364 &  486 & 276 &  1214 &  678 \\
+\bottomrule
+\end{tabular}
+\caption{Odd-prime tower costs in $\field_p$-operations. Hard multiplications are between runtime-variable elements; soft multiplications (by $\alpha$ or small constants) cost $\sim\!1$ addition each. ${}^*$Inversion costs are in addition to one $\field_p$-inversion.}
+\label{tab:tower-costs}
+\end{table}
+
+\parhead{Comparison to binary tower fields}
+In the context of arithmetization, the choice of base field is driven primarily by the computation being arithmetized: binary towers over $\field_2$ (e.g.\ the Wiedemann tower \cite{wiedemann1988iterated}) are natural when the computation is expressed as a Boolean circuit over XOR, NOT, and other bitwise gates, whereas odd-prime towers are natural for circuits over $\field_p$ involving mostly algebraic constraints. The arithmetization overhead from a mismatched base field will almost always dominate any difference in tower arithmetic efficiency, so the two settings are not directly comparable. With that caveat, the tower-level costs are similar: both towers use Karatsuba and achieve $3^\iota = k^{\log_2 3}$ hard base-field multiplications for degree-$k$ extension multiplication, with the remaining overhead in additions or soft operations. Our tower's reduction ($X_{\iota-1}^2 = X_{\iota-2}$, a permutation plus one soft $\alpha$-multiply) is particularly cheap; the Wiedemann reduction (multiply by a tower constant $c_{\iota-1}$) is $\field_2$-linear and thus also addition-only, but operates on increasingly large vectors. The binary tower's main structural advantage is free squaring via the Frobenius ($x\mapsto x^2$ is $\field_2$-linear), versus $\frac{2}{3}\,k^{\log_2 3}$ hard multiplications in our tower.

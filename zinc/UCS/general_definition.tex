@@ -132,7 +132,9 @@ For ease of reference, we restate the definition of $\ucs$ below.
 \paragraph{Design choices.} We discuss some of the design choices behind the definition of UCS.
 
 \medskip
-\noindent{\underline{\emph{Why are witness and input entries typed in polynomial rings~$R^{<w}[X]$ (e.g.\ $R=\ZZ, \FF_q$) rather than in~$R$ (or some other rings)?}}} One may instead try to reinterpret~$R^{<w}[X]$ as~$w$ copies of~$R$ and treat each witness entry as an element of~$R^w$. We see three advantages in preserving the ring structure of~$R[X]$:
+\noindent \underline{\emph{Why are witness and input entries typed in polynomial rings~$R^{<w}[X]$ (e.g.\ $R=\ZZ, \FF_q$) rather}} \\ \noindent \underline{\emph{than in~$R$ (or some other rings)?}}
+
+One may instead try to reinterpret~$R^{<w}[X]$ as~$w$ copies of~$R$ and treat each witness entry as an element of~$R^w$. We see three advantages in preserving the ring structure of~$R[X]$:
 
 First, $R[X]$ makes ideal membership constraints natural and efficient to reason about. It is not clear how to translate ideal membership predicates into~$R^w$ without resorting to lookups, and even when lookups are available, the translation loses the algebraic structure of the ideals. Our PIOP framework leverages this algebraic structure by resolving ideal membership predicates with a single MLE randomized check, analogously to how standard proof systems check strict equalities.
 

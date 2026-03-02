@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(ls *.bib)",
-      "Bash(ls /Users/psi/src/psivesely/dissertation/*.log)"
+      "Bash(ls /Users/psi/src/psivesely/dissertation/*.log)",
+      "Bash(python3 -c \":*)"
     ]
   }
 }

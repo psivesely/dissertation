@@ -147,6 +147,8 @@
 \DeclareMathOperator{\diag}{diag}
 \DeclareMathOperator{\sgn}{sgn}
 
+\AtBeginDocument{\renewcommand{\checkmark}{\ding{51}}}
+
 \renewc\Re{\operatorname{Re}}
 \renewc\Im{\operatorname{Im}}
 % These put symbols below.
@@ -235,7 +237,7 @@
 \newc{\knowledgeerror}{\kappa}
 \renewc{\poly}{\mathrm{poly}}
 \newc{\negl}{\mathrm{negl}}
-\renewc{\deg}{\mathrm{deg}}
+\renewc{\deg}{\mathrm{deg}\enspace}
 \newc{\view}{\mathrm{View}}
 
 % attackers
@@ -252,6 +254,8 @@
 
 \newc{\prover}{\mathsf{P}}
 \newc{\verifier}{\mathsf{V}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
 \makeatletter
 \long\def\defcommand#1{%
@@ -282,7 +286,6 @@
 }
 
 \newcommand{\norm}[1]{\ensuremath{\left\lVert #1 \right\rVert}}
-\newcommand{\ceil}[1]{\ensuremath{\left\lceil #1 \right\rceil}}
 
 \makeatletter
 

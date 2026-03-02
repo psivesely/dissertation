@@ -1,0 +1,214 @@
+\section{Round-by-round knowledge soundness}
+\label{sec:rbr-ks}
+
+\subsection{Definitions}
+\label{sec:rbr-defs}
+
+\subsubsection{Indexed relations}
+An \emph{indexed relation} is a set $\relation \subseteq \{0,1\}^* \times \{0,1\}^* \times \{0,1\}^*$ of triples $(\index, \instance, \witness)$, where $\index$ is the \emph{index} (encoding structural parameters such as field characteristic, dimensions, and degree bounds), $\instance$ is the \emph{instance} (the public input, which in the polynomial oracle model may include oracle access to polynomials), and $\witness$ is the \emph{witness} (the private input). The \emph{language} of $\relation$ is $\mathcal{L}(\relation) = \{(\index, \instance) : \exists\, \witness \text{ s.t.\ } (\index, \instance, \witness) \in \relation\}$.
+
+\subsubsection{Holographic polynomial interactive oracle reductions}
+\label{sec:pior}
+
+We define holographic polynomial interactive oracle reductions, specializing the definition of interactive oracle reductions in~\cite{BCFW25} to the polynomial oracle model.
+
+\begin{definition}[Holographic PIOR]
+\label{def:pior}
+A \emph{holographic polynomial interactive oracle reduction} (holographic PIOR) from an indexed relation~$\relation$ to an indexed relation~$\relation'$ is a triple $\Pi = (\indexer, \prover, \verifier)$:
+\begin{itemize}[nosep]
+  \item The \emph{indexer}~$\indexer$ takes the index~$\index$ and outputs polynomial oracles~$\sigma = \indexer(\index)$.
+  \item The \emph{prover}~$\prover$ takes $(\index, \instance, \witness)$ with $(\index, \instance, \witness) \in \relation$.
+  \item The \emph{verifier}~$\verifier$ takes~$\instance$ and has oracle access to~$\sigma$ and to any polynomial oracles in~$\instance$.
+\end{itemize}
+Prover and verifier interact for $k$ rounds: in round~$i \in [k]$, the prover sends a message~$\pi_i$ (a polynomial oracle or field element) and the verifier samples a uniformly random challenge~$\rho_i$, where $\pi_i$ may depend on $\rho_1, \ldots, \rho_{i-1}$ and $\rho_i$ is independent of~$\pi_i$. After the interaction, the verifier makes evaluation queries to the polynomial oracles in~$\sigma$, $\instance$, and $\pi_1, \ldots, \pi_k$. Then $\verifier$ either rejects or outputs a new index--instance pair $(\index', \instance')$, and $\prover$ outputs a new witness~$\witness'$ such that $(\index', \instance', \witness') \in \relation'$. Oracles appearing in~$\instance'$ may reference oracles in~$\instance$ and in $\pi_1, \ldots, \pi_k$.
+
+A \emph{(holographic) polynomial IOP} (PIOP) is the special case where $\relation'$ is trivial: the verifier either accepts or rejects.
+\end{definition}
+
+An \emph{$i$-round partial transcript} is $\tr_i = (\pi_1, \rho_1, \ldots, \pi_i, \rho_i)$; a \emph{$0$-round partial transcript} is $\tr_0 = \varnothing$. We write $\tr_{i-1} \| \pi_i$ for the partial transcript after the prover's round-$i$ message but before the verifier's round-$i$ challenge.
+
+\subsubsection{Round-by-round knowledge soundness}
+\label{sec:rbr-ks-defs}
+
+We recall the round-by-round knowledge soundness framework of~\cite{BCFW25}, which enables modular composition of PIOR chains.
+
+\begin{definition}[Knowledge state function {\cite[Def.~2.6]{BCFW25}}]
+\label{def:kstate}
+Let $\Pi$ be a (holographic) PIOR from $\relation$ to $\relation'$. A \emph{knowledge state function} for~$\Pi$ is a (possibly inefficient) function $\KState$ that takes as input a statement $(\index, \instance)$, a partial transcript~$\tr$, and a \emph{knowledge state witness}~$\kswitness$, and outputs a bit. It must satisfy:
+\begin{enumerate}[nosep]
+  \item \textbf{Empty transcript.} $\KState(\index, \instance, \varnothing, \kswitness) = 1$ if and only if $(\index, \instance, \kswitness) \in \relation$.
+  \item \textbf{Prover moves.} If $\KState(\index, \instance, \tr, \kswitness) = 0$ at a point where the prover is about to move, then $\KState(\index, \instance, \tr \| \pi, \kswitness) = 0$ for every prover message~$\pi$.
+  \item \textbf{Full transcript.} For a full transcript~$\tr_k$: $\KState(\index, \instance, \tr_k, \kswitness) = 1$ if and only if $\verifier$ outputs $(\index', \instance')$ such that $(\index', \instance', \kswitness) \in \relation'$.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[RBR knowledge soundness {\cite[Def.~2.7]{BCFW25}}]
+\label{def:rbr-ks}
+A PIOR $\Pi$ from $\relation$ to $\relation'$ has \emph{round-by-round knowledge soundness} with errors $(\knowledgeerror_1, \ldots, \knowledgeerror_k)$ if there exist a knowledge state function~$\KState$ and a deterministic extractor~$\extractor$ such that for every $(\index, \instance)$, every $i \in [k]$, every partial transcript~$\tr_{i-1} \| \pi_i$ where the verifier is about to send~$\rho_i$, and every knowledge state witness~$\kswitness$:
+\[
+  \Pr_{\rho_i}\!\Bigl[\;
+    \KState\bigl(\index, \instance, \tr_{i-1} \| \pi_i \| \rho_i,\; \kswitness\bigr) = 1
+    \;\;\land\;\;
+    \KState\bigl(\index, \instance, \tr_{i-1} \| \pi_i,\; \extractor(\index, \instance, \tr_{i-1} \| \pi_i \| \rho_i, \kswitness)\bigr) \neq 1
+  \;\Bigr]
+  \;\leq\; \knowledgeerror_i.
+\]
+\end{definition}
+
+\noindent
+Informally: if a knowledge state witness~$\kswitness$ certifies $\KState = 1$ after the challenge~$\rho_i$, the extractor must produce (``lift'') a witness certifying $\KState = 1$ \emph{before} the challenge; the error~$\knowledgeerror_i$ bounds the probability this fails. The composition theorem of~\cite{BCFW25} shows that if $\Pi_1$ is a PIOR from $\relation$ to $\relation'$ with RBR-KS errors $(\knowledgeerror_1, \ldots, \knowledgeerror_k)$ and $\Pi_2$ is a PIOR from $\relation'$ to $\relation''$ with errors $(\knowledgeerror'_1, \ldots, \knowledgeerror'_{k'})$, then the composed protocol has RBR-KS with errors $(\knowledgeerror_1, \ldots, \knowledgeerror_k, \knowledgeerror'_1, \ldots, \knowledgeerror'_{k'})$.
+
+%% ========================================================================
+\subsection{Protocol setup}
+\label{sec:setup}
+
+Fix a prime~$p$, $n = 2^\nu$ with $p \equiv 1 \pmod{2n}$, $N = 2^\tau$, $M = 2^\mu$, and let $\mathcal{R}_p = \ZZ_p[X]/(X^n+1)$.
+
+\begin{definition}[Source relation $\relation_{\mathsf{RM}}$]
+\label{def:source-rel}
+The \emph{ring multiplication relation} $\relation_{\mathsf{RM}}$ consists of triples $(\index, \instance, \witness)$ where:
+\begin{itemize}[nosep]
+  \item Index: $\index = (p, \nu, \tau, \mu)$.
+  \item Instance: $\instance = \bigl(\oracle{\tilde{A}},\, \oracle{\tilde{s}},\, \oracle{\tilde{t}}\bigr)$, three multilinear polynomial oracles over~$\field_p$ of arities $\tau{+}\mu{+}\nu$, $\mu{+}\nu$, and $\tau{+}\nu$ respectively.
+  \item Witness: $\witness = (A,s,t) \in \mathcal{R}_p^{N \times M} \times \mathcal{R}_p^M \times \mathcal{R}_p^N$.
+  \item Membership: $As = t$ in~$\mathcal{R}_p^N$, and the oracles are the multilinear extensions of the coefficient representations of~$A$, $s$, $t$.
+\end{itemize}
+\end{definition}
+
+The target relation is the polynomial evaluation relation $\relation_{\mathsf{eval}}$ (\cref{def:eval-rel}), whose triples $(\index', \instance', \witness')$ consist of a list of evaluation claims $\instance' = \{(\oracle{f_j}, z_j, v_j)\}_{j=1}^m$ on polynomial oracles, with membership requiring $f_j(z_j) = v_j$ for all~$j$. The witness~$\witness'$ is unconstrained: membership depends only on the oracles and the claimed evaluations.
+
+\subsubsection{$\Pi_{\mathsf{RingMul}}$ as a holographic PIOR}
+
+The protocol $\Pi_{\mathsf{RingMul}}$ (\cref{prot:ringmul}) is a holographic PIOR from $\relation_{\mathsf{RM}}$ to $\relation_{\mathsf{eval}}$ with $k = \mu + \nu + 2$ rounds. Its indexer is trivial: $\indexer(\index) = \varnothing$, as no additional preprocessing of the index is required; the verifier accesses the oracles $\oracle{\tilde{A}}, \oracle{\tilde{s}}, \oracle{\tilde{t}}$ directly from the instance. On input $(\index, \instance)$ with $\instance = (\oracle{\tilde{A}}, \oracle{\tilde{s}}, \oracle{\tilde{t}})$, the interaction proceeds as follows.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{c l l}
+\hline
+\textbf{Round} & \textbf{Prover message $\pi_i$} & \textbf{Challenge $\rho_i$} \\
+\hline
+$1$ & $e_t \in \extensionfield$ & $(\alpha, \alpha') \in \extensionfield^{\tau+\nu}$ \\
+$2, \ldots, \mu{+}1$ & Sumcheck~1 polynomials $g_r$ & $\beta_r \in \extensionfield$ \\
+$\mu{+}2$ & $e_A \in \extensionfield$ & $\xi \in \extensionfield$ \\
+$\mu{+}3, \ldots, \mu{+}\nu{+}2$ & Sumcheck~2 polynomials $h_r$ & $\gamma_r \in \extensionfield$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent
+After the final round, the verifier computes $\tilde{C}(\alpha', \gamma)$ locally, queries the three instance oracles at $e'_t \gets \tilde{t}(\alpha, \gamma)$, $e'_A \gets \tilde{A}(\alpha, \beta, \gamma)$, $e'_s \gets \tilde{s}(\beta, \gamma)$, and checks $\sigma'' = \tilde{C}(\alpha', \gamma) \cdot (e'_t + \xi \cdot e'_A + \xi^2 \cdot e'_s)$. If the check passes, the verifier outputs $(\index', \instance')$ where $\instance'$ consists of the three evaluation claims; otherwise it rejects.
+
+%% ========================================================================
+\subsection{Main theorem}
+
+Recall the CRT-domain virtual polynomials from~\cref{sec:matrix-vector-piop}: for formal variable vectors $i \in \extensionfield^\tau$, $j \in \extensionfield^\mu$, and $k \in \extensionfield^\nu$,
+\begin{align*}
+  t_C(i,k) &:= \textstyle\sum_{\ell \in \bits^\nu} \tilde{C}(k, \ell) \cdot \tilde{t}(i, \ell), \\
+  A_C(i,j,k) &:= \textstyle\sum_{\ell \in \bits^\nu} \tilde{C}(k, \ell) \cdot \tilde{A}(i, j, \ell), \\
+  s_C(j,k) &:= \textstyle\sum_{\ell \in \bits^\nu} \tilde{C}(k, \ell) \cdot \tilde{s}(j, \ell).
+\end{align*}
+Define the \emph{residual polynomial}
+\begin{equation}
+\label{eq:residual}
+  \Delta(i,k) \;:=\; t_C(i,k) \;-\; \sum_{j \in \bits^\mu} A_C(i,j,k) \cdot s_C(j,k).
+\end{equation}
+
+\begin{theorem}[RBR knowledge soundness of $\Pi_{\mathsf{RingMul}}$]
+\label{thm:rbr}
+$\Pi_{\mathsf{RingMul}}$, as a PIOR from $\relation_{\mathsf{RM}}$ to $\relation_{\mathsf{eval}}$, has round-by-round knowledge soundness (\cref{def:rbr-ks}) with errors
+\[
+  \knowledgeerror_1 = \frac{\tau + 2\nu}{|\extensionfield|},
+  \qquad
+  \knowledgeerror_{2},\ldots,\knowledgeerror_{\mu+\nu+2} = \frac{2}{|\extensionfield|}.
+\]
+\end{theorem}
+
+\begin{proof}
+We define the extractor and knowledge state function, then upper bound the round-by-round knowledge soundness errors. Throughout, the knowledge state function we construct is independent of the knowledge state witness~$\kswitness$ at all non-empty transcripts, and the extractor is independent of~$\kswitness$ entirely. We therefore suppress the~$\kswitness$ argument at non-empty transcripts and write $\KState(\index, \instance, \tr)$ for $\tr \neq \varnothing$.
+
+\medskip
+
+\noindent\textbf{Extractor.}
+For any partial transcript~$\tr$ where the verifier is about to move, the extractor~$\extractor$ queries each oracle $\oracle{\tilde{A}}, \oracle{\tilde{s}}, \oracle{\tilde{t}}$ at each point on the Boolean hypercube, recovering $(A, s, t)$. If $As = t$ in~$\mathcal{R}_p^N$ and the oracles are the corresponding multilinear extensions, it outputs $\witness = (A, s, t)$; otherwise it outputs $\bot$.
+
+\medskip
+
+\noindent\textbf{Knowledge state function.}
+We define $\KState$ at each partial transcript. Write $\mathsf{SC1}(r)$ for ``the Sumcheck~1 running claim is false after~$r$ of its rounds'' and $\mathsf{SC2}(r)$ analogously for Sumcheck~2. Here $\mathsf{SC1}(0)$ means $e_t \neq \sum_{j \in \bits^\mu} A_C(\alpha,j,\alpha') \cdot s_C(j,\alpha')$ and $\mathsf{SC2}(0)$ means
+\begin{equation}
+\label{eq:sc2-init}
+  e_t + \xi \cdot e_A + \xi^2 \cdot e_s \;\neq\; \sum_{\ell \in \bits^\nu} \tilde{C}(\alpha',\ell) \cdot \bigl[\tilde{t}(\alpha,\ell) + \xi \cdot \tilde{A}(\alpha,\beta,\ell) + \xi^2 \cdot \tilde{s}(\beta,\ell)\bigr].
+\end{equation}
+
+\begin{enumerate}[nosep]
+  \item \textbf{CRT-domain challenge (round~$1$):} At this stage the transcript is $\tr = (e_t, (\alpha, \alpha'))$. We set $\KState(\index, \instance, \tr) = 1$ if and only if $\Delta(\alpha,\alpha') = 0$ and $\lnot\mathsf{SC1}(0)$.
+
+  \item \textbf{Sumcheck~1 (rounds~$2$ to $\mu{+}1$):} After round~$r$ with challenges $\beta_1, \ldots, \beta_{r-1}$, we set $\KState(\index, \instance, \tr_r) = 1$ if and only if $\Delta(\alpha, \alpha') = 0$ and $\lnot\mathsf{SC1}(r{-}1)$.
+
+  \item \textbf{Bridge (round~$\mu{+}2$):} After the prover sends~$e_A$ and the verifier sends~$\xi$, we set $\KState(\index, \instance, \tr_{\mu+2}) = 1$ if and only if $\lnot\mathsf{SC2}(0)$.
+
+  \item \textbf{Sumcheck~2 (rounds~$\mu{+}3$ to $\mu{+}\nu{+}2$):} After round~$r$ with challenges $\gamma_1, \ldots, \gamma_{r-\mu-2}$, we set $\KState(\index, \instance, \tr_r) = 1$ if and only if $\lnot\mathsf{SC2}(r{-}\mu{-}2)$.
+
+  \item \textbf{Full transcript:} It remains to show that for a full transcript $\tr_k$ (with $k = \mu{+}\nu{+}2$), $\KState(\index, \instance, \tr_k, \kswitness) = 1$ if and only if~$\verifier$ outputs $(\index', \instance')$ such that $(\index', \instance', \kswitness) \in \relation_{\mathsf{eval}}$. At the final round, $\KState(\index, \instance, \tr_k) = 1$ iff $\lnot\mathsf{SC2}(\nu)$, i.e., the Sumcheck~2 final claim is correct. The verifier checks $\sigma'' = \tilde{C}(\alpha',\gamma) \cdot (e'_t + \xi \cdot e'_A + \xi^2 \cdot e'_s)$, which succeeds iff $\lnot\mathsf{SC2}(\nu)$ (since $e'_t, e'_A, e'_s$ are exact oracle evaluations in the polynomial oracle model). When the check passes, the output evaluation claims hold automatically; since membership in~$\relation_{\mathsf{eval}}$ depends only on these claims and not on~$\kswitness$, we have $(\index', \instance', \kswitness) \in \relation_{\mathsf{eval}}$ for every~$\kswitness$.
+\end{enumerate}
+
+\noindent
+At half-integer points we set $\KState(\index, \instance, \tr_{r-1} \| \pi_r, \kswitness) = \KState(\index, \instance, \tr_{r-1}, \kswitness)$ for each~$r$, ensuring the prover-move axiom (\cref{def:kstate}, item~2) holds: if $\KState = 0$ before a prover message, it remains~$0$ after. At the empty transcript we set $\KState(\index, \instance, \varnothing, \kswitness) = 1$ iff $(\index, \instance, \kswitness) \in \relation_{\mathsf{RM}}$, satisfying item~1.
+
+\medskip
+
+\noindent\textbf{RBR knowledge soundness.}
+We upper bound the round-by-round knowledge soundness errors based on the knowledge state function and extractor described above.
+
+\begin{enumerate}[nosep]
+  \item \textbf{CRT-domain challenge (round~$1$, $\knowledgeerror_1 = (\tau + 2\nu)/|\extensionfield|$):} We show
+  \[
+    \Pr_{(\alpha,\alpha')}\!\left[
+    \begin{array}{l}
+      \KState(\index, \instance, \tr_1) = 1 \\
+      {} \land\; \KState(\index, \instance, \tr_0 \| e_t,\; \extractor(\index, \instance, \tr_1)) \neq 1
+    \end{array}
+    \right]
+    \;\leq\; \frac{\tau + 2\nu}{|\extensionfield|}.
+  \]
+  Since $\KState(\index, \instance, \tr_0 \| e_t, \kswitness') = \KState(\index, \instance, \varnothing, \kswitness') = [(\index, \instance, \kswitness') \in \relation_{\mathsf{RM}}]$, the second conjunct is $(\index, \instance, \extractor(\ldots)) \notin \relation_{\mathsf{RM}}$, i.e., $\Delta \not\equiv 0$ (the CRT matrix~$C$ is invertible over~$\field_p$ since $p \equiv 1 \pmod{2n}$, so $\Delta \equiv 0$ iff $As = t$). The first conjunct requires $\Delta(\alpha, \alpha') = 0$.
+
+  When $\Delta \not\equiv 0$: $t_C$ is multilinear in~$(i,k)$, while $A_C(\cdot,j,\cdot) \cdot s_C(j,\cdot)$ has individual degree~$1$ in each~$i_r$ (only $A_C$ depends on~$i$) and at most~$2$ in each~$k_r$ (both $A_C$ and~$s_C$ contribute). Hence~$\Delta$ has individual degree~$1$ in each~$\alpha_r$ and at most~$2$ in each~$\alpha'_r$. By Schwartz--Zippel, $\Pr[\Delta(\alpha,\alpha') = 0] \leq (\tau + 2\nu)/|\extensionfield|$.
+
+  When $\Delta \equiv 0$: the extractor recovers a valid witness, so the second conjunct fails and the bad event does not occur.
+
+  \item \textbf{Sumcheck~1 (rounds~$2$ to $\mu{+}1$, $\knowledgeerror = 2/|\extensionfield|$ per round):} For round~$r \in \{2, \ldots, \mu{+}1\}$ we show
+  \[
+    \Pr_{\beta_{r-1}}\!\left[
+    \begin{array}{l}
+      \KState(\index, \instance, \tr_r) = 1 \\
+      {} \land\; \KState(\index, \instance, \tr_{r-1}) \neq 1
+    \end{array}
+    \right]
+    \;\leq\; \frac{2}{|\extensionfield|}.
+  \]
+  Here $\KState(\index, \instance, \tr_{r-1} \| \pi_r, \kswitness') = \KState(\index, \instance, \tr_{r-1})$ for any~$\kswitness'$ (the half-point value is witness-independent), so the bound on the second conjunct simplifies as shown.
+
+  The bad event requires $\Delta(\alpha,\alpha') = 0$ and $\lnot\mathsf{SC1}(r{-}1)$ (from $\KState = 1$) together with $\Delta(\alpha,\alpha') \neq 0$ or $\mathsf{SC1}(r{-}2)$ (from $\KState \neq 1$ at the previous round). If $\Delta(\alpha,\alpha') \neq 0$, the first condition cannot hold simultaneously. So we must have $\Delta(\alpha,\alpha') = 0$ and $\mathsf{SC1}(r{-}2)$ and $\lnot\mathsf{SC1}(r{-}1)$, meaning the Sumcheck~1 running claim transitions from false to correct upon the challenge~$\beta_{r-1}$. By~\cref{lem:sc-rbr} (individual degree~$d = 2$), this occurs with probability at most $2/|\extensionfield|$.
+
+  \item \textbf{Bridge (round~$\mu{+}2$, $\knowledgeerror_{\mu+2} = 2/|\extensionfield|$):} The prover sends~$e_A$; the verifier computes $e_s = \sigma'/e_A$ (where $\sigma' = g_\mu(\beta_\mu)$) and draws~$\xi$. We show
+  \[
+    \Pr_{\xi}\!\left[
+    \begin{array}{l}
+      \KState(\index, \instance, \tr_{\mu+2}) = 1 \\
+      {} \land\; \KState(\index, \instance, \tr_{\mu+1}) \neq 1
+    \end{array}
+    \right]
+    \;\leq\; \frac{2}{|\extensionfield|}.
+  \]
+  Escape means $\lnot\mathsf{SC2}(0)$, i.e., the Sumcheck~2 initial claim~\eqref{eq:sc2-init} holds. Phase~1 doom means $\Delta(\alpha,\alpha') \neq 0$ or $\mathsf{SC1}(\mu)$. Define
+  \[
+    \delta(\xi) \;:=\; (e_t - t_C(\alpha,\alpha')) \;+\; \xi\,(e_A - A_C(\alpha,\beta,\alpha')) \;+\; \xi^2\,(e_s - s_C(\beta,\alpha')).
+  \]
+  The Sumcheck~2 initial claim holds iff $\delta(\xi) = 0$. We show $\delta \not\equiv 0$ whenever Phase~1 doom persists. If $\mathsf{SC1}(\mu)$ (i.e., $\sigma' \neq A_C(\alpha,\beta,\alpha') \cdot s_C(\beta,\alpha')$), then $\delta \equiv 0$ would force $e_A = A_C$ and $e_s = s_C$ (equating coefficients of $1, \xi, \xi^2$), giving $\sigma' = e_A \cdot e_s = A_C \cdot s_C$, a contradiction. If $\lnot\mathsf{SC1}(\mu)$ and $\Delta(\alpha,\alpha') \neq 0$, then $e_t = \sum_j A_C \cdot s_C \neq t_C(\alpha,\alpha')$, so the constant term of~$\delta$ is nonzero.
+
+  Since $\deg \delta \leq 2$ and $\delta \not\equiv 0$, $\Pr_\xi[\delta(\xi) = 0] \leq 2/|\extensionfield|$.
+
+  \item \textbf{Sumcheck~2 (rounds~$\mu{+}3$ to $\mu{+}\nu{+}2$, $\knowledgeerror = 2/|\extensionfield|$ per round):} By the same reasoning as for Sumcheck~1, using~\cref{lem:sc-rbr} with individual degree~$d = 2$: the probability of transitioning from $\mathsf{SC2}(r)$ to $\lnot\mathsf{SC2}(r{+}1)$ is at most $2/|\extensionfield|$ per round.
+\end{enumerate}
+\end{proof}
