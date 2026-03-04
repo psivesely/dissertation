@@ -1,29 +1,25 @@
 \section{PIOPs over fields for cyclotomic ring arithmetic}
 \label{sec:ring-piop}
 
-We present a (multilinear) PIOP for proving matrix-vector products $As \equiv t$ in power-of-two cyclotomic rings $\ring_p = \ZZ_p[X]/(X^{2^\nu}+1)$ with prime moduli $p$, where all messages and polynomial coefficients are in $\extensionfield$ for a sufficiently large extension field $\extensionfield/\field_p$. This is given in~\cref{sec:matrix-vector-piop}. Subsequent sections present multiple variants and optimizations of this protocol, as we now describe.
+We first give the core matrix-vector PIOR in~\cref{sec:matrix-vector-pior}, which reduces proving $As \equiv t$ over $\ring_p$ to a small number of evaluation claims on the coefficient-domain oracles. Its prover and verifier complexity are $O(NMn)$ and $O(n + \log NM)$, and its proof size is $O(\log Mn)$. We show completeness, round-by-round knowledge soundness in~\cref{sec:ring-pior-ks}. Next, \cref{sec:holographic-piop} presents a holographic specialization for the public $A$ setting, where its commitment is output by an indexer. We show this allows a significantly simplified and more efficient protocol. Finally, \cref{sec:reducing-commitments}, using a ring-Plonkish SpeedySpartan running example, describes how a chain of PIORs can reduce verification to two query claims: one the MLE of the prover's witness and the other on an indexed oracle, wrapping up with a couple final optimizations in the PCS domain.
 
-\paragraph{Scope and restrictions.}
-Our protocol requires three structural assumptions on the ring $\ring_p$: the modulus $p$ is prime, the cyclotomic polynomial is $\Phi_{2n}(X) = X^n + 1$ with $n = 2^\nu$ a power of two, and $p$ splits $\Phi_{2n}$ completely (i.e., $p \equiv 1 \pmod{2n}$, so that $X^n + 1$ factors into $n$ distinct linear factors over $\field_p$). Each assumption serves a distinct purpose:
-\begin{itemize}
-    \item \emph{Prime modulus.} The sumcheck protocol, the polynomial commitment scheme, and the extension-field arithmetic all require that we work over a field. A composite modulus $q$ is not a field, so one cannot run the sumcheck or PCS directly over $\ZZ_q$. The standard workaround is to factor $q = \prod p_i$ and verify the relation modulo each prime factor independently; our protocol handles each such factor.
-    \item \emph{Fully splitting.} The CRT-domain approach requires that $X^n + 1$ admits $n$ distinct roots $\omega, \omega^3, \ldots, \omega^{2n-1}$ in $\field_p$, where $\omega$ is a primitive $2n$-th root of unity. This full splitting is what makes the ring product become a pointwise product after the CRT transform, yielding the key identity $t_C(i,k) = \sum_j A_C(i,j,k)\cdot s_C(j,k)$ that Sumcheck~1 verifies. When $\Phi_{2n}$ does not split completely over $\field_p$ (i.e., $p \not\equiv 1 \pmod{2n}$), the roots of $X^n + 1$ live in a proper extension of $\field_p$, and the CRT gives evaluation over that extension rather than over $\field_p$ itself; the protocol structure could in principle be adapted to this setting at the cost of increasing the base field size and the CRT matrix complexity, but we do not pursue this here.
-    \item \emph{Power-of-two degree.} This is primarily an efficiency assumption rather than a correctness requirement. The power-of-two structure $n = 2^\nu$ gives the CRT matrix $C_{k,\ell} = \omega^{(2k+1)\ell}$ a recursive dyadic periodicity: each factor $f_j(k) = (1-\gamma_j) + \gamma_j \omega^{(2k+1)2^j}$ has period $2^{\nu-j}$ in $k$, which is what enables the $O(n)$-time verifier evaluation of~$\tilde{C}$ in \cref{lem:m-eval}. For a general cyclotomic $\Phi_m(X)$ of degree $\varphi(m)$, the roots do not exhibit this clean doubling structure, so the factored product-table construction would not apply and the verifier's $\tilde{C}$ evaluation would cost $O(\varphi(m)^2)$ in the worst case. The power-of-two case also aligns with the DP24 packing reduction (\cref{sec:dp24-packing}), which uses a tower of quadratic extensions $\field_p \subset \field_{p^2} \subset \cdots \subset \extensionfield$ whose depth is $\log_2[\extensionfield:\field_p]$.
+\subsection{A PIOR for cyclotomic matrix-vector multiplication}
+\label{sec:matrix-vector-pior}
+
+Fix a prime~$p$, $n = 2^\nu$ with $p \equiv 1 \pmod{2n}$, $N = 2^\tau$, $M = 2^\mu$, and let $\mathcal{R}_p = \ZZ_p[X]/(X^n+1)$.
+
+\begin{definition}
+\label{def:source-rel}
+The \emph{ring multiplication relation} $\relation_{\mathsf{RM}}$ consists of triples $(\index, \instance, \witness)$ where:
+\begin{itemize}[nosep]
+  \item Index: $\index = (p, \nu, \tau, \mu)$.
+  \item Instance: $\instance = \bigl(\oracle{\tilde{A}},\, \oracle{\tilde{s}},\, \oracle{\tilde{t}}\bigr)$, three multilinear polynomial oracles over~$\field_p$ of arities $\tau{+}\mu{+}\nu$, $\mu{+}\nu$, and $\tau{+}\nu$ respectively.
+  \item Witness: $\witness = (A,s,t) \in \mathcal{R}_p^{N \times M} \times \mathcal{R}_p^M \times \mathcal{R}_p^N$.
+  \item Membership: $As = t$ in~$\mathcal{R}_p^N$, and the oracles are the multilinear extensions of the coefficient representations of~$A$, $s$, $t$.
 \end{itemize}
-These restrictions are broadly compatible with deployed lattice-based cryptography: NIST standards (ML-KEM, ML-DSA) and most lattice-based signature schemes use power-of-two cyclotomic rings with primes chosen so that $p \equiv 1 \pmod{2n}$, and composite moduli decompose into such primes.
+\end{definition}
 
-\paragraph{Why matrix-vector products.}
-The relation $t = As$ over $\ring_q$ is the common algebraic core of lattice-based cryptography: MLWE/RLWE encryption, Dilithium/Falcon/Hawk signatures, FHE operation proofs, Ajtai hash commitments, and lattice-based VRFs all reduce --- individually or in batches --- to one or more instances of this relation. Matrix-matrix products $T = AS$ reduce to matrix-vector products via column batching: the verifier samples $\rho \randpick \extensionfield^{M'}$ and the single relation $T\rho = A(S\rho)$ is checked, while multiple independent instances $A s_i = t_i$ batch to a single inner product as described in \cref{par:batch-verification}. We therefore present the protocol in full generality for $A \in \ring_q^{N \times M}$, then give optimized treatments for the inner product case $N = 1$ (which covers RSIS/SWIFFT, Falcon verification, and all batched multi-instance settings).
-
-Beyond lattice cryptography, the matrix-vector relation over cyclotomic rings is a natural building block for proving more general NP statements that involve ring arithmetic. Any computation expressed as an intermediate representation over $\ring_q$ --- such as an arithmetic circuit whose gates are ring additions and multiplications, or a sequence of NTT-based operations --- decomposes into a series of bilinear relations over $\ring_q$, each of which is an instance of matrix-vector multiplication (with $N = M = 1$ for scalar multiplication, $N = 1$ for inner products, and general $N, M$ for linear maps). Because our protocol is a sumcheck-based PIOP, it composes naturally with other sumcheck protocols: claims produced by one sumcheck invocation can feed directly into another, enabling modular stacking without additional commitment overhead. The CRT-domain structure we exploit is also not specific to matrix-vector products; any relation that becomes pointwise after applying the CRT transform admits the same two-sumcheck architecture (a pointwise-check sumcheck followed by a CRT consistency sumcheck). While we do not pursue a fully general ring-arithmetic compiler in this work, the techniques developed here --- CRT-domain verification, holographic indexing, packing, and oracle reduction --- provide the essential ingredients for doing so.
-
-For $n = 2^\nu$ and a $N \times M$ matrix $A$, our protocol has prover complexity $O(NMn)$\psiv{check this}, verifier complexity $O(n+\log NM)$, and proof size $O(\log Mn)$. The additive $O(n)$ term in verifier complexity arises from a single evaluation of the CRT matrix's multilinear extension (\cref{lem:m-eval}) and cannot be eliminated without fundamentally changing the protocol structure. An alternative ``coefficient-domain'' approach based on ring switching and a convolution sumcheck can in principle replace this $O(n)$ with $O(\log n)$, but it produces cross-polynomial product constraints that are incompatible with multiple of the optimizations our protocol benefits from. In practice, $n$ is often small (e.g., $n = 64$ for SWIFFT) and the constant factor in the $O(n)$ evaluation is small, so it does not dominate concrete verifier performance. \psiv{Give example estimate of how much it would contribute to total verifier computation.}
-%That said, in~\cref{sec:logger-verifier} we introduce a $O(\log^2 n+\log NM)$ verifier variant, with the tradeoff of it having $O(\log M + \log^2 n)$ proof size.
-
-We write the main PIOP construction in~\cref{sec:matrix-vector-piop} in the ``commit and prove'' style, where the verifier begins with three oracles to polynomial representations of matrix $A$ and vectors $s$ and $t$ (that we assume were earlier sent by the prover). When $A$ is constant (e.g., proving knowledge of an MSIS opening) and/or $t$ is public, we find ourselves in the holographic setting where an indexer can output variations of these oracles that allow for a more efficient argument. This is explained in~\cref{sec:holographic-piop}.
-
-\subsection{A PIOP for cyclotomic matrix-vector multiplication}
-\label{sec:matrix-vector-piop}
+The target relation is the polynomial evaluation relation $\relation_{\mathsf{eval}}$, whose triples $(\index', \instance', \witness')$ consist of a list of evaluation claims $\instance' = \{(\oracle{f_j}, z_j, v_j)\}_{j=1}^m$ on polynomial oracles, with membership requiring $f_j(z_j) = v_j$ for all~$j$. The witness~$\witness'$ is unconstrained: membership depends only on the oracles and the claimed evaluations.
 
 Let $\omega \in \field_p$ be a primitive $2n$-th root of unity and let $\tilde{C} \in \field_p^{\multilin}[\bm{K},\bm{L}]$ denote the multilinear extension of the CRT matrix $C = \crtnosubscript_{n,p}$,
 \[
@@ -37,10 +33,10 @@ which maps coefficient vectors to evaluations at the roots of $X^n + 1$. Define 
     t_C(i,k) &:= \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell)\cdot\tilde{t}(i,\ell).
     \end{array}
 \]
-When $t \equiv A s \mod p$, the CRT transform gives the pointwise relation $t_C(i,k) = \sum_{j \in \bits^\mu} A_{C}(i,j,k)\cdot s_{C}(j,k)$ for all $(i,k) \in \bits^{\tau+\nu}$.
+When $t \equiv A s \mod p$, the CRT transform gives the pointwise relation $t_C(i,k) = \sum_{j \in \bits^\mu} A_{C}(i,j,k)\cdot s_{C}(j,k)$ for all $(i,k) \in \bits^{\tau+\nu}$. Since $A_C$ and $s_C$ are individually multilinear in $\bm{K}$, the product $\sum_j A_C \cdot s_C$ has individual degree~$2$ in $\bm{K}$; the sumcheck therefore includes an $\meq(\bm{K},\alpha')$ kernel to project onto the multilinear extension in $\bm{K}$ and ensure completeness.
 
 \begin{figure}[H]
-\caption{Protocol $\Pi_{\mathsf{RingMul}}=(\prover, \verifier)$: a PIOP for checking matrix-vector multiplication in a cyclotomic ring $\ring_p = \ZZ_p[X]/(X^{2^\nu}+1)$ over $\field_p$}
+\caption{Protocol $\Pi_{\mathsf{RingMul}}=(\prover, \verifier)$: a PIOR for checking matrix-vector multiplication in a cyclotomic ring $\ring_p = \ZZ_p[X]/(X^{2^\nu}+1)$ over $\field_p$}
 \label{prot:ringmul}
 \begin{algorithm}[H]
 \textbf{Input:} The verifier receives oracles $\oracle{\tilde{A}} \in \field_{p}^{\multilin}[\bm{I},\bm{J},\bm{K}]$, $\oracle{\tilde{s}} \in \field_{p}^{\multilin}[\bm{J},\bm{K}],$ and $\oracle{\tilde{t}} \in \field_{p}^{\multilin}[\bm{I},\bm{K}]$. The prover receives matrix $A \in \ring_{p}^{N\times M}$ and vectors $s \in \ring_{p}^{M}$, $t \in \ring_{p}^{N}$ such that
@@ -58,26 +54,29 @@ holds for $i \in \bits^\tau, j \in \bits^\mu, k \in \bits^\nu$, where $\tau = \l
 
     \STATE $\prover$ and $\verifier$ engage in a sumcheck for the claim
     \[
-        e_t = \sum_{j \in \bits^{\mu}} A_C(\alpha, j, \alpha') \cdot s_C(j, \alpha')
+        e_t = \sum_{(j,k) \in \bits^{\mu+\nu}} A_C(\alpha, j, k) \cdot s_C(j, k) \cdot \meq(k, \alpha')
     \]
-    with challenges $\beta \randpick \extensionfield^{\mu}$, reducing to the claim $\sigma' = A_C(\alpha, \beta, \alpha') \cdot s_C(\beta, \alpha')$.
+    with challenges $(\beta,\gamma) \randpick \extensionfield^{\mu+\nu}$, reducing to the claim $\sigma' = A_C(\alpha, \beta, \gamma) \cdot s_C(\beta, \gamma) \cdot \meq(\gamma, \alpha')$.
 
-    \STATE The prover sends $e_A$ claimed to equal $A_C(\alpha, \beta, \alpha')$. The verifier computes $e_s \gets \sigma' / e_A$ and checks $e_A \neq 0$.\footnote{The event $A_C(\alpha, \beta, \alpha') = 0$ occurs with negligible probability at most $(\tau + \mu + \nu)/|\extensionfield|$.}
+    \STATE The prover sends $e_A$ and $e_s$ claimed to equal $A_C(\alpha, \beta, \gamma)$ and $s_C(\beta, \gamma)$ respectively. The verifier evaluates $\meq(\gamma,\alpha')$ in $O(\nu)$ operations and checks
+    \[
+        \sigma' \;=\; e_A \cdot e_s \cdot \meq(\gamma, \alpha').
+    \]
 
     \STATE The verifier samples batching challenge $\xi \randpick \extensionfield$.
 
     \STATE $\prover$ and $\verifier$ engage in a sumcheck for the claim
     \[
-        e_t + \xi \cdot e_A + \xi^{2} \cdot e_s  = \sum_{\ell \in \bits^{\nu}} \tilde{C}(\alpha', \ell) \cdot \Big[\tilde{t}(\alpha, \ell) + \xi \cdot \tilde{A}(\alpha, \beta, \ell) + \xi^{2} \cdot \tilde{s}(\beta, \ell)\Big]
+        e_A + \xi \cdot e_s + \xi^{2} \cdot e_t  = \sum_{\ell \in \bits^{\nu}} \Big[\tilde{C}(\gamma, \ell) \cdot \big(\tilde{A}(\alpha, \beta, \ell) + \xi \cdot \tilde{s}(\beta, \ell)\big) + \xi^{2} \cdot \tilde{C}(\alpha', \ell) \cdot \tilde{t}(\alpha, \ell)\Big]
     \]
-    with folding challenges $\gamma \randpick \extensionfield^{\nu}$, reducing to the claim
+    with folding challenges $\delta \randpick \extensionfield^{\nu}$, reducing to the claim
     \[
-        \sigma'' = \tilde{C}(\alpha', \gamma) \cdot \Big[\tilde{t}(\alpha, \gamma) + \xi \cdot \tilde{A}(\alpha, \beta, \gamma) + \xi^{2} \cdot \tilde{s}(\beta, \gamma)\Big].
+        \sigma'' = \tilde{C}(\gamma, \delta) \cdot \big(\tilde{A}(\alpha, \beta, \delta) + \xi \cdot \tilde{s}(\beta, \delta)\big) + \xi^{2} \cdot \tilde{C}(\alpha', \delta) \cdot \tilde{t}(\alpha, \delta).
     \]
 
-    \STATE The verifier evaluates $\tilde{C}(\alpha', \gamma)$ in $O(n)$ field operations (\cref{lem:m-eval}), queries $e'_t \gets \oracle{\tilde{t}(\alpha, \gamma)}$, $e'_A \gets \oracle{\tilde{A}(\alpha, \beta, \gamma)}$, $e'_s \gets \oracle{\tilde{s}(\beta, \gamma)}$, and checks
+    \STATE The verifier evaluates $\tilde{C}(\gamma, \delta)$ and $\tilde{C}(\alpha', \delta)$ in $O(n)$ field operations (\cref{lem:m-eval}), queries $e'_A \gets \oracle{\tilde{A}(\alpha, \beta, \delta)}$, $e'_s \gets \oracle{\tilde{s}(\beta, \delta)}$, $e'_t \gets \oracle{\tilde{t}(\alpha, \delta)}$, and checks
     \[
-        \sigma'' = \tilde{C}(\alpha', \gamma) \cdot \big(e'_t + \xi \cdot e'_A + \xi^{2} \cdot e'_s\big).
+        \sigma'' = \tilde{C}(\gamma, \delta) \cdot \big(e'_A + \xi \cdot e'_s\big) + \xi^{2} \cdot \tilde{C}(\alpha', \delta) \cdot e'_t.
     \]
 \end{algorithmic}
 \end{algorithm}
@@ -85,232 +84,129 @@ holds for $i \in \bits^\tau, j \in \bits^\mu, k \in \bits^\nu$, where $\tau = \l
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Completness, round-by-round knowledge soundness, and efficiency}
+\subsection{Completeness, round-by-round knowledge soundness, and efficiency}
+\label{sec:ring-pior-ks}
+\input{microlotus/piop-completeness}
+\input{microlotus/rbr-ks}
+\input{microlotus/pior-efficiency}
 
-\begin{lemma}\label{lem:m-eval}
-    Let $\omega \in \field_p$ be a primitive $2n$-th root of unity with $n = 2^\nu$, and let $\tilde{C} \in \field_p^{\mathsf{ml}}[\bm{K},\bm{L}]$ denote the multilinear extension of $C = \crtnosubscript_{n,p}$, given by $C_{k,\ell} = \omega^{(2k+1)\ell}$ for $k,\ell \in \bits^\nu$. Then for any $\alpha', \gamma \in \extensionfield^\nu$, the evaluation $\tilde{C}(\alpha', \gamma)$ can be computed in $O(n)$ field operations.
-\end{lemma}
-
-\begin{proof}
-    We first derive a factored representation by separating the sum over~$\ell$.
-    Since $\omega^{(2k+1)\ell} = \prod_{j=0}^{\nu-1} \omega^{(2k+1)\ell_j 2^j}$
-    and $\meq(\gamma,\ell) = \prod_{j} \bigl((1-\gamma_j)(1-\ell_j) + \gamma_j \ell_j\bigr)$,
-    the inner sum over $\ell$ factors across coordinates:
-    \begin{align}
-        \sum_{\ell \in \bits^\nu} \omega^{(2k+1)\ell} \, \meq(\gamma,\ell)
-        &\;=\; \prod_{j=0}^{\nu-1}\; \sum_{\ell_j \in \{0,1\}} \omega^{(2k+1)\ell_j 2^j}\, \bigl((1-\gamma_j)(1-\ell_j) + \gamma_j \ell_j\bigr) \notag \\
-        &\;=\; \prod_{j=0}^{\nu-1} \Big[(1-\gamma_j) + \gamma_j\, \omega^{(2k+1)2^j}\Big]. \label{eq:Mfactored}
-    \end{align}
-    Define the univariate polynomial
-    \[
-        g(X) \;:=\; \prod_{j=0}^{\nu-1} \Big[(1-\gamma_j) + \gamma_j\, X^{2^j}\Big],
-    \]
-    which has degree $\sum_{j=0}^{\nu-1} 2^j = n - 1$. By~\eqref{eq:Mfactored}, $g(\omega^{2k+1}) = \prod_j [(1-\gamma_j) + \gamma_j\, \omega^{(2k+1)2^j}]$, so
-    \begin{equation}\label{eq:Mfactored2}
-        \tilde{C}(\alpha', \gamma) \;=\; \sum_{k \in \bits^\nu} \meq(\alpha', k)\cdot g(\omega^{2k+1}).
-    \end{equation}
-
-    To evaluate the right-hand side in $O(n)$ time, we exploit the periodicity of each factor of~$g$.
-    Write $g(\omega^{2k+1}) = \prod_{j=0}^{\nu-1} f_j(k)$ where
-    \[
-        f_j(k) \;:=\; (1-\gamma_j) + \gamma_j\, \omega^{(2k+1)2^j}.
-    \]
-    Since $\omega$ has order $2n = 2^{\nu+1}$, the element $\omega^{2^{j+1}}$ has order $2^{\nu-j}$, and therefore $\omega^{(2k+1)2^j} = \omega^{2^j} \cdot (\omega^{2^{j+1}})^k$ is periodic in~$k$ with period $2^{\nu-j}$.
-    In particular:
-    \begin{itemize}
-        \item $f_{\nu-1}$ has period $2$ in $k$ \,($\omega^{2^\nu} = -1$, so $f_{\nu-1}(k)$ depends only on $k \bmod 2$),
-        \item $f_{\nu-2}$ has period $4$, \;\ldots, \; $f_0$ has period $n$.
-    \end{itemize}
-
-    We compute the product table $[g(\omega^{2k+1})]_{k=0}^{n-1}$ iteratively.
-    Initialize with the partial product $P_{\nu-1}(k) := f_{\nu-1}(k)$ for $k \in \{0, 1\}$, at a cost of $O(1)$.
-    For $s = \nu-2, \nu-3, \ldots, 0$: extend $P_{s+1}$ from its period $2^{\nu-s-1}$ to period $2^{\nu-s}$ by replication, and compute
-    $P_s(k) := P_{s+1}(k) \cdot f_s(k)$ for $k = 0,\ldots, 2^{\nu-s}-1$.
-    The cost at stage~$s$ is $O(2^{\nu-s})$ multiplications, so the total is
-    \[
-        \sum_{s=0}^{\nu-1} 2^{\nu-s} \;=\; 2 + 4 + \cdots + 2^\nu \;=\; 2(2^\nu - 1) \;=\; O(n).
-    \]
-    After the final stage, $P_0(k) = g(\omega^{2k+1})$ for all $k \in \{0,\ldots,n-1\}$.
-    The table $[\meq(\alpha',k)]_{k \in \bits^\nu}$ is computed in $O(n)$ by the standard recursive formula.
-    The evaluation~\eqref{eq:Mfactored2} is then an inner product of two length-$n$ vectors, costing $O(n)$.
-\end{proof}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{A holographic variant}
 \label{sec:holographic-piop}
 
-When the matrix $A$ is public (e.g., given by the structure of a hash function such as SWIFFT, or by a lattice scheme's public key), the oracle $\oracle{\tilde{A}}$ need not be sent by the prover: it can be provided by an indexer in a preprocessing phase. We now describe how to exploit this by committing directly to the CRT-domain representation $A_C$, which eliminates the CRT consistency check for~$A$ from Sumcheck~2 entirely.
+We describe a holographic variant that corresponds to how this protocol would be used as a subroutine in a more general PIOP for NP (e.g., a CCS or R1CS proof system over cyclotomic rings).
 
-\paragraph{Indexed CRT oracle.}
-Recall that $A_C(i,j,k) = \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell)\cdot\tilde{A}(i,j,\ell)$. Since $A$ is public, the indexer can compute $A_C$ explicitly and provide the verifier with an oracle $\oracle{A_C} \in \extensionfield^{\multilin}[\bm{I},\bm{J},\bm{K}]$ in a preprocessing phase. The crucial observation is that the verifier can now query $A_C(\alpha, \beta, \alpha')$ directly at Step~4 of \cref{prot:ringmul}, obtaining $e_A$ without relying on the prover. This removes $\tilde{A}$ from the batched sum in Sumcheck~2, which becomes
-\[
-    e_t + \xi \cdot e_s = \sum_{\ell \in \bits^{\nu}} \tilde{C}(\alpha', \ell) \cdot \Big[\tilde{t}(\alpha, \ell) + \xi \cdot \tilde{s}(\beta, \ell)\Big],
-\]
-with folding challenges $\gamma \randpick \extensionfield^\nu$ reducing to the final claim
-\[
-    \sigma'' = \tilde{C}(\alpha', \gamma)\cdot\big(e'_t + \xi \cdot e'_s\big),
-\]
-verified by querying $e'_t \gets \oracle{\tilde{t}(\alpha,\gamma)}$ and $e'_s \gets \oracle{\tilde{s}(\beta,\gamma)}$. The oracle $\oracle{\tilde{A}}$ no longer appears.
+In the main protocol (\cref{prot:ringmul}), Sumcheck~1 includes $\nu$ rounds for the $\bm{K}$-variables at degree~$3$, because the product $A_C \cdot s_C$ is degree~$2$ in $\bm{K}$ and the $\meq(\bm{K},\alpha')$ kernel adds another factor. Moreover, Sumcheck~2 must evaluate $\tilde{C}$ at two CRT points ($\gamma$ for $A_C,s_C$ and $\alpha'$ for $t_C$). Both costs stem from the fact that the prover constructs $A_C$ and $s_C$ as virtual polynomials $\sum_\ell \tilde{C}(k,\ell)\tilde{A}(\cdot)$ and $\sum_\ell \tilde{C}(k,\ell)\tilde{s}(\cdot)$, making $k$ a free variable. In the holographic setting, these extra rounds and the second sumcheck can be eliminated entirely.
 
-\paragraph{Additional simplification when $t$ is public.}
-In many lattice-based settings, $t$ is also public --- for instance, in Module-SIS where $t = 0$, or in Module-LWE where $t$ is the public ciphertext. In this case, an indexer can similarly provide $\oracle{t_C}$, and the verifier obtains $e_t$ by querying $t_C(\alpha, \alpha')$ directly. Sumcheck~2 then reduces to a CRT consistency check on $\tilde{s}$ alone:
-\[
-    e_s = \sum_{\ell \in \bits^{\nu}} \tilde{C}(\alpha', \ell) \cdot \tilde{s}(\beta, \ell).
-\]
-This is the minimal form of the protocol: a single prover-committed oracle $\oracle{\tilde{s}}$, two sumchecks, and one PCS evaluation.
-
-\paragraph{Prover and indexer preprocessing.}
-The indexer computes $A_C$ by applying the CRT transform (an $n$-point NTT at the odd powers of $\omega$) to each of the $NM$ entries of~$A$, for a total cost of $O(NMn\log n)$ field operations, or $O(NMn)$ using a batched radix-$2$ NTT. If $t$ is also indexed, the same applies at cost $O(Nn \log n)$. On the prover side, when $A$ is reused across multiple protocol invocations with the same public key (e.g., batch signature verification), the prover can cache the table of evaluations $\{A_C(i,j,k)\}_{i,j,k \in \bits^{\tau+\mu+\nu}}$ and reuse it across invocations, amortizing the NTT cost. Concretely, the prover's online cost for computing Sumcheck~1 round polynomials is dominated by the $O(NMn)$ summation, which does not change; the savings come from avoiding redundant CRT transforms of~$A$.
-
-\subsection{Optimized inner product variant}
-\label{sec:inner-product-piop}
-
-When $N=1$, the matrix--vector product $As = t$ reduces to a single inner product $\langle a, s \rangle = t$ in $\ring_p$, where $a \in \ring_p^M$ and $t \in \ring_p$ is a single ring element. This is the relevant setting for SWIFFT hash verification and for proving knowledge of a Module-SIS preimage with a single row. We describe how \cref{prot:ringmul} simplifies in this case.
-
-\paragraph{Structural simplification.}
-Setting $N = 1$ gives $\tau = \log N = 0$, so the variable block $\bm{I}$ is empty. The polynomial $\tilde{A}(j, \ell)$ has $\mu + \nu$ variables, $\tilde{s}(j, \ell)$ has $\mu + \nu$ variables, and $\tilde{t}(\ell)$ has $\nu$ variables. The CRT-domain virtual polynomials become
-\[
-    A_C(j,k) = \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell)\cdot \tilde{A}(j,\ell), \qquad
-    s_C(j,k) = \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell)\cdot \tilde{s}(j,\ell), \qquad
-    t_C(k) = \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell)\cdot \tilde{t}(\ell).
-\]
-
-Sumcheck~1 runs over $\bm{J}$ only ($\mu$ rounds), proving
-\[
-    e_t = \sum_{j \in \bits^\mu} A_C(j, \alpha') \cdot s_C(j, \alpha')
-\]
-for verifier challenges $\alpha' \randpick \extensionfield^\nu$, and produces the reduced claim $\sigma' = A_C(\beta, \alpha') \cdot s_C(\beta, \alpha')$ with $\beta \randpick \extensionfield^\mu$.
-
-\paragraph{Holographic $A$, public $t$.}
-In the common case where $A$ is public and $t$ is public (or $t = 0$ as in SIS), the protocol reaches its simplest form. The indexer provides $\oracle{A_C}$, and the verifier computes $e_t = t_C(\alpha')$ in $O(n)$ time via the factored evaluation of \cref{lem:m-eval} applied to the known coefficients of~$t$. Concretely, the verifier evaluates
-\[
-    e_t = \sum_{\ell \in \bits^\nu} \tilde{C}(\alpha', \ell) \cdot \tilde{t}(\ell) = \sum_{k \in \bits^\nu} \meq(\alpha', k) \cdot t_C(k)
-\]
-by first computing the CRT of~$t$ (an $n$-point NTT, or looked up from the indexed preprocessing) and then taking the $\meq$-weighted inner product with $\alpha'$.
-
-The protocol now involves a single prover oracle $\oracle{\tilde{s}} \in \extensionfield^{\multilin}[\bm{J}, \bm{L}]$ of dimension $\mu + \nu$:
-\begin{enumerate}
-    \item The verifier samples $\alpha' \randpick \extensionfield^\nu$ and computes $e_t = t_C(\alpha')$.
-    \item Sumcheck~1 ($\mu$ rounds): proves $e_t = \sum_{j \in \bits^\mu} A_C(j, \alpha') \cdot s_C(j, \alpha')$, yielding $\sigma' = A_C(\beta, \alpha') \cdot s_C(\beta, \alpha')$.
-    \item The verifier queries $e_A \gets \oracle{A_C(\beta, \alpha')}$ and computes $e_s \gets \sigma' / e_A$.
-    \item Sumcheck~2 ($\nu$ rounds): proves $e_s = \sum_{\ell \in \bits^\nu} \tilde{C}(\alpha', \ell) \cdot \tilde{s}(\beta, \ell)$, yielding $\sigma'' = \tilde{C}(\alpha', \gamma) \cdot \tilde{s}(\beta, \gamma)$.
-    \item The verifier queries $e'_s \gets \oracle{\tilde{s}(\beta, \gamma)}$ and checks $\sigma'' = \tilde{C}(\alpha', \gamma) \cdot e'_s$.
+We make two assumptions:
+\begin{enumerate}[nosep]
+    \item $A$ is public and the indexer supplies the CRT-domain oracle $\oracle{A_C} \in \extensionfield^{\multilin}[\bm{I},\bm{J},\bm{K}]$ directly.
+    \item $t_C$ is a virtual polynomial whose evaluations are determined by the outer protocol: the prover sends $e_t$ claimed to equal $t_C(\alpha, \alpha')$, and the verifier can check this claim without a CRT consistency sumcheck for~$t$.
 \end{enumerate}
-The total proof consists of $\mu + \nu$ sumcheck rounds and a single PCS evaluation of $\tilde{s}$ at the point $(\beta, \gamma) \in \extensionfield^{\mu + \nu}$. This clean structure --- one oracle, one evaluation claim --- composes particularly well with DP24 packing (\cref{sec:dp24-packing}), since there is no need for commitment merging or IOR reductions before invoking the PCS.
+The second assumption covers the case where $t$ is public (including the common $t = 0$ SIS setting, where $e_t = 0$ is trivially verified), and also the case where $t_C$ arises from the constraint structure of an outer proof system (see \cref{rem:r1cs-analogy}).
 
-\subsection{Reducing the number of commitments}
+Under these assumptions, the only committed polynomial requiring CRT consistency verification is $\tilde{s}$. Because $A_C$ is now an oracle rather than a virtual polynomial, the verifier can evaluate it directly at the fixed CRT point $\alpha'$: the quantity $A_C(\alpha, j, \alpha')$ depends on $\bm{J}$ alone, and there is no need to sum over $\bm{K}$ with an $\meq$ kernel. This eliminates the degree-$3$ $\bm{K}$-variable rounds from Sumcheck~1. In their place, we inline the CRT expansion $s_C(j, \alpha') = \sum_{\ell \in \bits^\nu} \tilde{C}(\alpha', \ell) \cdot \tilde{s}(j, \ell)$ directly into the sumcheck, yielding degree-$2$ rounds for the coefficient variable $\bm{L}$. Since $A_C$ is an oracle and $t_C$ is externally verified, Sumcheck~2 is eliminated as well, along with the intermediate evaluation claims $e_A, e_s$ and their multiplication check. The merged claim is
+\begin{equation}\label{eq:merged-sumcheck}
+    e_t \;=\; \sum_{(j,\, \ell) \in \bits^{\mu + \nu}} A_C(\alpha, j, \alpha') \cdot \tilde{C}(\alpha', \ell) \cdot \tilde{s}(j, \ell).
+\end{equation}
+The virtual polynomial is a product of three multilinears. In each $\bm{J}$-variable round, $A_C(\alpha, \cdot, \alpha')$ and $\tilde{s}$ depend on the current variable while $\tilde{C}(\alpha', \cdot)$ does not; in each $\bm{L}$-variable round, $\tilde{C}(\alpha', \cdot)$ and $\tilde{s}$ depend on the current variable while $A_C$ does not. The round polynomial therefore has degree~2 throughout, and the prover sends $2(\mu + \nu)$ field elements. Compared with the main protocol's $2\mu + 5\nu + 3$ elements (which includes the degree-$3$ rounds in $\bm{K}$, the explicit evaluation claims $e_A$ and $e_s$, and the full Sumcheck~2), this saves $3\nu + 2$ field elements and $\nu+1$ rounds.
+
+After $\mu + \nu$ rounds with challenges $(\beta, \gamma) \randpick \extensionfield^{\mu + \nu}$, the verifier checks the reduced claim
+\[
+    \sigma \;=\; A_C(\alpha, \beta, \alpha') \cdot \tilde{C}(\alpha', \gamma) \cdot \tilde{s}(\beta, \gamma)
+\]
+by querying $A_C(\alpha, \beta, \alpha')$ from the indexer oracle, evaluating $\tilde{C}(\alpha', \gamma)$ in $O(n)$ operations (\cref{lem:m-eval}), and querying $e'_s \gets \oracle{\tilde{s}(\beta, \gamma)}$. The output is a single evaluation claim $\tilde{s}(\beta, \gamma) = e'_s$ on the committed oracle. No $\meq$ kernel, evaluation claims $e_A$ or $e_s$, multiplication check, batching challenge, or second sumcheck is needed.
+
+\begin{remark}[Analogy with R1CS second sumcheck]\label{rem:r1cs-analogy}
+    The merged sumcheck~\eqref{eq:merged-sumcheck} is the cyclotomic-ring analogue of the ``memory-checking'' or ``oracle-evaluation'' sumcheck that appears in holographic proof systems for R1CS (e.g., Spartan~\cite{spartan}). In a Spartan-style R1CS proof, the witness is $z$ with committed oracle $\oracle{\tilde{z}}$, and the constraint matrices $M \in \{A, B, C\}$ are public with indexed oracles $\oracle{\tilde{M}}$. The first sumcheck verifies $0 = \sum_x \meq(\tau, x) \cdot [z_A(x) \cdot z_B(x) - z_C(x)]$ where $z_M(x) := \sum_y \tilde{M}(x, y) \cdot \tilde{z}(y)$ are virtual polynomials, producing challenges $r$ and claimed evaluations $e_A = z_A(r)$, $e_B = z_B(r)$, $e_C = z_C(r)$. The second sumcheck then verifies these claims via the batched sum
+    \[
+        e_A + \rho \, e_B + \rho^2 e_C \;=\; \sum_{y} \bigl[\tilde{A}(r, y) + \rho\, \tilde{B}(r, y) + \rho^2\, \tilde{C}(r, y)\bigr] \cdot \tilde{z}(y).
+    \]
+    The structural correspondence is: $\tilde{s}$ plays the role of $\tilde{z}$ (the committed oracle), $\tilde{C}(\alpha', \cdot)$ plays the role of $\tilde{M}(r, \cdot)$ (a verifier-computable weight function), and the indexed CRT-domain polynomial $A_C(\alpha, \cdot, \alpha')$ plays the role of the constraint-selecting weight in the first sumcheck.
+\end{remark}
+
+% \subsection{Inner products}
+% \label{sec:inner-product-piop}
+
+% When $N=1$, the matrix--vector product $As = t$ reduces to a single inner product $\langle a, s \rangle = t$ in $\ring_p$, where $a \in \ring_p^M$ and $t \in \ring_p$ is a single ring element. This is the relevant setting for SWIFFT hash verification and for proving knowledge of a Ring-SIS preimage. We describe how \cref{prot:ringmul} simplifies in this case.
+
+% Setting $N = 1$ gives $\tau = \log N = 0$, so the variable block $\bm{I}$ is empty. The polynomial $\tilde{A}(j, \ell)$ has $\mu + \nu$ variables, $\tilde{s}(j, \ell)$ has $\mu + \nu$ variables, and $\tilde{t}(\ell)$ has $\nu$ variables. The CRT-domain polynomials become
+% \[
+%     A_C(j,k) = \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell)\cdot \tilde{A}(j,\ell), \qquad
+%     s_C(j,k) = \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell)\cdot \tilde{s}(j,\ell), \qquad
+%     t_C(k) = \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell)\cdot \tilde{t}(\ell).
+% \]
+
+% \noindent Sumcheck~1 runs over $\bm{J}$ only ($\mu$ rounds), proving
+% \[
+%     e_t = \sum_{j \in \bits^\mu} A_C(j, \alpha') \cdot s_C(j, \alpha')
+% \]
+% for verifier challenge $\alpha' \randpick \extensionfield^\nu$, and produces the reduced claim $\sigma' = A_C(\beta, \alpha') \cdot s_C(\beta, \alpha')$ with $\beta \randpick \extensionfield^\mu$.
+
+% The prover sends $e_A$ claimed to equal $A_C(\beta, \alpha')$. The verifier computes $e_s \gets \sigma' / e_A$ and checks $e_A \neq 0$. Since $\tau = 0$, the polynomial $\tilde{t}(\ell)$ has only $\nu$ variables and $t_C(k) = \sum_\ell \tilde{C}(k,\ell) \cdot \tilde{t}(\ell)$ depends on $k$ alone. The batched Sumcheck~2 becomes
+% \[
+%     e_t + \xi \cdot e_A + \xi^{2} \cdot e_s \;=\; \sum_{\ell \in \bits^{\nu}} \tilde{C}(\alpha', \ell) \cdot \Big[\tilde{t}(\ell) + \xi \cdot \tilde{A}(\beta, \ell) + \xi^{2} \cdot \tilde{s}(\beta, \ell)\Big],
+% \]
+% with folding challenges $\gamma \randpick \extensionfield^{\nu}$, reducing to the claim
+% \[
+%     \sigma'' \;=\; \tilde{C}(\alpha', \gamma) \cdot \big(e'_t + \xi \cdot e'_A + \xi^{2} \cdot e'_s\big).
+% \]
+% The verifier evaluates $\tilde{C}(\alpha', \gamma)$ in $O(n)$ operations (\cref{lem:m-eval}), queries $e'_t \gets \oracle{\tilde{t}(\gamma)}$, $e'_A \gets \oracle{\tilde{A}(\beta, \gamma)}$, $e'_s \gets \oracle{\tilde{s}(\beta, \gamma)}$, and checks the claim. The output is three evaluation claims on the committed oracles.
+
+% The key simplification relative to the general case is that the evaluation claim on $\tilde{t}$ is on a $\nu$-dimensional polynomial (no $\bm{I}$-block). For small $n$ (e.g., $n \leq 32$), it may be cheaper for the prover to send $t$ in the clear ($n$ field elements) rather than committing to $\tilde{t}$ and running the PCS; see \cref{sec:reducing-commitments}.
+
+% \paragraph{Holographic inner products.}
+% The holographic variant of \cref{sec:holographic-piop} applies to the inner product case with $\tau = 0$. When $A$ is public (the indexer supplies $\oracle{A_C} \in \extensionfield^{\multilin}[\bm{J}, \bm{K}]$) and $e_t$ is trusted or verifier-computable, the merged single-sumcheck~\eqref{eq:merged-sumcheck} takes the form
+% \[
+%     e_t \;=\; \sum_{(j,\, \ell) \in \bits^{\mu + \nu}} A_C(j, \alpha') \cdot \tilde{C}(\alpha', \ell) \cdot \tilde{s}(j, \ell),
+% \]
+% running for $\mu + \nu$ rounds with challenges $(\beta, \gamma) \randpick \extensionfield^{\mu + \nu}$. The verifier checks the reduced claim $\sigma = A_C(\beta, \alpha') \cdot \tilde{C}(\alpha', \gamma) \cdot \tilde{s}(\beta, \gamma)$ using the indexer oracle and \cref{lem:m-eval}, producing a single evaluation claim $\tilde{s}(\beta, \gamma) = e'_s$. No separate CRT sumcheck, batching challenge, or division step is needed.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Reducing commitment size and evaluations}
 \label{sec:reducing-commitments}
 
-When the prover commits to multiple oracles, each oracle incurs a Merkle tree and associated PCS opening costs. We describe a standard selector-polynomial technique that merges the oracles for $\tilde{s}$ and $\tilde{t}$ into a single oracle~$h'$, and analyze when this merge is beneficial in conjunction with the IOR and packing optimizations of later sections.
+After sumchecks, the verifier holds evaluation claims on committed (prover) and indexed (preprocessed) oracles. Each oracle naively requires its own Merkle tree and PCS opening. We describe two standard PIOR optimizations---selector-polynomial merging and multi-point reduction---that consolidate these claims, and illustrate them with a concrete example. We then describe two ways to shorten the proofs of these consolidated claims: the ring-switch packing from~\cite{EC:DiaPos25}, and technique of sumcheck challenge sharing with interleaved Merkle paths from Basefold~\cite{basefold}.
 
-\paragraph{The selector polynomial.}
-Define $h' \in \extensionfield^{\multilin}[B, \bm{X}, \bm{L}]$ on $1 + \max(\tau, \mu) + \nu$ variables by
+\paragraph{Running example: SpeedySpartan for Ring Arithmetic.}
+\label{sec:speedyspartan}
+Consider a SpeedySpartan-style protocol~\cite{speedyspartan} proving arithmetic circuit satisfiability over $\ring_p$. The indexed (preprocessed) oracles are three wiring matrices $\tilde{W}_a, \tilde{W}_b, \tilde{W}_c \in \extensionfield^{\multilin}[\bm{X}, \bm{J}, \bm{L}]$ of dimension $m + \mu + \nu$, and a gate-type selector $\tilde{q}_M \in \extensionfield^{\multilin}[\bm{X}]$ of dimension $m$. The witness oracle $\oracle{\tilde{s}} \in \extensionfield^{\multilin}[\bm{J}, \bm{L}]$ of dimension $\mu + \nu$ is committed by the prover. After an outer (constraint) sumcheck and an inner (memory-checking) sumcheck with challenges $r \in \extensionfield^m$ and $(\beta, \gamma) \in \extensionfield^{\mu + \nu}$---where the inner sumcheck uses the CRT-inlining of \cref{sec:holographic-piop}---the verifier holds five evaluation claims:
+\begin{alignat*}{2}
+    &\tilde{W}_w(r, \beta, \gamma) = e'_w \;\text{ for } w \in \{a,b,c\}, \qquad &&\tilde{q}_M(r) = e'_q, \\
+    &\tilde{s}(\beta, \gamma) = e'_s. &&
+\end{alignat*}
+The first four oracles are output by the indexer, while $\tilde{s}$ is prover-committed.
+
+\paragraph{SelectorMerge.}
+The indexer merges the four indexed oracles into a single oracle $h \in \extensionfield^{\multilin}[B_1, B_2, \bm{X}, \bm{J}, \bm{L}]$ of dimension $2 + m + \mu + \nu$ using two selector bits: $h(0,0,\cdot) = \tilde{W}_a$, $h(0,1,\cdot) = \tilde{W}_b$, $h(1,0,\cdot) = \tilde{W}_c$, and $h(1,1,x,j,\ell) = \tilde{q}_{M,\mathrm{pad}}(x)$, padded to be constant in $(\bm{J}, \bm{L})$. Setting the padded coordinates of $\tilde{q}_M$'s evaluation point to $(\beta, \gamma)$ aligns all four claims to a common data point $(r, \beta, \gamma)$, with evaluation points differing only in the two selector bits:
+\begin{alignat*}{2}
+    &h(0, 0, r, \beta, \gamma) = e'_a, \quad &&h(0, 1, r, \beta, \gamma) = e'_b, \\
+    &h(1, 0, r, \beta, \gamma) = e'_c, \quad &&h(1, 1, r, \beta, \gamma) = e'_q.
+\end{alignat*}
+
+\paragraph{MultiPoint.}
+The multi-point-to-single-point PIOR~\cite{BCHO22} reduces multiple evaluation claims on one polynomial to a single claim. Given $\ell$ claims $f(z_1) = v_1, \ldots, f(z_\ell) = v_\ell$, the key observation is that whenever the claims cover the full Boolean hypercube $\bits^c$ of a set of $c$ shared coordinates---with all other coordinates identical---the multilinear extension in those $c$ variables is completely determined by the $2^c$ known values, and no prover messages are needed. 
+
+In our setting, $c = 2$ and the four claims cover all of $\bits^2$. The verifier computes
 \[
-    h'(b, x, \ell) \;:=\; (1 - b)\cdot \tilde{s}(x_{1:\mu}, \ell) \;+\; b\cdot \tilde{t}(x_{1:\tau}, \ell),
+    h^*(b_1, b_2) = (1{-}b_1)(1{-}b_2) e'_a + (1{-}b_1) b_2 e'_b + b_1(1{-}b_2) e'_c + b_1 b_2 e'_q,
 \]
-where $x_{1:r}$ denotes the first $r$ coordinates of $x$. When $\tau < \mu$, the polynomial $\tilde{t}(x_{1:\tau}, \ell)$ does not depend on coordinates $x_{\tau+1}, \ldots, x_{\mu}$, so $h'$ is well-defined and multilinear. By construction, $h'(0, x, \ell) = \tilde{s}(x_{1:\mu}, \ell)$ and $h'(1, x, \ell) = \tilde{t}(x_{1:\tau}, \ell)$, so a single committed oracle $\oracle{h'}$ replaces both $\oracle{\tilde{s}}$ and $\oracle{\tilde{t}}$.
+samples $(r_1, r_2) \randpick \extensionfield^2$, and reduces to the single claim $h(r_1, r_2, r, \beta, \gamma) = h^*(r_1, r_2)$. In this special exact hypercube covering case the prover needs send \emph{zero} field elements. Note that because SelectorMerge aligned all data coordinates, every coordinate the claims share is identical and the selector bits span the full hypercube, so this all-at-once reduction applies directly.
 
-After Sumcheck~2 (with holographic $A$), the verifier needs the evaluations $\tilde{s}(\beta, \gamma)$ and $\tilde{t}(\alpha, \gamma)$, which correspond to
-\begin{align*}
-    h'(0,\; \beta,\; \gamma) &= \tilde{s}(\beta, \gamma), \\
-    h'(1,\; (\alpha, \beta_{\tau+1:\mu}),\; \gamma) &= \tilde{t}(\alpha, \gamma),
-\end{align*}
-where we pad $\alpha \in \extensionfield^\tau$ with the coordinates $\beta_{\tau+1}, \ldots, \beta_\mu$ (or any fixed values) to obtain a point of length $\mu$. This gives two evaluation claims on $h'$ at points that differ in the first coordinate ($b = 0$ vs $b = 1$) and possibly in coordinates $1$ through $\tau$ ($\beta_{1:\tau}$ vs $\alpha$), but agree on coordinates $\tau+1$ through $\mu+\nu$ (both use $\beta_{\tau+1:\mu}$ and $\gamma$). These two claims are reduced to a single evaluation via the IOR of \cref{sec:iors}.
+At this point, the $5$ evaluation claims on $5$ oracles have been consolidated into $2$ claims: $h(z_h) = v_h$ (indexed, dimension $2 + m + \mu + \nu$) and $\tilde{s}(\beta, \gamma) = e'_s$ (committed, dimension $\mu + \nu$).
 
-\paragraph{When to use $h'$.}
-The merge is not always beneficial. Without $h'$, the prover commits to two oracles: $\tilde{s}$ of dimension $\mu + \nu$ and $\tilde{t}$ of dimension $\tau + \nu$. With $h'$, a single oracle of dimension $1 + \mu + \nu$ (assuming $\mu \geq \tau$) replaces both, but the IOR adds a small number of extra field elements to the transcript (see \cref{sec:iors}). The following guidelines cover the main cases:
-\begin{itemize}
-    \item \emph{$N = 1$, $t$ public (e.g., SIS).} Only $\tilde{s}$ is committed. Do not use $h'$.
-    \item \emph{$N = 1$, $t$ private.} Here $\tilde{t}$ has only $\nu$ variables while $\tilde{s}$ has $\mu + \nu$. The merge produces an oracle of dimension $1 + \mu + \nu$, saving one Merkle tree at the cost of one extra PCS round. This is beneficial when $\mu \geq 3$, which holds in all practical MSIS parameter sets. When $\mu \leq 2$, the overhead of the extra variable and IOR outweighs the Merkle tree savings; committing separately is preferable.
-    \item \emph{General $N, M$ with $\tau \leq \mu$.} The merge saves the $\tilde{t}$ commitment entirely (one fewer Merkle tree root and PCS opening proof), at the cost of one additional variable in the merged oracle. The net savings in proof size scale with $\min(\tau, \mu) + \nu$: roughly, eliminating the $\tilde{t}$ PCS proof saves $\approx 3(\tau + \nu)$ field elements from PCS folding, while the extra variable adds $\approx 3$ field elements. Thus $h'$ is beneficial whenever $\tau + \nu \geq 2$, which is the generic case.
-    \item \emph{$\tau = \mu$ (square matrices).} The two oracles have equal dimension. The merge is always worthwhile, saving one full PCS opening at the cost of one extra round.
-\end{itemize}
+\paragraph{Ring-switch packing.}
+Each of the two evaluation claims are fed independently into the ring-switch packing PIOR of~\cite{EC:DiaPos25}, which exploits the tower $\field_p \subset \field_{p^2} \subset \cdots \subset \extensionfield$ (with $s = \log_2[\extensionfield:\field_p]$) to produce a claim on a packed polynomial of dimension $R - s$, where $R$ is the original dimension. The reduction is an $s$-round degree-$1$ sumcheck with round-$i$ challenges in $\field_{p^{2^i}}$; the prover sends $s$ field elements per polynomial. Applied to our two claims, packing produces $\hat{h}$ of dimension $R_h - s$ (where $R_h = 2 + m + \mu + \nu$) and $\hat{s}$ of dimension $R_s - s$ (where $R_s = \mu + \nu$). We use the tower construction for odd primes given in \cref{sec:odd-prime-tower}.
 
-\subsection{Interactive oracle reductions}
-\label{sec:iors}
+\parhead{Interleaved BaseFold opening}
+Both packed claims are opened via BaseFold~\cite{basefold}, which interleaves an $\meq$-sumcheck with IOPP folding: at each round, the verifier sends one challenge, the prover folds the codeword and sends the next sumcheck round polynomial, and commits the folded codeword via a Merkle tree.
 
-After the two sumchecks and any holographic oracle queries, the verifier holds one or more evaluation claims on the prover's committed polynomial(s). Before invoking the PCS, we apply interactive oracle reductions (IORs) to consolidate these claims. We follow the framework of Baweja, Chiesa, and Spooner~\cite{BCS24}\psiv{fix cite key}, who give IORs for linear-time-encodable codes in the IOPP model; we describe the two reductions we use and verify their compatibility with random foldable codes (in the BaseFold setting) and with DP24 packing.
+Since $\hat{h}$ has $R_h - R_s = 2 + m$ more variables than $\hat{s}$, the prover first folds $\hat{h}$ solo for $2 + m$ rounds, bringing its codeword to the same length as $\hat{s}$'s. For the remaining $R_s - s$ rounds, both polynomials fold with the same challenge: a single uniform $r_i \randpick \extensionfield$ serves both IOPP instances (soundness holds by a union bound). At each shared round, the prover builds one MMCS-style Merkle tree whose leaf~$j$ contains the pair $(\pi^{(h)}_i[j],\, \pi^{(s)}_i[j])$ of folded codeword values. The prover sends one tree root and two sumcheck round polynomials (one per evaluation target). During the query phase, a single authentication path per shared round opens both values simultaneously, and fold consistency is checked independently for each polynomial.  The saving is one full set of Merkle authentication paths over the shared rounds: $(R_s - s) \cdot t \cdot \lambda_{\mathrm{hash}}$ bits, where $t$ is the number of query repetitions.
 
-\paragraph{Multi-point to single-point IOR.}
-Given two evaluation claims $h'(z_0) = v_0$ and $h'(z_1) = v_1$ on the same multilinear polynomial $h'$ of dimension $d$, the standard reduction proceeds as follows. The verifier sends a challenge $r \randpick \extensionfield$ and both parties compute the convex combination $z^* = (1-r)\cdot z_0 + r\cdot z_1$ and $v^* = (1-r)\cdot v_0 + r\cdot v_1$. Since $h'$ is multilinear, the univariate restriction $g(t) := h'((1-t)\cdot z_0 + t\cdot z_1)$ has degree at most $d$ in $t$, and satisfies $g(0) = v_0$, $g(1) = v_1$. The prover sends the coefficients of $g$ (at most $d-1$ additional field elements, since $g(0)$ and $g(1)$ are known), and the verifier checks consistency and accepts the reduced claim $h'(z^*) = g(r)$.
-
-In the special case arising from the $h'$ construction of \cref{sec:reducing-commitments}, the two evaluation points $z_0 = (0, \beta, \gamma)$ and $z_1 = (1, (\alpha, \beta_{\tau+1:\mu}), \gamma)$ differ in at most $1 + \tau$ coordinates (the selector bit and the first $\tau$ entries of $\bm{X}$). When $\tau = 0$ (the $N = 1$ case), the points differ in the first coordinate only, and the restriction $g$ is linear: $g(t) = (1-t)v_0 + t\cdot v_1$, so the prover sends nothing and the verifier simply evaluates $g(r)$. The IOR is free.
-
-For general $\tau$, the prover sends $\tau$ field elements (the intermediate coefficients of $g$), and the reduced claim is $h'(z^*) = g(r)$ at a single point $z^* \in \extensionfield^{1+\mu+\nu}$.
-
-\paragraph{Multi-polynomial to single-polynomial IOR.}
-When $h'$ is not used and the prover commits to $\tilde{s}$ and $\tilde{t}$ separately, the verifier holds evaluation claims on distinct polynomials at distinct points: $\tilde{s}(\beta, \gamma) = e'_s$ and $\tilde{t}(\alpha, \gamma) = e'_t$. To reduce these to a single PCS invocation, we first pad both polynomials to a common dimension $d^* = \max(\tau, \mu) + \nu$ by treating the lower-dimensional polynomial as constant in the extra variables. The verifier sends a batching challenge $\zeta \randpick \extensionfield$ and defines the combined polynomial $f = \tilde{s} + \zeta \cdot \tilde{t}_{\mathrm{pad}}$. The two evaluation claims become a single claim on $f$ at a single point (obtained by a further multi-point reduction if the evaluation points differ). The prover commits to $f$ implicitly by providing the combined codeword; the PCS then opens $f$ at the required point.
-
-When additionally $A$ is not holographic and $\oracle{\tilde{A}}$ is prover-committed, its evaluation claim $\tilde{A}(\alpha, \beta, \gamma) = e'_A$ is absorbed into the same batching: $f = \tilde{s} + \zeta \cdot \tilde{t}_{\mathrm{pad}} + \zeta^2 \cdot \tilde{A}$.
-
-\paragraph{Compatibility with random foldable codes and DP24.}
-Both IOR reductions operate at the PIOP level, producing a single evaluation claim before the PCS is invoked. The BaseFold PCS then proves this claim using the foldable code's proximity test. The critical property is that the IOR does not impose structural requirements on the code beyond the ability to evaluate the committed polynomial at an arbitrary extension-field point, which random foldable codes support by construction (the encoding is $\field_p$-linear, and evaluation at $\extensionfield$-points is obtained by $\extensionfield$-linear extension of the codeword).
-
-DP24 packing (\cref{sec:dp24-packing}) operates \emph{after} the IOR: the single evaluation claim $f(z^*) = v^*$ on a polynomial of dimension $d^*$ is reduced by the packing sumcheck to a claim on a packed polynomial $\hat{f}$ of dimension $d^* - s$, where $s = \log_2 \kappa$. The IOR's output is a standard evaluation claim, which is exactly the input format that the packing reduction expects. There is no interaction between the IOR mechanics and the packing sumcheck's tower-based decomposition, so compatibility is immediate.
-
-\subsection{DP24 packing}
-\label{sec:dp24-packing}
-
-We apply the packing technique of Diamond and Posen~\cite{DP24}\psiv{fix cite key} to reduce the PCS oracle dimension by $s = \log_2 \kappa$ variables, where $\kappa = [\extensionfield : \field_p]$ is the extension degree. This reduces the depth of the Merkle tree and the number of PCS folding rounds, yielding significant concrete proof-size savings. We describe the mechanism, its dependencies, and --- crucially --- why the CRT consistency check (Sumcheck~2) must remain an explicit sumcheck rather than being absorbed into the PCS when packing is in use.
-
-\paragraph{Packing overview.}
-Let $f \in \extensionfield^{\multilin}[X_1, \ldots, X_R]$ be the multilinear polynomial to be opened at a point $z \in \extensionfield^R$ (this is the single evaluation claim produced by the IOR of \cref{sec:iors}). The DP24 packing partitions the $R$ variables into $s$ ``packed'' variables $X_1, \ldots, X_s$ and $R - s$ ``free'' variables $X_{s+1}, \ldots, X_R$. Fixing a $\field_p$-basis $\{e_\rho\}_{\rho=1}^\kappa$ of $\extensionfield$ with dual basis $\{e^*_\rho\}$, define the packed polynomial $\hat{f} \in \extensionfield^{\multilin}[X_{s+1}, \ldots, X_R]$ by
+\emph{Full PIOR chain.} Starting from $5$ evaluation claims on $5$ oracles:
 \[
-    \hat{f}(x_{s+1}, \ldots, x_R) := \sum_{b \in \bits^s} \meq(z_{1:s}, b) \cdot f(b, x_{s+1}, \ldots, x_R).
+    \mathrm{SelectorMerge} \;\to\; \mathrm{MultiPoint} \;\to\; \mathrm{DP24\;Packing} \;\to\; \mathrm{BaseFold\;(solo\;+\;interleaved)}.
 \]
-The evaluation $f(z) = \hat{f}(z_{s+1:R})$ follows by multilinearity. The prover commits to $\hat{f}$ (an oracle of dimension $R - s$) and proves $\hat{f}(z_{s+1:R}) = f(z)$ via the BaseFold PCS using a random foldable code over $\extensionfield$.
-
-The packing reduction itself is an $s$-round sumcheck that verifies the relationship between $f$ and $\hat{f}$. Each round ``lifts'' one tower level, exploiting the tower of quadratic extensions $\field_p \subset \field_{p^2} \subset \cdots \subset \field_{p^\kappa} = \extensionfield$: at level $i$, the sumcheck challenge lives in $\field_{p^{2^i}}$, and the round polynomial has degree~1 in the current variable. After $s$ rounds, the claim reduces to a single evaluation of $\hat{f}$ at an extension-field point, which the BaseFold PCS proves.
-
-\paragraph{Dependencies.}
-The packing reduction requires:
-\begin{itemize}
-    \item A \emph{tower of quadratic extensions} $\field_p \subset \field_{p^2} \subset \cdots \subset \extensionfield$ with explicit embedding and projection maps. For odd primes~$p$, we construct such a tower in \cref{sec:odd-prime-tower}\psiv{fix cref}.
-    \item \emph{Linear-time encodable random foldable codes} over each tower level $\field_{p^{2^i}}$, $i = 0, \ldots, s$. We describe our construction based on~\cite{BaseFold}\psiv{fix cite} in \cref{sec:foldable-codes}\psiv{fix cref}.
-\end{itemize}
-
-\paragraph{Transcript costs.}
-The $s$-round packing sumcheck contributes $3s$ field elements to the PIOP transcript (one degree-1 univariate per round, costing 2 coefficients, plus 1 claimed evaluation --- but since the constant term is determined by the claim, each round sends 1 new field element; the total is $2s$\psiv{double-check this count against DP24}). The BaseFold PCS then runs $R - s$ folding rounds instead of $R$, saving $3s$ field elements from PCS round messages. The net transcript-size change is approximately zero, but the Merkle tree depth decreases by $s$, which saves $s \cdot \lambda$ bits of hash proof per query (where $\lambda$ is the hash output length). For $s = 4$ and $\lambda = 256$, this is a saving of 128 bytes per query repetition.
-
-\paragraph{Incompatibility of CRT absorption with packing.}
-\label{par:crt-absorption-incompatibility}
-
-A natural question is whether Sumcheck~2 (the CRT consistency check) can be absorbed into the PCS as a weighted-sum constraint, eliminating it as an explicit sumcheck and saving $\sim 3\nu$ field elements. We now show that this absorption is \emph{incompatible} with DP24 packing, and therefore Sumcheck~2 must remain explicit whenever packing is used.
-
-\begin{proposition}\label{prop:crt-packing-incompatibility}
-    Let $\hat{f}$ be the packed polynomial obtained from $f$ via the DP24 reduction with packing parameter $s \geq 1$. Let $\varphi_\rho : \extensionfield \to \extensionfield$ denote the $\field_p$-linear dual-basis extraction map $\varphi_\rho(x) = \langle e^*_\rho, x \rangle_{\field_p}$ (i.e., $\varphi_\rho$ extracts the $\rho$-th $\field_p$-coordinate of $x$). If the CRT consistency check is absorbed into the PCS, the resulting constraint on $\hat{f}$ takes the form
-    \[
-        \sum_{y} w(y, \rho) \cdot \varphi_\rho\!\bigl(\hat{f}(y)\bigr) = \sigma_\rho
-    \]
-    for verifier-computable weights $w(\cdot)$ and each basis index $\rho$. This constraint is $\field_p$-linear but not $\extensionfield$-linear in the evaluations of $\hat{f}$.
-
-    The BaseFold folding step replaces $\hat{f}$ with $\hat{f}_{\mathrm{new}}(y') = \hat{f}(0, y') + r \cdot \hat{f}(1, y')$ for a challenge $r \in \extensionfield$. For the constraint to be maintained through folding, we would need
-    \[
-        \varphi_\rho\bigl(\hat{f}(0, y') + r \cdot \hat{f}(1, y')\bigr) = \varphi_\rho\bigl(\hat{f}(0, y')\bigr) + r \cdot \varphi_\rho\bigl(\hat{f}(1, y')\bigr)
-    \]
-    for all $r \in \extensionfield$ and all evaluations. But $\varphi_\rho$ is $\field_p$-linear, not $\extensionfield$-linear: for general $r \in \extensionfield \setminus \field_p$, $\varphi_\rho(r \cdot x) \neq r \cdot \varphi_\rho(x)$. Hence the absorbed constraint cannot be tracked through $\extensionfield$-challenge folding.
-\end{proposition}
-
-\begin{proof}
-    It suffices to exhibit a concrete failure. Let $p$ be an odd prime and $\extensionfield = \field_{p^2}$ with basis $\{1, \theta\}$ where $\theta^2 = g$ for a non-square $g \in \field_p$. Then $\varphi_1(a + b\theta) = a$ and $\varphi_2(a + b\theta) = b$. Take $r = \theta$ and $x = 1$. Then $\varphi_1(\theta \cdot 1) = \varphi_1(\theta) = 0$, but $\theta \cdot \varphi_1(1) = \theta \cdot 1 = \theta \neq 0$. The constraint breaks at the first folding step.
-\end{proof}
-
-By contrast, standard evaluation claims $\hat{f}(z) = v$ are trivially compatible with packing: the verifier holds $v$ and applies $\varphi_\rho$ post-hoc if needed, without requiring the PCS to track an $\field_p$-linear constraint through its folds.
-
-\paragraph{Correct protocol architecture.}
-The incompatibility above dictates the following structure when all optimizations are combined:
-\begin{enumerate}
-    \item \textbf{Sumcheck~1} ($\mu$ rounds, or $\tau + \mu$ rounds if $\bm{I}$ is nonempty): the matrix-vector product check in the CRT domain, producing evaluation claims on $A_C$, $\tilde{s}$, and $\tilde{t}$.
-    \item \textbf{Sumcheck~2} ($\nu$ rounds): the explicit CRT consistency check, reducing CRT-domain claims to coefficient-domain evaluation claims on the committed oracles. When $A$ is holographic, only $\tilde{s}$ and $\tilde{t}$ (or $\tilde{s}$ alone, if $t$ is also public) participate.
-    \item \textbf{IOR reduction} (\cref{sec:iors}): consolidates the resulting evaluation claims into a single claim $f(z) = v$ on a single polynomial of dimension $d^*$. When the $h'$ merge is used, this is a multi-point IOR; otherwise, a multi-polynomial IOR.
-    \item \textbf{DP24 packing sumcheck} ($s$ rounds): reduces the claim to $\hat{f}(z') = v$ on a packed polynomial of dimension $d^* - s$.
-    \item \textbf{BaseFold PCS} ($d^* - s$ folding rounds): proves the evaluation of $\hat{f}$ using a random foldable code over $\extensionfield$, with linear-time encoding (\cref{sec:foldable-codes}\psiv{fix cref}).
-\end{enumerate}
-The total PIOP transcript size is $3(\mu + \nu) + O(\tau) + 2s + 3(d^* - s)$ field elements, plus the IOR messages. The prover complexity is $O(NMn)$ for the sumchecks plus $O(2^{d^*})$ for the PCS encoding; the verifier complexity is $O(n + \log NM)$ field operations.
-
-\paragraph{Batch verification across MSIS instances.}
-\label{par:batch-verification}
-A common setting in lattice-based cryptography is the need to verify $k$ independent Module-SIS relations $A s_i = t_i$ for $i = 1, \ldots, k$ with a shared public matrix~$A$. Since the indexed oracle $\oracle{A_C}$ is the same across instances, the indexing cost is paid once. The verifier batches the $k$ instances by sampling $\eta_1, \ldots, \eta_k \randpick \extensionfield$ and checking the combined relation
-\[
-    A \Bigl(\sum_{i=1}^k \eta_i s_i\Bigr) = \sum_{i=1}^k \eta_i t_i.
-\]
-This reduces $k$ protocol executions to a single execution on the combined witness $s^* = \sum_i \eta_i s_i$ and target $t^* = \sum_i \eta_i t_i$, at the cost of the prover computing the random linear combination of witness vectors. If each $s_i$ has dimension $M$, the combination costs $O(kMn)$ ring-element operations. The PCS can additionally batch the $k$ oracle openings using a single multi-polynomial IOR (treating each $\tilde{s}_i$ as a separate polynomial), or the prover can commit to $\tilde{s}^*$ directly if the combination is performed before commitment. The latter is preferable when $k$ is known in advance (e.g., batch signature verification), as it requires a single oracle of the same dimension as each individual $\tilde{s}_i$.
+The prover maintains two original Merkle commitments ($T_h$ from preprocessing, $T_s$ from the prover's first message). After packing, the prover commits $T_{\hat{h}}$ and $T_{\hat{s}}$. The solo-fold phase produces $2 + m$ folding commitments for $\hat{h}$; the interleaved phase produces $R_s - s$ shared commitments. The PIOP-level reductions cost $0$~prover field elements for MultiPoint (the four claims cover $\bits^2$) and $2s$~for packing ($s$ per polynomial).

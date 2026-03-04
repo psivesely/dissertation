@@ -100,6 +100,9 @@
 \usepackage{mleftright}
 \usepackage{float}
 \usepackage{wrapfig}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\tikzset{>=Latex}
 
 \newcommand{\disstitle}{Efficient Hash- and Lattice-based Proof Systems for Mixed Algebras}
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
@@ -168,15 +171,15 @@ We now provide an overview of the main contributions of this work.
 \input{zinc/UCS/structural_instantiations}
 \input{zinc/PIOR/zincplus_pior}
 
-\chapter{Microlotus: Faster Proving Over Small Fields and Cyclotomic Rings}
+\chapter{Microlotus: Efficient Hash-based Proofs for Cyclotomic Rings}
 \label{ch:microlotus}
 \input{microlotus/macros}
 \input{microlotus/intro}
+\input{microlotus/related-work}
 \input{microlotus/tech-overview}
 \input{microlotus/preliminaries}
 \input{microlotus/odd-prime-tower}
 \input{microlotus/ring-iop}
-\input{microlotus/rbr-ks}
 % \input{microlotus/ring-codes}
 % \input{microlotus/ring-speedyspartan}
 

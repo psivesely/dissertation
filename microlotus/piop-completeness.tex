@@ -1,0 +1,12 @@
+\parhead{Completeness}
+\begin{theorem}[Completeness of $\Pi_{\mathsf{RingMul}}$]
+\label{thm:completeness}
+$\Pi_{\mathsf{RingMul}}$ (\Cref{prot:ringmul}) satisfies perfect completeness (\Cref{def:pior-completeness}).
+\end{theorem}
+\begin{proof}
+Since $As = t$, the CRT pointwise identity $t_C(i,k) = \sum_j A_C(i,j,k)\,s_C(j,k)$ holds for all $(i,k) \in \bits^{\tau+\nu}$. Both $t_C(I,K)$ and $\sum_{k\in\bits^\nu}\meq(k,K)\sum_j A_C(I,j,k)\,s_C(j,k)$ are multilinear in $(I,K)$ and agree on the Boolean hypercube, so they agree everywhere; in particular the honest claim $e_t = t_C(\alpha,\alpha')$ equals the Sumcheck~1 sum $\sum_{(j,k)}A_C(\alpha,j,k)\,s_C(j,k)\,\meq(k,\alpha')$. By sumcheck completeness, the reduced claim $\sigma' = A_C(\alpha,\beta,\gamma)\cdot s_C(\beta,\gamma)\cdot\meq(\gamma,\alpha')$ holds.
+
+The honest prover sets $e_A = A_C(\alpha,\beta,\gamma)$ and $e_s = s_C(\beta,\gamma)$, so the multiplication check $\sigma' = e_A \cdot e_s \cdot \meq(\gamma,\alpha')$ passes. The Sumcheck~2 sum identity then holds by the definitions of $A_C$, $s_C$, $t_C$, and sumcheck completeness yields $\sigma'' = f_{\mathsf{sc2}}(\delta)$ where $f_{\mathsf{sc2}}(\ell) := \tilde{C}(\gamma,\ell)\cdot[\tilde{A}(\alpha,\beta,\ell)+\xi\,\tilde{s}(\beta,\ell)] + \xi^2\,\tilde{C}(\alpha',\ell)\cdot\tilde{t}(\alpha,\ell)$.
+
+Since the oracles are the honest multilinear extensions, the queried values $e'_A,e'_s,e'_t$ equal the true evaluations $\tilde{A}(\alpha,\beta,\delta)$, $\tilde{s}(\beta,\delta)$, $\tilde{t}(\alpha,\delta)$, and the final evaluation check $\sigma'' = \tilde{C}(\gamma,\delta)\cdot(e'_A + \xi\,e'_s) + \xi^2\,\tilde{C}(\alpha',\delta)\cdot e'_t$ holds. The verifier accepts and outputs the three evaluation claims $\bigl(\oracle{\tilde{A}},(\alpha,\beta,\delta)\bigr)$, $\bigl(\oracle{\tilde{s}},(\beta,\delta)\bigr)$, $\bigl(\oracle{\tilde{t}},(\alpha,\delta)\bigr)$ with correct values, which lie in $\relation_{\mathsf{eval}}$.
+\end{proof}

@@ -123,69 +123,93 @@ Applying $\mathsf{DFT}_m$ corresponds to evaluating a polynomial of degree less 
 \subsection{Indexed relations}
 \label{sec:indexed-relations}
 
-An \emph{indexed relation} is a set $\relation \subseteq \{0,1\}^* \times \{0,1\}^* \times \{0,1\}^*$ of triples $(\index, \instance, \witness)$, where $\index$ is called the \emph{index}, $\instance$ is the \emph{instance} (or \emph{statement}), and $\witness$ is the \emph{witness}. The corresponding \emph{indexed language} is $\langrel = \{(\index, \instance) : \exists\, \witness \text{ s.t.\ } (\index, \instance, \witness) \in \relation\}$.% We say $\relation$ is an NP relation if membership in $\relation$ can be decided in time $\poly(|\index| + |\instance| + |\witness|)$.
-An indexed relation separates the \emph{public structure} of a problem (the index) from the \emph{per-instance} data. In the holographic setting, an indexer $\indexer$ preprocesses $\index$ into an oracle that the verifier can query during the protocol. For example, in our ring-arithmetic PIOP (\cref{sec:ring-piop}), the index encodes the public matrix $A$ (and possibly $t$), the instance is empty or encodes public parameters, and the witness is the secret vector $s$.
+An \emph{indexed relation} is a set $\relation \subseteq \{0,1\}^* \times \{0,1\}^* \times \{0,1\}^*$ of triples $(\index, \instance, \witness)$, where $\index$ is the \emph{index} (encoding structural parameters such as field characteristic, dimensions, and degree bounds), $\instance$ is the \emph{instance} (the public input, which in the polynomial oracle model may include oracle access to polynomials), and $\witness$ is the \emph{witness} (the private input). The \emph{language} of $\relation$ is $\mathcal{L}(\relation) = \{(\index, \instance) : \exists\, \witness \text{ s.t.\ } (\index, \instance, \witness) \in \relation\}$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Polynomial interactive oracle proofs}
-\label{sec:piop}
+\subsection{Polynomial interactive oracle reductions}
+\label{sec:prelim-pior}
 
-We recall the definition of polynomial interactive oracle proofs (polynomial IOPs, or PIOPs)~\cite{BCRSVW19,CHMMVW20,ACFY24}. A PIOP is an interactive proof system in which the prover's messages are polynomials that the verifier can query at points of its choosing, rather than reading in their entirety.
+We define holographic polynomial interactive oracle reductions, specializing the definition of interactive oracle reductions in~\cite{BCFW25} to the polynomial oracle model.
 
-\begin{definition}[Polynomial IOP {\cite[Section~3.1]{ACFY24}}]
-\label{def:poly-iop}
-A \emph{$\mu$-round polynomial IOP} (poly-IOP) for a relation $\relation$ is a pair of interactive algorithms $\Pi = (\prover, \verifier)$ where:
-\begin{itemize}
-    \item At the start of the protocol, $\prover$ receives $(\instance, \witness)$ and $\verifier$ receives $\instance$.
-    \item The protocol proceeds in $\mu$ rounds. In round $i \in [\mu]$, there is a prescribed list of $n_i$ individual degree bounds $(d_{i,1}, \ldots, d_{i,n_i})$ with $d_{i,j} \in \mathbb{N}$. The prover sends $n_i$ polynomials by specifying their coefficients: the $j$-th polynomial $\hat{f}_{i,j} \in \extensionfield^{\leq d_{i,j}}[X]$ has degree at most $d_{i,j}$. The verifier then replies with a uniformly random challenge $c_i \sample \chalspace_i$. After round $\mu$, the prover sends a final list of polynomials.
-    \item The verifier has \emph{oracle access} to each prover polynomial: it may query $\hat{f}_{i,j}$ at any point $z \in \extensionfield$, receiving the evaluation $\hat{f}_{i,j}(z)$, rather than reading the polynomial in its entirety.
-    \item After the interaction, the verifier outputs $\mathsf{accept}$ or $\mathsf{reject}$.
+\begin{definition}[Holographic PIOR]
+\label{def:pior}
+A \emph{public-coin holographic polynomial interactive oracle reduction} (PIOR) from an indexed relation~$\relation$ to an indexed relation~$\relation'$ is a triple $\Pi = (\indexer, \prover, \verifier)$ that works as follows.
+\begin{itemize}[nosep]
+  \item \emph{Offline phase.} The \emph{indexer}~$\indexer$ takes the index~$\index$ and outputs a new index $\index'$, which may contain both explicit values and oracles.
+  \item \emph{Online phase.} The prover \prover is an interactive algorithm that receives as input $(\index', \instance, \witness) \in \relation$, and the verifier \verifier is an interactive oracle algorithm that receives $(\index', \instance)$. They interact over $k$ rounds as follows. In each round $i \in [k]$, \prover sends a message $\provermsg_i$ that may contain both explicit inputs and oracles, and $V$ sends a uniformly random message $\verifiermsg_i \randpick \challspace_i$ for some challenge space $\challspace_i$. After $k$ rounds of interaction, \verifier queries any oracles in $\index',\instance,$ and the messages sent by \prover. After that:
+  \begin{itemize}[nosep]
+    \item \verifier either rejects or outputs a new instance \instance', and
+    \item \prover outputs a new witness \witness' such that $(\index',\instance',\witness') \in \relation'$.
+  \end{itemize}
+  Without loss of generality, \verifier's output is a deterministic function of its input and the transcript. Note that \verifier may specify oracles in its output implicitly, e.g., \verifier could output an oracle $[[f]] := [[g_0]] + \verifiermsg_1 [[g_1]]$, where $[[g_0]], [[g_1]]$ are oracles it has access to.
 \end{itemize}
-More generally, in a \emph{multilinear} poly-IOP, each prover oracle is a multilinear polynomial $\hat{f}_{i,j} \in \extensionfield^{\multilin}[X_1, \ldots, X_{d_{i,j}}]$, and the verifier may query it at any point in $\extensionfield^{d_{i,j}}$. We write $\langle \prover(\witness), \verifier \rangle(\instance)$ for the output of the verifier after interacting with $\prover$ on common input $\instance$.
 \end{definition}
 
-An \emph{$i$-round partial transcript} is a tuple $\tau_i = (\instance, f_1, c_1, \ldots, f_i, c_i)$, where $f_i$ denotes the list of prover polynomials in round $i$; a \emph{$0$-round partial transcript} is simply $(\instance)$. A \emph{complete transcript} appends the final prover polynomials to a $\mu$-round partial transcript; it is \emph{accepting} if the verifier outputs $\mathsf{accept}$.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\parhead{Completeness and soundness}
+A \emph{polynomial IOP} (PIOP) is the special case where $\relation'$ is trivial: the verifier either accepts or rejects.
 
-PIOP completeness is defined as follows.
+An \emph{$i$-round partial transcript} is $\tr_i = (\pi_1, \rho_1, \ldots, \pi_i, \rho_i)$; a \emph{$0$-round partial transcript} is $\tr_0 = \varnothing$. We write $\tr_{i-1} \| \pi_i$ for the partial transcript after the prover's round-$i$ message but before the verifier's round-$i$ challenge.
 
-\begin{definition}[Completeness]
-\label{def:completeness}
-A poly-IOP $\Pi = (\prover, \verifier)$ for a relation $\relation$ has \emph{(perfect) completeness} if for all $(\instance, \witness) \in \relation$,
-\[
-    \Pr\bigl[\langle \prover(\witness), \verifier \rangle(\instance) = \mathsf{accept}\bigr] = 1,
-\]
-where the probability is over the verifier's random challenges.
-\end{definition}
-
-We omit the standard soundness definition as we prove the stronger round-by-round \emph{knowledge} soundness for our protocols. We use the generalized formulation from Block, Garreta, Tiwari, and Zaj\k{a}c~\cite{BGTZ24}.
-
-\begin{definition}[Round-by-round knowledge soundness {\cite[Definition~4.2]{BGTZ24}}]
-\label{def:rbr-knowledge}
-A poly-IOP $\Pi = (\prover, \verifier)$ for a relation $\relation$ has \emph{round-by-round knowledge soundness with errors $(\varepsilon_1, \ldots, \varepsilon_\mu)$} if there exists a doomed set $\doomedset$ and a polynomial-time algorithm $\extractor$ (the \emph{extractor}) such that:
-\begin{enumerate}
-    \item \textbf{All statements start doomed.} For \emph{all} inputs $\instance$ (including $\instance \in \langrel$), $(\instance) \in \doomedset$.
-    \item \textbf{Doomed transcripts reject.} For any $\mu$-round partial transcript $(\instance, \tau) \in \doomedset$ and any final prover polynomials, the verifier rejects.
-    \item \textbf{Escaping doom yields a witness.} For any $(i-1)$-round partial transcript $(\instance, \tau) \in \doomedset$ (where $i \in [\mu]$) and any list of prover polynomials $f_i$ in round $i$: if
+\begin{definition}[PIOR completeness]
+    \label{def:pior-completeness}
+    We say that a PIOR $(\indexer,\prover,\verifier)$ has (perfect) completeness if for every $(\index,\instance,\witness) \in \relation$,
     \[
-        \Pr_{c \sample \chalspace_i}\bigl[(\instance, \tau, f_i, c) \notin \doomedset\bigr] > \varepsilon_i,
+    \Pr\left[ (\index',\instance',\witness') \in \relation' \pST 
+    \begin{array}{l}
+        \index' \gets \indexer(\index) \\
+        \provermsg_1 \gets \prover(\index',\instance,\witness) \\
+        \verifiermsg_1 \gets \challspace_1 \\
+        \vdots \\
+        (\provermsg_k,\witness') \gets \prover(\index',\instance,\witness,\verifiermsg_1,\dotsc,\verifiermsg_{k-1}) \\
+        \verifiermsg_k \gets \challspace_k \\
+        \instance' \gets \verifier(\index',\instance,\verifiermsg_1,\dotsc,\verifiermsg_{k})
+    \end{array}
+    \right]
+    = 1.
     \]
-    then $\extractor(\instance, \tau, f_i)$ outputs a witness $\witness$ such that $(\instance, \witness) \in \relation$.
+\end{definition}
+
+We now specialize the round-by-round knowledge soundness framework of~\cite{BCFW25} for IORs to PIORs, which enables modular composition of PIOR chains.
+
+\begin{definition}[Knowledge state function {\cite[Def.~2.6]{BCFW25}}]
+\label{def:kstate}
+Let $\Pi = (\indexer,\prover,\verifier)$ be a (holographic) PIOR from $\relation$ to $\relation'$. A \emph{knowledge state function} for~$\Pi$ is a (possibly inefficient) function $\KState$ that takes as input a statement $(\index, \instance)$, a partial transcript~$\tr$, and a \emph{knowledge state witness}~$\kswitness$, and outputs a bit. It must satisfy:
+\begin{enumerate}[nosep]
+  \item \textbf{Empty transcript.} $\KState(\index, \instance, \varnothing, \kswitness) = 1$ if and only if $(\index, \instance, \kswitness) \in \relation$.
+  \item \textbf{Prover moves.} If $\KState(\index, \instance, \tr, \kswitness) = 0$ at a point where the prover is about to move, then $\KState(\index, \instance, \tr \| \pi, \kswitness) = 0$ for every prover message~$\pi$.
+  \item \textbf{Full transcript.} For a full transcript~$\tr_k$: $\KState(\index, \instance, \tr_k, \kswitness) = 1$ if and only if $\verifier$ outputs $\instance'$ such that $(\index', \instance', \kswitness) \in \relation'$.
 \end{enumerate}
 \end{definition}
 
-The key distinction from plain RBR soundness is condition~(1): the doomed set is defined for all inputs, not only false statements. This enables extraction --- if a (possibly honest) prover can make the transcript escape doom with probability exceeding $\varepsilon_i$, the extractor must be able to recover a valid witness from the partial transcript alone.
+\begin{definition}[RBR knowledge soundness {\cite[Def.~2.7]{BCFW25}}]
+\label{def:rbr-ks}
+A PIOR $\Pi$ from $\relation$ to $\relation'$ has \emph{round-by-round knowledge soundness} with errors $(\knowledgeerror_1, \ldots, \knowledgeerror_k)$ if there exist a knowledge state function~$\KState$ and a deterministic extractor~$\extractor$ such that for every statement $(\index, \instance)$, every $i \in [k]$, and every partial transcript~$\tr$ where the verifier is about to move,
+\[
+  \Pr_{\verifiermsg_i}\left[
+    \exists \kswitness :
+    \begin{array}{ll}
+        \KState\left(\index, \instance, \tr, \extractor(\index,\instance,\tr\|\verifiermsg_i,\kswitness)\right) = 0 \\
+        \land \ 
+        \KState\left(\index, \instance, \tr \| \verifiermsg_i, \kswitness\right) = 1
+    \end{array}
+  \right]
+  \leq \knowledgeerror_i(\index,\instance).
+\]
+\end{definition}
 
-\begin{remark}
-RBR knowledge soundness implies \emph{round-by-round soundness} (the weaker notion where only false statements start doomed, and no extractor is required) with the same errors~\cite[Remark~4.4]{BGTZ24}. It also implies $(k_1, \ldots, k_\mu)$-special soundness with $k_i = \lceil |\chalspace_i| \varepsilon_i \rceil + 1$~\cite[Theorem~1.2]{BGTZ24}.
+Informally, if a knowledge state witness~$\kswitness$ certifies $\KState = 1$ after the challenge~$\rho_i$, the extractor must produce a witness certifying $\KState = 1$ \emph{before} the challenge; the error~$\knowledgeerror_i$ bounds the probability this fails.
+
+\begin{remark}[Composition of PIORs]
+The composition theorem of~\cite{BCFW25} shows that if $\Pi_1$ is a PIOR from $\relation$ to $\relation'$ with RBR-KS errors $(\knowledgeerror_1, \ldots, \knowledgeerror_k)$ and $\Pi_2$ is a PIOR from $\relation'$ to $\relation''$ with errors $(\knowledgeerror'_1, \ldots, \knowledgeerror'_{k'})$, then the composed protocol has RBR-KS with errors $(\knowledgeerror_1, \ldots, \knowledgeerror_k, \knowledgeerror'_1, \ldots, \knowledgeerror'_{k'})$.
+\end{remark}
+
+\begin{remark}[Implied RBR and generalized special soundness]
+RBR knowledge soundness implies \emph{round-by-round soundness} (the weaker notion where only false statements start doomed, and no extractor is required) with the same errors~\cite[Remark~4.4]{BGTZ24}. It also implies $(k_1, \ldots, k_\mu)$-special soundness~\cite[Theorem~1.2]{BGTZ24}.
 \end{remark}
 
 \begin{remark}[Compilation to non-interactive arguments]
-Since every PIOP is an IOP (where prover oracles are constrained to be polynomials), any PIOP with RBR (knowledge) soundness can be compiled into a non-interactive argument via the Fiat-Shamir transformation~\cite{BCS16} that is adaptively (knowledge) sound in both the random oracle model~\cite{BCS16} and the quantum random oracle model~\cite{CMS19}.
+Any PIOR with RBR (knowledge) soundness can be compiled into a non-interactive argument via the Fiat-Shamir transformation~\cite{BCS16} that is adaptively (knowledge) sound in both the random oracle model~\cite{BCS16} and the quantum random oracle model~\cite{CMS19}.
 \end{remark}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

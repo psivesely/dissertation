@@ -1,0 +1,103 @@
+\parhead{Efficiency}
+\begin{theorem}[Efficiency of $\Pi_{\mathsf{RingMul}}$]\label{thm:efficiency}
+Let $N \ge \log n$. The PIOR $\Pi_{\mathsf{RingMul}}: \relation_{\mathsf{RM}} \to \relation_{\mathsf{eval}}$ (\cref{prot:ringmul}) with parameters $N=2^\tau$, $M=2^\mu$, $n=2^\nu$ has:
+\begin{itemize}[nosep]
+    \item \emph{Rounds:} $\mu + 2\nu + 2$.
+    \item \emph{Prover complexity:} $O(NMn)$ field operations over $\extensionfield$.
+    \item \emph{Verifier complexity:} $O(n + \log NM)$ field operations over $\extensionfield$, plus $3$ oracle queries.
+    \item \emph{Proof size:} $2\mu+5\nu+3$ elements of $\extensionfield$, which is $O(\log Mn)$.
+\end{itemize}
+\end{theorem}
+\begin{proof}
+\emph{Rounds.}
+$\Pi_{\alpha,\alpha'}$ ($1$ round), $\Pi_{\mathsf{sc1}}$ ($\mu+\nu$ rounds), $\Pi_\xi$ ($1$ round), and $\Pi_{\mathsf{sc2}}$ ($\nu$ rounds) total $\mu + 2\nu + 2$.
+
+\emph{Proof size.}
+The prover sends $e_t$ ($1$ element), Sumcheck~1 round polynomials ($2$ coefficients $\times$ $\mu$ $\bm{J}$-rounds, $3$ coefficients $\times$ $\nu$ $\bm{K}$-rounds), $e_A$ and $e_s$ ($2$ elements), and Sumcheck~2 round polynomials ($2$ coefficients $\times$ $\nu$ rounds): $1 + 2\mu + 3\nu + 2 + 2\nu = 2\mu + 5\nu + 3$.
+
+\emph{Prover complexity.}
+Given the evaluation table of a degree-$d$ virtual polynomial over $v$ variables,
+the sumcheck prover runs in $O(d \cdot 2^v)$ time (\cref{fig:linear-sc}).
+
+\emph{Sumcheck~1} operates on $A_C(\alpha, j, k) \cdot s_C(j, k) \cdot \meq(k, \alpha')$ over $(j,k) \in \bits^{\mu+\nu}$, requiring three evaluation tables of size~$Mn$:
+\begin{itemize}[nosep]
+    \item Partial-evaluate $\tilde{A}$ at $\bm{I} = \alpha$
+          (standard halving, $O(NMn)$), yielding $\tilde{A}(\alpha, j, \ell)$
+          for all $(j,\ell) \in \bits^{\mu+\nu}$.
+    \item Form $[A_C(\alpha,j,k)]_{k \in \bits^\nu}$ for each $j \in \bits^\mu$ via an NTT.
+          At Boolean $k$, we have $\tilde{C}(k,\ell) = C_{k,\ell} = \omega^{(2k+1)\ell}$, so
+          \[
+              A_C(\alpha,j,k) = \sum_{\ell\in\bits^\nu} \omega^{(2k+1)\ell}\,\tilde{A}(\alpha,j,\ell)
+              = \sum_{\ell\in\bits^\nu} (\omega^2)^{k\ell}\,\bigl[\omega^{\ell}\,\tilde{A}(\alpha,j,\ell)\bigr].
+          \]
+          Since $\omega^2$ is a primitive $n$-th root of unity, the map $k \mapsto A_C(\alpha,j,k)$ is the length-$n$ NTT (with respect to $\omega^2$) of the twisted vector $[\omega^\ell\,\tilde{A}(\alpha,j,\ell)]_{\ell}$.
+          Each NTT costs $O(n\log n)$; over all $M$ slices, the total is $O(Mn\log n)$.
+          The table for $s_C(j,k)$ is formed analogously in $O(Mn\log n)$.
+\end{itemize}
+Run Sumcheck~1 in $O(Mn)$ via \cref{fig:linear-sc} (degree~$3$, $Mn$ evaluations).
+
+\emph{Between sumchecks,} partial-evaluate
+$\tilde{A}(\alpha,\cdot,\ell)$ and $\tilde{s}(\cdot,\ell)$
+at $\bm{J}=\beta$ ($O(Mn)$ each),
+$\tilde{t}$ at $\bm{I}=\alpha$ ($O(Nn)$),
+and evaluate $\tilde{C}(\gamma,\cdot)$ ($O(n)$ by \cref{lem:m-eval}).
+All five length-$n$ coefficient vectors for Sumcheck~2 are now in hand.
+
+\emph{Sumcheck~2} operates on $\tilde{C}(\gamma,\ell) \cdot
+[\tilde{A}(\alpha,\beta,\ell) + \xi\,\tilde{s}(\beta,\ell)]
+ + \xi^2\,\tilde{C}(\alpha',\ell)\cdot\tilde{t}(\alpha,\ell)$
+over $\ell \in \bits^\nu$ (degree~$2$, $n$ evaluations): $O(n)$.
+
+The total is $O(NMn + Mn\log n)$. This simplifies to $O(NMn)$ by our assumption $N \ge \log n$.
+
+\emph{Verifier complexity.}
+The dominant cost is two evaluations of $\tilde{C}$ (\cref{lem:m-eval}), each $O(n)$. Verifying $\mu+2\nu$ round polynomials and evaluating $\meq(\gamma,\alpha')$ costs $O(\mu+\nu)$. Including $3$ oracle queries and $O(1)$ field operations for the multiplication and final checks, the total is $O(n + \log(NM))$.
+\end{proof}
+
+\begin{lemma}\label{lem:m-eval}
+    Let $\omega \in \field_p$ be a primitive $2n$-th root of unity with $n = 2^\nu$, and let $\tilde{C} \in \field_p^{\mathsf{ml}}[\bm{K},\bm{L}]$ denote the multilinear extension of $C = \crtnosubscript_{n,p}$, given by $C_{k,\ell} = \omega^{(2k+1)\ell}$ for $k,\ell \in \bits^\nu$. Then for any $\alpha', \gamma \in \extensionfield^\nu$, the evaluation $\tilde{C}(\alpha', \gamma)$ can be computed in $O(n)$ field operations.
+\end{lemma}
+
+\begin{proof}
+    We first derive a factored representation by separating the sum over~$\ell$.
+    Since $\omega^{(2k+1)\ell} = \prod_{j=0}^{\nu-1} \omega^{(2k+1)\ell_j 2^j}$
+    and $\meq(\gamma,\ell) = \prod_{j} \left((1-\gamma_j)(1-\ell_j) + \gamma_j \ell_j\right)$,
+    the inner sum over $\ell$ factors across coordinates:
+    \begin{align}
+        \sum_{\ell \in \bits^\nu} \omega^{(2k+1)\ell} \, \meq(\gamma,\ell)
+        &\;=\; \prod_{j=0}^{\nu-1}\; \sum_{\ell_j \in \{0,1\}} \omega^{(2k+1)\ell_j 2^j}\, \left((1-\gamma_j)(1-\ell_j) + \gamma_j \ell_j\right) \notag \\
+        &\;=\; \prod_{j=0}^{\nu-1} \Big[(1-\gamma_j) + \gamma_j\, \omega^{(2k+1)2^j}\Big]. \label{eq:Mfactored}
+    \end{align}
+    Define the univariate polynomial
+    \[
+        g(X) \;:=\; \prod_{j=0}^{\nu-1} \Big[(1-\gamma_j) + \gamma_j\, X^{2^j}\Big],
+    \]
+    which has degree $\sum_{j=0}^{\nu-1} 2^j = n - 1$. By~\eqref{eq:Mfactored}, $g(\omega^{2k+1}) = \prod_j [(1-\gamma_j) + \gamma_j\, \omega^{(2k+1)2^j}]$, so
+    \begin{equation}\label{eq:Mfactored2}
+        \tilde{C}(\alpha', \gamma) \;=\; \sum_{k \in \bits^\nu} \meq(\alpha', k)\cdot g(\omega^{2k+1}).
+    \end{equation}
+
+    To evaluate the right-hand side in $O(n)$ time, we exploit the periodicity of each factor of~$g$.
+    Write $g(\omega^{2k+1}) = \prod_{j=0}^{\nu-1} f_j(k)$ where
+    \[
+        f_j(k) \;:=\; (1-\gamma_j) + \gamma_j\, \omega^{(2k+1)2^j}.
+    \]
+    Since $\omega$ has order $2n = 2^{\nu+1}$, the element $\omega^{2^{j+1}}$ has order $2^{\nu-j}$, and therefore $\omega^{(2k+1)2^j} = \omega^{2^j} \cdot (\omega^{2^{j+1}})^k$ is periodic in~$k$ with period $2^{\nu-j}$.
+    In particular:
+    \begin{itemize}
+        \item $f_{\nu-1}$ has period $2$ in $k$ \,($\omega^{2^\nu} = -1$, so $f_{\nu-1}(k)$ depends only on $k \bmod 2$),
+        \item $f_{\nu-2}$ has period $4$, \;\ldots, \; $f_0$ has period $n$.
+    \end{itemize}
+
+    We compute the product table $[g(\omega^{2k+1})]_{k=0}^{n-1}$ iteratively.
+    Initialize with the partial product $P_{\nu-1}(k) := f_{\nu-1}(k)$ for $k \in \{0, 1\}$, at a cost of $O(1)$.
+    For $s = \nu-2, \nu-3, \ldots, 0$: extend $P_{s+1}$ from its period $2^{\nu-s-1}$ to period $2^{\nu-s}$ by replication, and compute
+    $P_s(k) := P_{s+1}(k) \cdot f_s(k)$ for $k = 0,\ldots, 2^{\nu-s}-1$.
+    The cost at stage~$s$ is $O(2^{\nu-s})$ multiplications, so the total is
+    \[
+        \sum_{s=0}^{\nu-1} 2^{\nu-s} \;=\; 2 + 4 + \cdots + 2^\nu \;=\; 2(2^\nu - 1) \;=\; O(n).
+    \]
+    After the final stage, $P_0(k) = g(\omega^{2k+1})$ for all $k \in \{0,\ldots,n-1\}$.
+    The table $[\meq(\alpha',k)]_{k \in \bits^\nu}$ is computed in $O(n)$ by the standard recursive formula.
+    The evaluation~\eqref{eq:Mfactored2} is then an inner product of two length-$n$ vectors, costing $O(n)$.
+\end{proof}

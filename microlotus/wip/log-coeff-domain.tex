@@ -1,0 +1,345 @@
+\subsection{Modified coefficient-domain protocol with shared PCS coordinates}
+\label{sec:coeff-domain-modified}
+
+We describe a variant of the coefficient-domain protocol (Protocol~A
+in~\cref{sec:coeff-vs-crt}) that recovers the shared-coordinate PCS
+advantage of the CRT-domain protocol, at the cost of $3\nu$ additional
+sumcheck elements.  The key idea is to \emph{defer} the oracle queries
+on $\tilde{t}$ and $\tilde{s}$ and batch their verification into
+Sumcheck~2, so that all three final oracle evaluation points share a
+common last-$\nu$ challenge~$\gamma$.
+
+\paragraph{Setup.}
+As before: $\ring_p = \ZZ_p[X]/(X^n+1)$, $n = 2^\nu$,
+$A \in \ring_p^{N \times M}$, $s \in \ring_p^M$, $t \in \ring_p^N$
+with $t = As$.  The prover commits to coefficient MLEs
+$\tilde{A}(\bm{I},\bm{J},\bm{K})$,
+$\tilde{s}(\bm{J},\bm{K})$,
+$\tilde{t}(\bm{I},\bm{K})$.
+Let $d_f(\cdot\,;\alpha',\beta')$ denote the $\nu$-variate shift
+function arising from the negacyclic circulant decomposition,
+evaluable by the verifier in $O(\nu)$ field operations.
+
+\begin{figure}[H]
+\caption{Protocol $\Pi_{\mathsf{RingMul}}^{\mathsf{coeff*}}$: modified
+coefficient-domain PIOP with shared PCS coordinates.}
+\label{prot:coeff-modified}
+\begin{algorithm}[H]
+\textbf{Input:} Oracles
+$\oracle{\tilde{A}} \in \field_p^{\multilin}[\bm{I},\bm{J},\bm{K}]$,
+$\oracle{\tilde{s}} \in \field_p^{\multilin}[\bm{J},\bm{K}]$,
+$\oracle{\tilde{t}} \in \field_p^{\multilin}[\bm{I},\bm{K}]$.
+
+\begin{algorithmic}[1]
+
+\STATE The verifier samples
+$\alpha \randpick \extensionfield^\tau$,
+$\alpha' \randpick \extensionfield^\nu$.
+
+\STATE \label{step:coeff-et}
+The prover sends $e_t$ claimed to equal $\tilde{t}(\alpha, \alpha')$.
+
+\STATE \label{step:coeff-sc1}
+\textbf{Sumcheck~1} (degree-$2$, $\mu + \nu$ rounds).
+$\prover$ and $\verifier$ run a sumcheck for the claim
+\[
+    e_t \;=\; \sum_{(j,k) \in \bits^{\mu+\nu}}
+    V(j,k) \cdot \tilde{s}(j,k),
+\]
+where $V(j,k) = \sum_\ell \meq(\ell, \alpha')
+\cdot [Z_{-1}(\tilde{A}(\alpha, j, \cdot))]_{\ell,\, k}$
+is the negacyclic-circulant virtual polynomial.
+Let $(\beta, \beta') \in \extensionfield^{\mu+\nu}$ denote the
+folding challenges, reducing to the claim
+$\sigma' = V(\beta,\beta') \cdot \tilde{s}(\beta,\beta')$.
+
+\STATE \label{step:coeff-eV}
+The prover sends $e_V$ claimed to equal $V(\beta,\beta')$.
+The verifier computes $e_s := \sigma' / e_V$
+(rejecting if $e_V = 0$ and $\sigma' \neq 0$).
+
+\STATE \label{step:coeff-rho}
+The verifier samples batching challenge
+$\rho \randpick \extensionfield$.
+
+\STATE \label{step:coeff-sc2}
+\textbf{Sumcheck~2} (degree-$2$, $\nu$ rounds).
+$\prover$ and $\verifier$ run a sumcheck for the batched claim
+\begin{equation}\label{eq:coeff-batched-sc2}
+    e_V + \rho\, e_t + \rho^2 e_s
+    \;=\;
+    \sum_{\ell \in \bits^\nu} \Big[
+        \tilde{A}(\alpha,\beta,\ell) \cdot d_f(\ell;\, \alpha',\beta')
+        \;+\; \rho\, \meq(\ell,\alpha') \cdot \tilde{t}(\alpha,\ell)
+        \;+\; \rho^2\, \meq(\ell,\beta') \cdot \tilde{s}(\beta,\ell)
+    \Big].
+\end{equation}
+Each term in the summand is a product of two multilinears in~$\ell$
+(degree~$2$).
+Let $\gamma \in \extensionfield^\nu$ denote the folding challenges,
+reducing to the claim
+\[
+    c \;=\;
+    \tilde{A}(\alpha,\beta,\gamma) \cdot d_f(\gamma)
+    + \rho\, \meq(\gamma,\alpha') \cdot \tilde{t}(\alpha,\gamma)
+    + \rho^2\, \meq(\gamma,\beta') \cdot \tilde{s}(\beta,\gamma).
+\]
+
+\STATE \label{step:coeff-queries}
+The verifier evaluates $d_f(\gamma)$,
+$\meq(\gamma,\alpha')$, and $\meq(\gamma,\beta')$
+in $O(\nu)$ each, then queries
+\[
+    e'_A \gets \oracle{\tilde{A}(\alpha,\beta,\gamma)}, \qquad
+    e'_t \gets \oracle{\tilde{t}(\alpha,\gamma)}, \qquad
+    e'_s \gets \oracle{\tilde{s}(\beta,\gamma)},
+\]
+and checks
+$c = e'_A \cdot d_f(\gamma) + \rho\, \meq(\gamma,\alpha')\, e'_t
+     + \rho^2\, \meq(\gamma,\beta')\, e'_s$.
+
+\end{algorithmic}
+\end{algorithm}
+\end{figure}
+
+
+\paragraph{Shared coordinates.}
+All three oracle queries share $\gamma$ as their last $\nu$
+coordinates:
+\begin{center}
+\begin{tabular}{lll}
+    Oracle & Point & Dimension \\
+    \hline
+    $\tilde{t}$ & $(\alpha, \gamma)$ & $\tau + \nu$ \\
+    $\tilde{s}$ & $(\beta, \gamma)$ & $\mu + \nu$ \\
+    $\tilde{A}$ & $(\alpha, \beta, \gamma)$ & $\tau + \mu + \nu$
+\end{tabular}
+\end{center}
+This is the same shared-suffix structure as the CRT-domain
+protocol (\cref{prot:ringmul}), so the full PIOR consolidation
+chain of \cref{sec:reducing-commitments} (SelectorMerge, MultiPoint,
+DP24~packing, interleaved BaseFold) applies identically.
+
+\paragraph{Costs.}
+\begin{center}
+\begin{tabular}{lccc}
+    & Coeff.\ (original) & Coeff.\ (modified) & CRT \\
+    \hline
+    Sumcheck~1 & $3(\mu+\nu)$ & $3(\mu+\nu)$ & $3\mu$ \\
+    Sumcheck~2 & $3\nu$ & $3\nu$ & $3\nu$ \\
+    Prover claims & 1 & 2 & 2 \\
+    \textbf{Total} & $3\mu + 6\nu + 1$ & $3\mu + 6\nu + 2$ & $3\mu + 3\nu + 2$ \\
+    \hline
+    Shared last-$\nu$ PCS & No & Yes & Yes \\
+    PIOR chain & Separate opens & Full consolidation & Full consolidation
+\end{tabular}
+\end{center}
+The modification adds one prover claim ($e_t$) and trades the three
+unrelated PCS evaluation points of the original coefficient protocol
+for a shared-$\gamma$ suffix, at no change in sumcheck round count or
+degree.  The residual gap with the CRT protocol is exactly $3\nu$
+sumcheck elements, arising entirely from Sumcheck~1 ranging over
+$\mu + \nu$ variables (convolution entangles column and coefficient
+indices) rather than $\mu$.
+
+\begin{theorem}[Completeness]
+If $t = As$ over $\ring_p$ and both parties follow the protocol,
+then the verifier accepts.
+\end{theorem}
+
+\begin{proof}
+Assume $t = As$.
+
+\emph{Step~\ref{step:coeff-et}.}
+The honest prover sets $e_t = \tilde{t}(\alpha,\alpha')$.
+
+\emph{Step~\ref{step:coeff-sc1}.}
+The negacyclic convolution gives
+$t_i[\ell] = \sum_j [Z_{-1}(A_{ij})]_{\ell,k}\, s_j[k]$
+for all $(i,\ell)$.  Passing to MLEs and evaluating at $(\alpha,\alpha')$:
+\[
+    \tilde{t}(\alpha,\alpha')
+    = \sum_{(j,k) \in \bits^{\mu+\nu}} V(j,k) \cdot \tilde{s}(j,k),
+\]
+so the sumcheck claim $e_t = \text{RHS}$ holds.  By completeness
+of degree-$2$ sumcheck, the honest round messages are accepted.
+
+\emph{Step~\ref{step:coeff-eV}.}
+The sumcheck reduces to $\sigma' = V(\beta,\beta') \cdot \tilde{s}(\beta,\beta')$.
+The honest prover sets $e_V = V(\beta,\beta')$, so
+$e_s = \sigma'/e_V = \tilde{s}(\beta,\beta')$.
+
+\emph{Step~\ref{step:coeff-sc2}.}
+We verify the three terms on the RHS of~\eqref{eq:coeff-batched-sc2}
+separately.  The first:
+\[
+    \sum_{\ell \in \bits^\nu} \tilde{A}(\alpha,\beta,\ell) \cdot d_f(\ell)
+    \;=\; V(\beta,\beta') \;=\; e_V,
+\]
+by the definition of $d_f$ (encoding the negacyclic shift at
+challenges $\alpha',\beta'$).  The second:
+\[
+    \sum_{\ell \in \bits^\nu} \meq(\ell,\alpha') \cdot \tilde{t}(\alpha,\ell)
+    \;=\; \tilde{t}(\alpha,\alpha'),
+\]
+since $\sum_\ell \meq(\ell,\alpha')\, f(\ell) = f(\alpha')$ for any
+multilinear~$f$.  Hence this contributes $\rho \cdot e_t$.
+The third:
+\[
+    \sum_{\ell \in \bits^\nu} \meq(\ell,\beta') \cdot \tilde{s}(\beta,\ell)
+    \;=\; \tilde{s}(\beta,\beta') \;=\; e_s,
+\]
+contributing $\rho^2 \cdot e_s$.  The total is
+$e_V + \rho\, e_t + \rho^2 e_s$, matching the LHS.
+
+\emph{Step~\ref{step:coeff-queries}.}
+By completeness of Sumcheck~2, the reduced claim at $\gamma$ holds.
+The oracle queries return the honest evaluations, and the verifier's
+check passes.
+\end{proof}
+
+
+\begin{theorem}[Soundness]
+Protocol $\Pi_{\mathsf{RingMul}}^{\mathsf{coeff*}}$ has
+round-by-round knowledge soundness error at most
+\[
+    \epsilon_{\mathsf{rbr}}
+    \;\leq\;
+    \underbrace{\frac{\tau + 2\nu}{|\extensionfield|}}_{\text{Schwartz--Zippel}}
+    \;+\; \underbrace{\frac{2(\mu+\nu)}{|\extensionfield|}}_{\text{Sumcheck 1}}
+    \;+\; \underbrace{\frac{2}{|\extensionfield|}}_{\text{batching}}
+    \;+\; \underbrace{\frac{2\nu}{|\extensionfield|}}_{\text{Sumcheck 2}}
+    \;=\;
+    \frac{\tau + 2\mu + 6\nu + 2}{|\extensionfield|}.
+\]
+For comparison, the CRT protocol (\cref{thm:ringmul-rbr}) achieves
+$(\tau + 2\mu + 4\nu + 1)/|\extensionfield|$; the difference of
+$2\nu + 1$ arises from the $\nu$ extra Sumcheck~1 rounds and the
+degree-$2$ (versus degree-$1$) batching polynomial.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+The protocol has four phases contributing to the soundness error.
+
+\emph{(i) Schwartz--Zippel for the main relation.}
+Define $R(i,\ell) := t_i[\ell] - \sum_j \sum_k
+[Z_{-1}(A_{ij})]_{\ell,k}\, s_j[k]$ for $(i,\ell) \in [N] \times [n]$,
+and let
+$H(\alpha,\alpha') := e_t - \sum_{(j,k)} V(j,k)\, \tilde{s}(j,k)$.
+On Boolean inputs $H$ agrees with $\tilde{R}$, so $R \not\equiv 0$
+implies $H \not\equiv 0$.  Since $H$ has individual degree~$1$ in
+the $\tau$ variables of~$\alpha$ and individual degree~$2$ in
+the $\nu$ variables of~$\alpha'$ (from the product structure of the
+circulant), Schwartz--Zippel gives
+$\Pr[H(\alpha,\alpha') = 0] \leq (\tau + 2\nu)/|\extensionfield|$.
+
+\emph{(ii) Sumcheck~1 RBR soundness.}
+Degree-$2$ sumcheck over $\mu + \nu$ rounds contributes
+$2(\mu+\nu)/|\extensionfield|$.
+
+\emph{(iii) Batching.}
+After Sumcheck~1, the prover commits to $e_V$ and the verifier
+derives $e_s = \sigma'/e_V$.  Define the errors
+$\Delta_V = e_V - V(\beta,\beta')$,
+$\Delta_t = e_t - \tilde{t}(\alpha,\alpha')$,
+$\Delta_s = e_s - \tilde{s}(\beta,\beta')$.
+The batched error is $\Delta_V + \rho\,\Delta_t + \rho^2\Delta_s$,
+a degree-$2$ polynomial in the random $\rho$ (sampled after $e_V$
+is fixed).  If any $\Delta \neq 0$, this vanishes with probability
+$\leq 2/|\extensionfield|$.
+
+Since $e_s = \sigma'/e_V$ and Sumcheck~1 fixes $\sigma'$,
+an incorrect $e_V \neq V(\beta,\beta')$ generically forces
+$e_s \neq \tilde{s}(\beta,\beta')$, so at least one of $\Delta_V$,
+$\Delta_s$ is nonzero.
+
+\emph{(iv) Sumcheck~2 RBR soundness.}
+Degree-$2$ sumcheck over $\nu$ rounds contributes
+$2\nu/|\extensionfield|$.
+
+Summing all terms gives the stated bound.
+\end{proof}
+
+
+\paragraph{Integration with SpeedySpartan.}
+In a SpeedySpartan-style outer protocol, the inner sumcheck
+(our Sumcheck~1) produces challenges $(\beta,\beta')$ that also
+determine the evaluation points for the wiring matrices
+$\tilde{W}_w(r,\beta,\beta')$.  These claims can be absorbed into
+Sumcheck~2 at no increase in degree by adding terms
+$\rho_w\, \meq(\ell,\beta') \cdot \tilde{W}_w(r,\beta,\ell)$
+to~\eqref{eq:coeff-batched-sc2}.  After folding with~$\gamma$,
+the wiring-matrix queries land at $(r,\beta,\gamma)$---sharing
+$\gamma$ with the ring-IOP claims---so the full PIOR consolidation
+chain applies to all oracles simultaneously.
+
+The gate selector $\tilde{q}_M(r)$ is lower-dimensional and
+independent of the coefficient-index variables;
+padding it to $(r,\beta,\gamma)$ (constant in $(\bm{J},\bm{L})$)
+makes it compatible with any shared suffix.
+
+\emph{SelectorMerge alignment.}
+After Sumcheck~2 with challenge~$\gamma$, the evaluation claims are:
+\begin{center}
+\begin{tabular}{llll}
+    Oracle & Point & Dim. & Last $\mu{+}\nu$ coords \\
+    \hline
+    $\tilde{W}_w$ ($w \in \{a,b,c\}$) & $(r, \beta, \gamma)$ & $m + \mu + \nu$ & $(\beta, \gamma)$ \\
+    $\tilde{q}_{M,\mathrm{pad}}$ & $(r, \beta, \gamma)$ & $m + \mu + \nu$ & $(\beta, \gamma)$ \\
+    $\tilde{A}$ & $(\alpha, \beta, \gamma)$ & $\tau + \mu + \nu$ & $(\beta, \gamma)$ \\
+    $\tilde{t}_{\mathrm{pad}}$ & $(\alpha, \beta, \gamma)$ & $\tau + \mu + \nu$ & $(\beta, \gamma)$ \\
+    $\tilde{s}$ & $(\beta, \gamma)$ & $\mu + \nu$ & $(\beta, \gamma)$
+\end{tabular}
+\end{center}
+Here $\tilde{t}_{\mathrm{pad}}(x,j,\ell) := \tilde{t}(x,\ell)$
+is padded to be constant in~$\bm{J}$, so
+$\tilde{t}_{\mathrm{pad}}(\alpha,\beta,\gamma) = \tilde{t}(\alpha,\gamma)$.
+All seven claims share $(\beta,\gamma)$ as their last $\mu + \nu$
+coordinates.  The indexed oracles split into two families:
+\begin{enumerate}[nosep]
+    \item $\tilde{W}_a, \tilde{W}_b, \tilde{W}_c, \tilde{q}_{M,\mathrm{pad}}$
+          at data point $(r, \beta, \gamma)$---SelectorMerge with $2$
+          selector bits covers $\bits^2$ exactly, so MultiPoint
+          costs $0$ prover messages.
+    \item $\tilde{A}, \tilde{t}_{\mathrm{pad}}$
+          at data point $(\alpha, \beta, \gamma)$---SelectorMerge
+          with $1$ selector bit covers $\bits^1$ exactly,
+          MultiPoint costs $0$ prover messages.
+\end{enumerate}
+After MultiPoint, there are $3$ claims: $h_1(r'_1, r'_2, r, \beta, \gamma)$,
+$h_2(r'_3, \alpha, \beta, \gamma)$, and $\tilde{s}(\beta, \gamma)$.
+These share $(\beta,\gamma)$ as a suffix but differ in prefix
+coordinates $(r'_1, r'_2, r)$ vs.\ $(r'_3, \alpha)$.
+They cannot be further merged by SelectorMerge (different prefix
+dimensions and values), so they proceed as three independent claims
+into DP24~packing and BaseFold.
+
+However, interleaved BaseFold still benefits: once each polynomial
+is solo-folded down to $\mu + \nu$ variables, all three share the
+same folding challenges for the remaining $\mu + \nu$ rounds,
+and a single interleaved Merkle tree covers all three simultaneously.
+
+\emph{Comparison with the CRT variant.}
+The CRT SpeedySpartan instance (\cref{sec:reducing-commitments})
+produces $2$ claims after PIOR consolidation ($h_1$ and $\tilde{s}$),
+because $\tilde{A}$ and $\tilde{t}$ are handled by the CRT
+consistency sumcheck rather than as separate oracle claims.
+The coefficient variant produces $3$ claims, adding one
+indexed-oracle opening ($h_2$) to the BaseFold phase.
+The concrete cost of this extra opening is $1 + \tau$ solo-fold
+rounds for $h_2$ (dimension $1 + \tau + \mu + \nu$, shared
+dimension $\mu + \nu$) before joining the interleaved phase.
+For SWIFFT ($\tau = 4$): $5$ extra folding rounds---each
+contributing one Merkle commitment and $q$ authentication
+paths---versus the CRT variant.
+
+\paragraph{Comparison with CRT protocol.}
+The PCS costs are now identical.  The irreducible difference is
+$3\nu$ sumcheck extension-field elements, arising from Sumcheck~1's
+$\mu + \nu$ variables versus the CRT protocol's $\mu$.
+For SWIFFT parameters ($\mu = 4$, $\nu = 6$):
+$3\nu = 18$ extension-field elements $\approx 90$ bytes---negligible
+relative to hash-based PCS proof sizes of tens of kilobytes.
+The CRT-domain protocol's advantage in this regime is therefore
+structural simplicity (one sumcheck architecture, no shift function
+$d_f$) rather than concrete proof size.
