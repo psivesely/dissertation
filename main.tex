@@ -29,7 +29,8 @@
 
 \newcommand{\CryptoEprint}{Cryptology ePrint Archive, Report}
 \usepackage{mathtools}
-\usepackage{unicode-math}
+\usepackage[warnings-off={mathtools-overbracket,mathtools-colon}]{unicode-math}
+\AtBeginDocument{\renewcommand{\setminus}{\mathbin{\symbol{"2216}}}}
 \usepackage{amsthm}
 \usepackage{xspace}
 \usepackage{makecell}
@@ -47,6 +48,14 @@
 %   Scale=MatchLowercase
 % ]
 % \AtBeginDocument{\setoperatorfont\symup}
+
+% Fix font shape warnings (must be after font loading)
+\AtBeginDocument{%
+  % Fix "Font shape `TU/lmr/bx/sc' undefined" warning (bold + smallcaps)
+  \DeclareFontShape{TU}{lmr}{bx}{sc}{<->ssub*lmr/m/sc}{}%
+  % Fix "Font shape `TU/lmss/m/it' undefined" warning (sans-serif italic)
+  \DeclareFontShape{TU}{lmss}{m}{it}{<->ssub*lmss/m/sl}{}%
+}
 
 \usepackage{caption}
 \captionsetup{
@@ -84,8 +93,7 @@
   \setlength{\bibitemsep}{\baselineskip} % space between entries (one “blank line”)
   \setlength{\bibparsep}{0pt}            % space within an entry (keep tight)
 }
-\addbibresource{references.bib} 
-\addbibresource{zinc/references.bib} 
+\addbibresource{zinc/references.bib}
 \addbibresource{orbweaver/references.bib} 
 \addbibresource{microlotus/references.bib} 
 \addbibresource{cryptobib/abbrev3.bib} 
@@ -95,6 +103,7 @@
 \usepackage{setspace}
 \doublespacing
 
+\counterwithout{footnote}{chapter}
 \usepackage{enumitem}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{mleftright}
@@ -104,7 +113,7 @@
 \usetikzlibrary{arrows.meta}
 \tikzset{>=Latex}
 
-\newcommand{\disstitle}{Efficient Hash- and Lattice-based Proof Systems for Mixed Algebras}
+\newcommand{\disstitle}{Efficient Hash- and Lattice-Based Proof Systems for Mixed Algebras}
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
 \hypersetup{
     colorlinks=true,
@@ -126,11 +135,13 @@
 %%%%%%%%%%%%%%%%%
 	
 \pagenumbering{gobble}
+\hypersetup{pageanchor=false}
 
 \input{content/abstract}
 \input{content/title-page}
 \input{content/copyright}
 
+\hypersetup{pageanchor=true}
 \pagenumbering{roman}
 \setcounter{page}{3}
 
@@ -154,6 +165,7 @@
 \chapter{Introduction}
 \label{ch:intro}
 \input{content/intro}
+\input{content/disclaimer}
 
 \chapter{Zinc+: SNARKs for Polynomial Rings}
 \label{ch:zinc}
@@ -171,9 +183,10 @@ We now provide an overview of the main contributions of this work.
 \input{zinc/UCS/structural_instantiations}
 \input{zinc/PIOR/zincplus_pior}
 
-\chapter{Microlotus: Efficient Hash-based Proofs for Cyclotomic Rings}
+\chapter{Microlotus: Small Field Proofs for Cyclotomic Rings}
 \label{ch:microlotus}
 \input{microlotus/macros}
+\section{Introduction}
 \input{microlotus/intro}
 \input{microlotus/related-work}
 \input{microlotus/tech-overview}
@@ -183,7 +196,7 @@ We now provide an overview of the main contributions of this work.
 % \input{microlotus/ring-codes}
 % \input{microlotus/ring-speedyspartan}
 
-\chapter{Orbweaver: Succinct Linear Functional Commitments from Lattices}
+\chapter[Orbweaver: Succinct Linear Functional Commitments from Lattices]{Orbweaver\protect\footnotemark: Succinct Linear Functional Commitments from Lattices}
 \label{ch:orbweaver}
 \input{orbweaver/macros}
 \input{orbweaver/intro}
@@ -192,7 +205,10 @@ We now provide an overview of the main contributions of this work.
 %%%%%%%%%%%%%%%%%
 % Bibliography
 %%%%%%%%%%%%%%%%%
+\begingroup
+\emergencystretch=1em
 \printbibliography
+\endgroup
 
 %%%%%%%%%%%%%%%%%
 % Appendices

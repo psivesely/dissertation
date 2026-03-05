@@ -9,7 +9,7 @@ on $\tilde{t}$ and $\tilde{s}$ and batch their verification into
 Sumcheck~2, so that all three final oracle evaluation points share a
 common last-$\nu$ challenge~$\gamma$.
 
-\paragraph{Setup.}
+\parhead{Setup}
 As before: $\ring_p = \ZZ_p[X]/(X^n+1)$, $n = 2^\nu$,
 $A \in \ring_p^{N \times M}$, $s \in \ring_p^M$, $t \in \ring_p^N$
 with $t = As$.  The prover commits to coefficient MLEs
@@ -103,7 +103,7 @@ $c = e'_A \cdot d_f(\gamma) + \rho\, \meq(\gamma,\alpha')\, e'_t
 \end{figure}
 
 
-\paragraph{Shared coordinates.}
+\parhead{Shared coordinates}
 All three oracle queries share $\gamma$ as their last $\nu$
 coordinates:
 \begin{center}
@@ -120,7 +120,7 @@ protocol (\cref{prot:ringmul}), so the full PIOR consolidation
 chain of \cref{sec:reducing-commitments} (SelectorMerge, MultiPoint,
 DP24~packing, interleaved BaseFold) applies identically.
 
-\paragraph{Costs.}
+\parhead{Costs}
 \begin{center}
 \begin{tabular}{lccc}
     & Coeff.\ (original) & Coeff.\ (modified) & CRT \\
@@ -261,7 +261,7 @@ Summing all terms gives the stated bound.
 \end{proof}
 
 
-\paragraph{Integration with SpeedySpartan.}
+\parhead{Integration with SpeedySpartan}
 In a SpeedySpartan-style outer protocol, the inner sumcheck
 (our Sumcheck~1) produces challenges $(\beta,\beta')$ that also
 determine the evaluation points for the wiring matrices
@@ -333,7 +333,7 @@ For SWIFFT ($\tau = 4$): $5$ extra folding rounds---each
 contributing one Merkle commitment and $q$ authentication
 paths---versus the CRT variant.
 
-\paragraph{Comparison with CRT protocol.}
+\parhead{Comparison with CRT protocol}
 The PCS costs are now identical.  The irreducible difference is
 $3\nu$ sumcheck extension-field elements, arising from Sumcheck~1's
 $\mu + \nu$ variables versus the CRT protocol's $\mu$.

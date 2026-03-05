@@ -5,7 +5,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\section{Preliminaries}\label{sec:preliminaries}
+\section{Preliminaries}\label{sec:zinc-preliminaries}
 \label{s:extended_preliminaries}
 
 
@@ -32,7 +32,7 @@ We use $\KK$ to denote (possibly infinite) fields and $R$ to denote rings. We wr
 
 
 
-\paragraph{Polynomial rings and commutative algebra.}
+\parhead{Polynomial rings and commutative algebra}
 For variables $\YY=(Y_1,\ldots, Y_\mu)$, $R[\YY]$ denotes multivariate polynomials over $R$, and $R^{\multilin}[\YY]$ the multilinear polynomials (individual degree $\le 1$ in each variable).
 
 We often work with multivariate polynomials whose coefficients are themselves univariate polynomials. For a ring $\cR$ (typically $\ZZ[X]$, $\QQ[X]$, or $\local{q}[X]$) and variables $\YY=(Y_1,\ldots, Y_\mu)$, we write $\cR[\YY]$ for polynomials in $\YY$ with coefficients in $\cR$. We view elements of $(\ZZ[X])[\YY]$ as polynomials in $\YY$ (not as elements of $\ZZ[X,\YY]$), denoting them by $f(\YY)$.
@@ -45,7 +45,7 @@ For any field $\FF_{p^e}$ containing subfield $L$ we can map elements of $L$ int
 
 
 
-\label{sec:local-rings}
+\label{sec:zinc-local-rings}
 The subset $\loc{p} = \{a/b\in \QQ : p\nmid b\}$ of $\QQ$ is a ring called the \emph{localization of $\ZZ$ at the prime~$p$}. This ring admits a surjective homomorphism $\phi_p: \loc{p} \to \FF_p$, $a/b \mapsto a \cdot b^{-1}$, with kernel $\ker(\phi_p) = p\loc{p}$.
 
 
@@ -58,14 +58,14 @@ For prime powers $q=p_\primeindex^{e_\primeindex}$, we set $\loc{q_\primeindex}\
 \end{equation}
 
 
-\paragraph{Bitstring representation.}
+\parhead{Bitstring representation}
 \label{sec:bitstring-rep}
 We use standard representations: integers are represented in two's complement, so an integer $n\in\ZZ$ has bit-size $\lceil\log_2(|n|+1)\rceil + 1$; rationals $a/b\in\QQ$ are represented as pairs $(a,b)$ in \emph{lowest terms} (i.e., $\gcd(a,b)=1$ and $b>0$), with bit-size the sum of the bit-sizes of $a$ and $b$; polynomials are represented as tuples of coefficients (in increasing degree order), with bit-size the sum of the coefficient bit-sizes.
 We write $\ZZ^{<B}$, $\QQ^{<B}$, $\ZZ^{<d,<B}[X]$, $\QQ^{<d,<B}[X]$, and $\local{q}^{<d,<B}[X]$ for elements with bit-size less than $B$ (and degree $<d$ for polynomials).
 For a ring $\cR$, we write $\cR^{<B}$ for elements representable with fewer than $B$ bits.
 
 
-\paragraph{Multilinear extensions (MLE).}
+\parhead{Multilinear extensions (MLE)}
 \label{sec:multilinear-extensions}
 A multilinear polynomial $f(\YY)\in R^{\multilin}[\YY]$ is uniquely determined by its values on $\BB^\mu$. For any map $f: \BB^\mu \to R$, we write $\multilinmle{f}(\YY)$ for its \emph{multilinear extension} (MLE), the unique multilinear polynomial that agrees with $f$ on the Boolean hypercube. 
 For a vector $\mathbf{v}\in R^{2^\mu}$, we write $\multilinmle{\mathbf{v}}(\YY)$ for the MLE of the map $\yy\mapsto v_\yy$ (interpreting $\yy\in\BB^\mu$ as an integer in binary).
@@ -76,7 +76,7 @@ We also use the standard \emph{equality polynomial}
 which satisfies $\meq(\yy;\zz)=1$ if $\yy=\zz$ and $\meq(\yy;\zz)=0$ otherwise for $\yy,\zz\in\BB^\mu$. 
 
 
-\paragraph{Schwartz--Zippel lemma for exceptional sets.}
+\parhead{Schwartz--Zippel lemma for exceptional sets}
 \label{sec:algebraic-tools}
 We will need the following general form of Schwartz-Zippel lemma in order to address certain ideal-membership constraints in our proof system. A subset $S\subseteq \cR$ is \emph{exceptional} if $a-b$ has a multiplicative inverse for all distinct $a,b\in S$.
 \begin{lemma}[Schwartz--Zippel lemma for exceptional sets]
@@ -89,7 +89,7 @@ $\Pr_{\rr\getsr S^\mu}[f(\rr)=0] \le \mu/|S|$.
 
 
 \subsection{Indexed relations and oracles.}
-\label{sec:polynomial-commitments}
+\label{sec:zinc-polynomial-commitments}
 
 
 An \emph{indexed relation} $\REL$ is a set of index-input-witness triples $(\idx,\inp;\wit)$. The \emph{language} associated with $\REL$ is
@@ -119,13 +119,13 @@ An \emph{oracle to a polynomial} $f(\XX)$ over $R$ is a black-box that allows qu
 % \]
 % where $\varepsilon_{\mathsf{cmp}}$ is the \emph{completeness error}. When $\varepsilon_{\mathsf{cmp}}=0$, the protocol has \emph{perfect completeness}.
 
-% \noindent\textbf{Soundness.} For every $(\idx,\inp)\notin\LANG(\REL)$ and every (computationally unbounded) prover $\prover^*$ that sends correctly typed oracle messages (cf.\ \cref{rem:oracle_typing}),
+% \noindent\textbf{Soundness.} For every $(\idx,\inp)\notin\LANG(\REL)$ and every (computationally unbounded) prover $\prover^*$ that sends correctly typed oracle messages (cf.\ \cref{rem:zinc-oracle_typing}),
 % \[
 %   \Pr\bigl[\langle\prover^*,\verifier(\idx,\inp)\rangle = \mathsf{accept}\bigr]\ \le\ \varepsilon_{\mathsf{snd}},
 % \]
 % where $\varepsilon_{\mathsf{snd}}$ is the \emph{soundness error}.
 
-% \noindent\textbf{Knowledge soundness.} \albert{Should be round-by-round knowledge soundness? Let's wait for Psi's section  } The PIOP is \emph{knowledge sound} with knowledge error $\knowledgeerror$ if there exists a polynomial-time \emph{extractor} $\extractor$ such that for every prover $\prover^*$ that sends correctly typed oracle messages (cf.\ \cref{rem:oracle_typing}), every index $\idx$, and every input $\inp$,
+% \noindent\textbf{Knowledge soundness.} \albert{Should be round-by-round knowledge soundness? Let's wait for Psi's section  } The PIOP is \emph{knowledge sound} with knowledge error $\knowledgeerror$ if there exists a polynomial-time \emph{extractor} $\extractor$ such that for every prover $\prover^*$ that sends correctly typed oracle messages (cf.\ \cref{rem:zinc-oracle_typing}), every index $\idx$, and every input $\inp$,
 % \[
 %   \Pr\Bigl[
 %     \langle\prover^*,\verifier(\idx,\inp)\rangle = \mathsf{accept}
@@ -140,7 +140,7 @@ An \emph{oracle to a polynomial} $f(\XX)$ over $R$ is a black-box that allows qu
 
 
 \begin{remark}[Oracle typing assumption]
-\label{rem:oracle_typing}
+\label{rem:zinc-oracle_typing}
 Soundness and knowledge soundness for PIOPs are required to hold only for malicious provers $\prover^*$ that send \emph{correctly typed} oracles---i.e., oracles that actually correspond to polynomials with the prescribed number of variables, degrees, and coefficient domains. Informally speaking, enforcing that a (computationally bounded) prover sends such oracles is the responsibility of the polynomial commitment scheme (PCS) or other cryptographic mechanisms (such as IOPP) used to compile the PIOP into a concrete argument system.
 \end{remark}
 
@@ -162,7 +162,7 @@ Soundness and knowledge soundness for PIOPs are required to hold only for malici
 
 % \subsection{Constrained linear codes, IOPs of Proximity (IOPPs), and Mutual Correlated Agreement (MCA)}\label{def:prelims_iopp}
 
-% \paragraph{Constrained linear codes.}
+% \parhead{Constrained linear codes}
 
 % A \emph{linear code} over a field  $\KK$ is a linear subspace $\mc{C}\subseteq \KK^n$.
 % The \emph{block length} is $n$, and the \emph{dimension} $k=\dim(\mc{C})$ is the dimension of the subspace.
@@ -215,7 +215,7 @@ Soundness and knowledge soundness for PIOPs are required to hold only for malici
 
 
 
-% \paragraph{Mutual Correlated Agreement}
+% \parhead{Mutual Correlated Agreement}
 % \input{IOPP/mutual_correlated_agreement.tex}
 
 
@@ -313,7 +313,7 @@ if there exists a knowledge state function $\kstate$ for $\Pi$ and a determinist
 
 % \psiv{Todo: prove that (our variant of) round-by-round knowledge soundness implies straightline state-restoration knowledge soundness}
 
-% \paragraph{Efficiency measures.}
+% \parhead{Efficiency measures}
 % We track several efficiency measures:
 % \begin{itemize}
 %   \item rounds $k$;

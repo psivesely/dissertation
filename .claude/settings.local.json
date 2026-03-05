@@ -1,9 +1,56 @@
 {
+  "$schema": "https://claude.ai/schema/settings.json",
   "permissions": {
     "allow": [
-      "Bash(ls *.bib)",
-      "Bash(ls /Users/psi/src/psivesely/dissertation/*.log)",
-      "Bash(python3 -c \":*)"
+      "Bash(git:*)",
+
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(pip3:*)",
+
+      "Bash(mkdir:*)",
+      "Bash(chmod:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(touch:*)",
+
+      "Bash(curl:*)",
+
+      "Bash(npm run:*)",
+      "Bash(./build.sh)",
+
+      "Bash(sage:*)",
+      "Bash(sage -python:*)",
+
+      "Bash(cargo:*)",
+      "Bash(rustc:*)",
+      "Bash(rustup:*)",
+      "Bash(rustfmt:*)",
+      "Bash(clippy:*)",
+
+      "Bash(latexmk:*)",
+      "Bash(biber:*)",
+      "Bash(pdflatex:*)",
+      "Bash(xelatex:*)",
+      "Bash(lualatex:*)",
+      "Bash(bibtex:*)",
+      "Bash(makeindex:*)",
+      "Bash(makeglossaries:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Bash(chmod 777:*)"
     ]
   }
 }

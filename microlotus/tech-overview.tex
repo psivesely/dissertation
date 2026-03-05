@@ -4,7 +4,7 @@
 
 We give an overview of our PIOP for proving matrix-vector products $As = t$ over the cyclotomic ring $\ring_p = \ZZ_p[X]/(X^n+1)$, where $n = 2^\nu$ and $p \equiv 1 \pmod{2n}$. This is the $\ring$-algebraic core of lattice-based cryptography including MLWE/RLWE encryption, Dilithium/Falcon/Hawk signatures, FHE operation proofs, and Ajtai hash commitments. The full protocol is given in~\cref{sec:matrix-vector-pior}.
 
-\paragraph{A CRT-domain sumcheck for ring arithmetic.}
+\parhead{A CRT-domain sumcheck for ring arithmetic}
 Our starting observation is that since we target fully splitting rings, we can use the CRT isomorphism $\ring_p \cong \field_p^n$ to reduce ring multiplication to pointwise multiplication. If $C \in \field_p^{n \times n}$ denotes the CRT matrix with entries $C_{k,\ell} = \omega^{(2k+1)\ell}$ (where $\omega$ is a primitive $2n$-th root of unity), then $As = t$ in $\ring_p^N$ is equivalent to the pointwise identity
 \begin{equation}\label{eq:overview-pointwise}
     t_C(i,k) = \sum_{j=0}^{M-1} A_C(i,j,k) \cdot s_C(j,k) \qquad \text{for all } (i,k) \in [N] \times [n],
@@ -12,11 +12,11 @@ Our starting observation is that since we target fully splitting rings, we can u
 where $A_C = C A$, $s_C = Cs$, and $t_C = Ct$ denote the CRT transforms applied to coefficient vectors.
 
 As in the main construction, we never materialize these CRT transforms as committed polynomials. Instead, from the coefficient-domain multilinear extensions $\tilde{A}$, $\tilde{s}$, $\tilde{t}$ and the CRT-matrix multilinear extension $\tilde{C}$, we define the virtual polynomials
-\[
-    A_C(i,j,k) := \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell) \cdot \tilde{A}(i,j,\ell), \qquad
-    s_C(j,k) := \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell) \cdot \tilde{s}(j,\ell), \qquad
-    t_C(i,k) := \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell) \cdot \tilde{t}(i,\ell).
-\]
+\begin{align*}
+    A_C(i,j,k) &:= \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell) \cdot \tilde{A}(i,j,\ell), \\
+    s_C(j,k) &:= \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell) \cdot \tilde{s}(j,\ell), \\
+    t_C(i,k) &:= \sum_{\ell \in \bits^\nu} \tilde{C}(k,\ell) \cdot \tilde{t}(i,\ell).
+\end{align*}
 On Boolean inputs, these agree with the actual CRT-domain values by linearity. 
 
 The protocol instance includes oracles for $\tilde{A}$, $\tilde{s}$, $\tilde{t}$ (you may think of these as either prover or indexer-provided, depending on the setting). The verifier moves first, sampling $\alpha \in \extensionfield^\tau$ and $\alpha' \in \extensionfield^\nu$, and the prover sends $e_t$ claimed to equal $t_C(\alpha,\alpha')$. Next sumcheck is run on
@@ -32,25 +32,26 @@ To connect the virtual CRT-domain claims back to the committed coefficient-domai
 \]
 Notice that $A_C$ and $s_C$ are opened at the CRT point $\gamma$ produced by the first sumcheck, while $t_C$ remains tied to the original point $\alpha'$. After the verifier samples a final challenge $\delta \in \extensionfield^\nu$, the protocol reduces to three ordinary evaluation claims on $\tilde{A}$, $\tilde{s}$, and $\tilde{t}$, together with two evaluation claims $\tilde{C}(\gamma,\delta)$ and $\tilde{C}(\alpha',\delta)$ which we show can be computed in $O(n)$ time (\cref{lem:m-eval}).
 
-\paragraph{Holographic variant and reduced sumcheck.}
+\parhead{Holographic variant and reduced sumcheck}
 When $A$ is public, the indexer can supply the CRT-domain oracle $A_C$ directly. If in addition the claimed value $e_t = t_C(\alpha,\alpha')$ is public or the claimed evaluation of a virtual polynomial, then the only remaining committed CRT-consistency obligation is for $\tilde{s}$. In that case, we can inline the CRT expansion of $s_C$ directly into the first sumcheck and eliminate the second sumcheck entirely:
 \[
     e_t = \sum_{(j,\ell) \in \bits^{\mu+\nu}} A_C(\alpha, j, \alpha') \cdot \tilde{C}(\alpha', \ell) \cdot \tilde{s}(j, \ell).
 \]
 This merged sumcheck has degree~$2$ in every round, saves $3\nu + 2$ field elements and $\nu+1$ rounds relative to the base protocol, and leaves only a single evaluation claim on the committed oracle $\tilde{s}$.
 
-\paragraph{Ring Plonkish SNARK example.}
+\parhead{Ring Plonkish SNARK example}
 \label{sec:tech-overview-speedyspartan}
 We informally sketch how our PIOR can yield a SNARK for ring Plonkish, building on SpeedySpartan. The highly optimized final variant we arrive at reflects the strength and composability of our protocol design as well as the PIOR framework.
 
-\paragraph{Security.}
+\parhead{Security}
 We prove round-by-round knowledge soundness by decomposing the protocol into PIOR building blocks and bounding the knowledge error of each. This modular viewpoint makes the ring-arithmetic subprotocol compose cleanly with other RBRKS arguments. Applying Fiat--Shamir to the resulting public-coin protocol then yields a non-interactive argument with the usual QROM knowledge guarantees.
 
-\paragraph{Odd-prime tower fields.}
+\parhead{Odd-prime tower fields}
 The core ring-arithmetic PIOP only requires a sufficiently large extension field $\extensionfield/\field_p$. The odd-prime tower from~\cref{sec:odd-prime-tower} is needed specifically for the DP25 ring-switch packing step in the oracle-reduction pipeline: it realizes the quadratic tower $\field_p \subset \field_{p^2} \subset \cdots \subset \extensionfield$ over an odd prime base field, so the packing reduction can run natively without changing the underlying arithmetization field.
 
-\subsection{Polynomial commitment scheme implementation}
-\subsection{sec:microlotus}
+\subsection{Microlotus PCS implementation}
+\label{sec:microlotus}
+
 We implement \textit{microlotus}, a multilinear polynomial commitment scheme that combines the Basefold IOPP, random linear codes, our tower field construction for odd primes, ring-switch packing, and oracle skipping. Microlotus supports evaluating $v$-variate polynomials $f \in \field^{\multilin}[\vec{X}]$, for $\mathrm{char}(\field)>2$, at points $\vec{x} \in \extensionfield^v$ for any extension field $\extensionfield/\field$ such that $[\extensionfield:\field]$ is a power of two.
 
 In the context of arithmetization, the choice of base field is driven primarily by the computation being arithmetized. The arithmetization overhead from a mismatched base field will almost always dominate the efficiency gains between being able to use one PCS versus another, so in this sense Microlotus is not directly comparable with schemes that don't support odd prime towers. With this caveat, we compare the performance of Microlotus against other schemes (Basefold, WHIR, Brakedown). Microlotus is instantiated over the degree 16 odd prime tower extension $\mathbb{K}$ of $\mathbb{F} = \mathbb{F}_{257}$, which corresponds to SWIFFT\footnote{In practice one should instead reparametrize SWIFFT around the modulus that works best for the rest of the circuit.}. Basefold below, refers to Basefold with Reed-Solomon using code rate $\frac{1}{2}$ and $100$ queries. Our benchmarks for WHIR are over a degree 3 Goldilocks extension. For Brakedown, they are over 
@@ -63,13 +64,13 @@ a $255$ bit prime field. We also compare our Basefold implementation over degree
 The benchmarks presented in this section were run \textit{single-threaded} on an AWS r7iz.8xlarge EC2 instance with 256 GB RAM.
 
 
-\begin{figure}[t]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\linewidth]{microlotus/plots/microlotus_odd_prime_tower_oracle_skip_1_folding_arity_1.pdf}
   \caption{Total Commit + Prove, Verify Times vs. $\log n$.}
 \end{figure}
 
-\begin{table}[h]
+\begin{table}[H]
 
 \centering
 \renewcommand{\arraystretch}{0.6}

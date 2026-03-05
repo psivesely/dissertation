@@ -33,7 +33,7 @@ where  $\primeideal' = \phi_q(\primeideal\cap \local{q})$;
 
 
 
-We note that $\phi_{q}$ is only well-defined on the subring $\local{q}[X]$ of $\QQ[X]$. In our completeness and security proofs, we show that for random $q$ the probability that the relevant elements do not belong to this subring is negligible.   For brevity, we do not consider this issue further in the present overview. We refer to \cref{subsec:ucs-pior-security} for the technical details, or to the technical overview of the Zinc paper~\cite{Zinc}, where this matter is discussed thoroughly.
+We note that $\phi_{q}$ is only well-defined on the subring $\local{q}[X]$ of $\QQ[X]$. In our completeness and security proofs, we show that for random $q$ the probability that the relevant elements do not belong to this subring is negligible.   For brevity, we do not consider this issue further in the present overview. We refer to the technical overview of the Zinc paper~\cite{Zinc}, where this matter is discussed thoroughly.
 
 
 
@@ -135,7 +135,7 @@ Since~\eqref{e:new_claim} is a standard algebraic claim over a finite field, the
 The overall protocol is summarized informally in \cref{a:tech_overview_zincplus_compiler}; the formal version is given in Protocol~\ref{prot:zincplus-ucs-pior} in \cref{sec:zincplus-pior}.
 
 % \begin{breakablealgorithm}
-\begin{figure}[h!]
+\begin{figure}[H]
 \caption{$\Zinc^+$-$\PIOP$ (simplified, $\QQ[X]$-part only): a PIOP for $\ucs$ from PIOPs over finite fields (informal).}
 \label{a:tech_overview_zincplus_compiler}
 \textbf{Input:} $\prover$ and $\verifier$ receive $(\idx, \inp;\wit)\in \ucs$ and $(\idx, \inp)$, respectively, with $\wit=(\ff_0)$, $\ff_0\in (\mainpolyring{\QQ}{\bitbound}{\degreebound})^{\witlen}$.

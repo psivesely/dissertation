@@ -1,4 +1,4 @@
-\section{Sumcheck algorithms}
+\chapter{Sumcheck Algorithms}
 \label{app:sumcheck}
 
 This section includes an optimized sumcheck protocol in \cref{fig:sumcheck} and a linear time and space prover algorithm for it in \cref{fig:linear-sc}, both from from~\cite{BagadDaoDombThaler25}. We include these both for self-containedness and because these particular protocols provide a launching off point for some further sumcheck optimizations introduced in our paper.
@@ -18,7 +18,7 @@ s(\infty) = \prod_{i=1}^d p_i(\infty) = \prod_{i=1}^d (p_i(1) - p_i(0)) \quad.
 \]
 More generally, when $s(X) = G(p_1(X), \ldots, p_d(X))$ for some polynomial $G$ and linear polynomials $p_1, \ldots, p_d$, we can calculate $s(\infty)$ by evaluating only the terms of $G$ of highest total degree. Then, like $s(1)$, the prover can generally omit sending the evaluation $s(\infty)$, instead computing it using the equation above.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 \centering
 \caption{The sumcheck protocol}
 \label{fig:sumcheck}
@@ -50,7 +50,7 @@ $V$ checks this claim by making a single oracle query to $g$.
 
 A linear time and space prover for this sumcheck version may be implemented as follows. The prover maintains $d$ arrays $P_1, \dotsc, P_d$, which initially store all evaluations of $p_1, \dotsc, p_d$ over $\bits^v$; we have $P_k[x] = p_k(x)$ for all $k \in [d]$ and $x \in \bits^v$. The prover halves the size of the arrays after each round $i$, via “binding” the arrays $[P_k]_{k\in [d]}$ to the challenge $\alpha_i$ received from the verifier.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 \centering
 \caption{A linear time and space prover implementation of sumcheck}
 \label{fig:linear-sc}

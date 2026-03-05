@@ -15,9 +15,9 @@ In this section we report on a PoC partial implementation of our proof system. C
   \end{remark}
 
 
-\paragraph{UAIR$+$ constraints} As done in \cref{s:crypto_ucs} with the relation $\REL_{f}$, 
+\parhead{UAIR$+$ constraints} As done in \cref{s:crypto_ucs} with the relation $\REL_{f}$, 
 we arithmetize our computations as a specific type of UCS constraint, which we call \emph{Universal AIR constraint with lookups (UAIR$+$)}. Specifically, witness vectors are organized into traces (i.e.\ matrices), and constraints  apply consecutively on contiguous rows of the trace (sometimes the separation between constrained rows can be larger).% cf.\ \cref{rem:uair_two_step_shifts}).
-Additionally, trace columns admit types, which are enforced via lookup constraints, e.g., a column may be constrained to have all its entries in $\BitPolyset{32}$, $\Wordset{32}$, etc.. UAIR$+$ constraints generalize standard AIR constraints \cite{ethstark}. We refer to \cref{s:uair} for a full description and discussion of the UAIR$+$ relation. 
+Additionally, trace columns admit types, which are enforced via lookup constraints, e.g., a column may be constrained to have all its entries in $\BitPolyset{32}$, $\Wordset{32}$, etc.. UAIR$+$ constraints generalize standard AIR constraints \cite{ethstark}. We refer to the Zinc paper~\cite{Zinc} for a full description and discussion of the UAIR$+$ relation.
 
 \begin{remark}[Indicative benchmarks]
   The benchmark in \cref{tab:sha256_ecdsa_intro_bench} is intended as a rough estimate of the end-to-end performance achievable with our techniques, not as a direct comparison with fully deployed systems. Three caveats apply: first, our experiments do not cover the  full proving and verification pipeline, although they include Zip+, which is expected to dominate the overall cost. Second, our implementation is an initial proof of concept and has not been optimized; third, due to an incomplete implementation, we make benchmark choices that are detrimental to the overall performance, as discussed in \cref{rem:detrimental_choices}. 
@@ -26,7 +26,7 @@ Additionally, trace columns admit types, which are enforced via lookup constrain
 \end{remark}
 
 
-\paragraph{Technical specifications}
+\parhead{Technical specifications}
 
 All reported benchmarks are run on a MacBook Air M4 (16\,GB RAM, 2025), multi-threaded. All experiments target $100$ bits of security.
 
@@ -92,10 +92,10 @@ $10$  & 5.23 & 1.50& 221 & 8 (168)\\
 $11$ & 9.51 & 2.70 & 240 & 16 (186) \\
 \bottomrule
 \end{tabular}
-\caption{ Zip+ IOPP benchmarks (compiled with Merkle tree commitments) for batches of MLE polynomials of sizes corresponding to the dominant part of our SHA-256 arithmetization (cf.\ \cref{ss:sha256_64_rounds}). All rows provide costs of batching $7$ MLEs of vectors with entries in $\BitPolyset{w}$.
+\caption{ Zip+ IOPP benchmarks (compiled with Merkle tree commitments) for batches of MLE polynomials of sizes corresponding to the dominant part of our SHA-256 arithmetization. All rows provide costs of batching $7$ MLEs of vectors with entries in $\BitPolyset{w}$.
 The coefficients of each polynomial are organized in a $1 \times 2^{\text{\#Vars}}$ table, which leads to optimal proof size in this setting.
 \newline
-The ``\#Compr.''\ column indicates how many SHA-256 compressions (as per our arithmetization in \cref{ss:sha256_64_rounds}) the committed polynomials correspond to. We make the unfavorable (to us) choices in \cref{rem:detrimental_choices}, namely, we treat two columns typed in $\FF_2[X]$ as $\BitPolyset{32}$-typed columns.  In parentheses next to the number of compressions we indicate the proof size if we kept said columns in their correct $\FF_2[X]$ type.}
+The ``\#Compr.''\ column indicates how many SHA-256 compressions (as per our arithmetization) the committed polynomials correspond to. We make the unfavorable (to us) choices in \cref{rem:detrimental_choices}, namely, we treat two columns typed in $\FF_2[X]$ as $\BitPolyset{32}$-typed columns.  In parentheses next to the number of compressions we indicate the proof size if we kept said columns in their correct $\FF_2[X]$ type.}
  %\newline 
 %For context, in \cref{tab:sha256-benchmark} we provide \emph{end-to-end} benchmarks for Binius64 on the same task. %Other state-of-the-art proof systems present \emph{end-to-end} results on the same task which are \emph{one or two orders of magnitude worse} than the numbers discussed here, see for example \cite{ethproofs}. }
 \label{tab:sha256_intro_bench}
@@ -116,7 +116,7 @@ $12$ & 1.68 (8.93) & 0.87 (0.93) & 30 (87)  \\
 $13$ & 2.73 (14.59) & 1.35 (1.58) & 41 (125) \\
 \bottomrule
 \end{tabular}
-\caption{ Zip+ IOPP benchmarks (compiled with Merkle tree commitments) for batches of 3 (respectively, 27) MLE polynomials with entries in $\range{0}{2^{32}-1}$.  Our SHA-256 compression arithmetization has 3 such polynomials, with $10$ variables for $8$ compressions, $11$ for $9$ compressions, and so on. Our initial, non-optimized, ECDSA arithmetization \cref{ss:ecdsa} has $24$ such polynomials, each of $10$ variables. We use a batch size of $27$ in parentheses which corresponds to the aggregate number of polynomials typed in $\Wordset{32}$ between both our SHA-256 and ECDSA arithmetizations.}%\newline
+\caption{ Zip+ IOPP benchmarks (compiled with Merkle tree commitments) for batches of 3 (respectively, 27) MLE polynomials with entries in $\range{0}{2^{32}-1}$.  Our SHA-256 compression arithmetization has 3 such polynomials, with $10$ variables for $8$ compressions, $11$ for $9$ compressions, and so on. Our initial, non-optimized, ECDSA arithmetization has $24$ such polynomials, each of $10$ variables. We use a batch size of $27$ in parentheses which corresponds to the aggregate number of polynomials typed in $\Wordset{32}$ between both our SHA-256 and ECDSA arithmetizations.}%\newline
 %\protect\footnotemark} 
 \label{tab:ecdsa_intro_bench}
 \end{table}
@@ -194,7 +194,7 @@ $z_0,\dots,z_{26}$, each in $\Wordset{32}^{2^{10}}$, with $14$ constraints appli
 Here $v_i[t]$ denotes the $t$-th entry of a vector $v_i$. The element $z_i[t+1]$ is defined as zero when $t=2^{10}$. 
 
 
-\begin{remark}[Unimplemented parts of Zinc$+$ PIOP]\label{rem:unimplemnted_parts} The main unimplemented parts of our Zinc$+$ PIOP have to do with managing MLE evaluations of shifted columns  and running lookup arguments over the finite field $\FF_q$. The former is the main reason why the UAIR$+$ constraints we use for benchmarking are not exactly those of our SHA-256 + ECDSA arithmetization. These missing parts are purely based on sumchecks over $\FF_q$,  most of which can be batched with other sumchecks.  Other unimplemented parts of the Zinc+ PIOP have to do with boundary constraints  and selector polynomials for some constraints, cf.\ \cref{rem:uair_boundary}. 
+\begin{remark}[Unimplemented parts of Zinc$+$ PIOP]\label{rem:unimplemnted_parts} The main unimplemented parts of our Zinc$+$ PIOP have to do with managing MLE evaluations of shifted columns  and running lookup arguments over the finite field $\FF_q$. The former is the main reason why the UAIR$+$ constraints we use for benchmarking are not exactly those of our SHA-256 + ECDSA arithmetization. These missing parts are purely based on sumchecks over $\FF_q$,  most of which can be batched with other sumchecks.  Other unimplemented parts of the Zinc+ PIOP have to do with boundary constraints and selector polynomials for some constraints.
 
   Regarding the lookup arguments, we remark that these are performed purely over $\FF_q$. In particular, any decomposition vectors required during the argument (in order to handle lookups into large tables) are vectors of $\FF_q$ elements. To save on implementation hurdles we have the prover send the decomposition vectors in the clear: for lookup tables $\BitPolyset{32}$ and $\Wordset{32}$, and batching lookup claims, this requires sending a vectors of length $2^{10}$ (in our example UAIR$+$) with entries in $\FF_q$, which amounts to $12$\,KB.
 
@@ -203,7 +203,7 @@ Here $v_i[t]$ denotes the $t$-th entry of a vector $v_i$. The element $z_i[t+1]$
 
 \subsubsection{Partial comparisons with other schemes}
 
-For context, we next provide end-to-end benchmarks for the Binius64 proof system on SHA-256 hashing and SHA-256+ECDSA \cite{binius}. We emphasize that the following comparison is between our partial (IOPP-only) benchmarks and Binius64's end-to-end numbers, and is therefore not apples-to-apples; nonetheless, the gap between the two provides preliminary evidence that a fully optimized end-to-end Zinc+ implementation may outperform state-of-the-art SNARKs for these computations. Binius64 is the most competitive scheme we are aware of for the specific computation our benchmarks target, namely SHA-256 followed by ECDSA verification. For other applications (e.g.\ the Hamming weight + RLWE encryption example from \cref{sec:voting_example_appendix}) our framework may show a larger advantage, though again this remains to be validated with end-to-end benchmarks. 
+For context, we next provide end-to-end benchmarks for the Binius64 proof system on SHA-256 hashing and SHA-256+ECDSA \cite{EC:DiaPos25}. We emphasize that the following comparison is between our partial (IOPP-only) benchmarks and Binius64's end-to-end numbers, and is therefore not apples-to-apples; nonetheless, the gap between the two provides preliminary evidence that a fully optimized end-to-end Zinc+ implementation may outperform state-of-the-art SNARKs for these computations. Binius64 is the most competitive scheme we are aware of for the specific computation our benchmarks target, namely SHA-256 followed by ECDSA verification. For other applications (e.g.\ Hamming weight + RLWE encryption) our framework may show a larger advantage, though again this remains to be validated with end-to-end benchmarks.
 
 
 
@@ -211,7 +211,7 @@ On the other hand, using our work for, say, proving Poseidon2 hashing on a small
 
 
 \begin{remark}[Comparison caveats]\label{rem:comparison-caveats}
- The reported benchmarks are both favorable to us because we do not report end-to-end results (cf.\ \cref{rem:unimplemnted_parts}), and unfavorable to us because of unoptimized implementation and detrimental benchmark choices. Regardless, we hope the reported experiments resolve what is, in our opinion, the most pressing question regarding the performance of our framework: namely whether the smaller arithmetization sizes compensate for the cost of committing to polynomials with coefficients in $\ZZ[X]$ (see \cref{ss:efficiency-discussion} for further discussion). The experiments provide preliminary support for a positive answer: for $8\times$SHA-256 + ECDSA, our Zip+-only prover (the IOPP compiled with Merkle tree commitments, not end-to-end) runs in $10.71$\,ms with a $211$\,KB proof, whereas the Binius64 end-to-end prover takes $136$\,ms with a $291$\,KB proof (\cref{tab:sha256-benchmark}). While this is not an apples-to-apples comparison since our numbers cover only the IOPP/PCS component (including Merkle tree hashing)---the over $12\times$ gap in prover time and $27\%$ smaller proof size leave substantial room for the remaining PIOP-related costs. For reference, the (partial) PIOP costs reported in \cref{tab:sha256-snark-steps} add up to $7.11$\,ms, which is about $66\%$ of the Zip+ prover time.
+ The reported benchmarks are both favorable to us because we do not report end-to-end results (cf.\ \cref{rem:unimplemnted_parts}), and unfavorable to us because of unoptimized implementation and detrimental benchmark choices. Regardless, we hope the reported experiments resolve what is, in our opinion, the most pressing question regarding the performance of our framework: namely whether the smaller arithmetization sizes compensate for the cost of committing to polynomials with coefficients in $\ZZ[X]$ (see \cref{ss:zinc-efficiency-discussion} for further discussion). The experiments provide preliminary support for a positive answer: for $8\times$SHA-256 + ECDSA, our Zip+-only prover (the IOPP compiled with Merkle tree commitments, not end-to-end) runs in $10.71$\,ms with a $211$\,KB proof, whereas the Binius64 end-to-end prover takes $136$\,ms with a $291$\,KB proof (\cref{tab:sha256-benchmark}). While this is not an apples-to-apples comparison since our numbers cover only the IOPP/PCS component (including Merkle tree hashing)---the over $12\times$ gap in prover time and $27\%$ smaller proof size leave substantial room for the remaining PIOP-related costs. For reference, the (partial) PIOP costs reported in \cref{tab:sha256-snark-steps} add up to $7.11$\,ms, which is about $66\%$ of the Zip+ prover time.
 \end{remark}
 
 \cref{tab:sha256-benchmark} provides end-to-end benchmark results for Binius64 on SHA-256 and SHA-256+ECDSA. To aid comparison: the Binius64 row for $8\times$SHA-256 + ECDSA (prover: $136$\,ms, proof: $291$\,KB) targets the same computation as our aggregated Zip+ benchmark in \cref{tab:sha256_ecdsa_intro_bench} (prover: $10.71$\,ms, proof: $211$\,KB). Similarly, the SHA-256-only rows in \cref{tab:sha256-benchmark} correspond to the same number of compressions as the rows in \cref{tab:sha256_intro_bench}. Note that our numbers cover only the Zip+ layer (IOPP compiled with Merkle tree commitments), whereas Binius64's are end-to-end.
@@ -237,16 +237,16 @@ On the other hand, using our work for, say, proving Poseidon2 hashing on a small
 \label{tab:sha256-benchmark}
 \end{table}
 
-%\paragraph{Verifier cost decomposition.}
-%\albert{Review} The reported Zip+ verifier time of $2.30$\,ms for the SHA-256 ($\times 8$) + ECDSA trace (\cref{tab:sha256_ecdsa_intro_bench}) is itself the sum of the verifier times from \cref{tab:sha256_intro_bench,tab:ecdsa_intro_bench}. The verifier's work decomposes into the following components: (1)~\emph{Merkle path verification}: the verifier checks $147$ query paths (one per query) against the Merkle tree commitment, each involving logarithmically many hash evaluations; (2)~\emph{IOPP verification}: for each query, the verifier evaluates the IOPP's consistency checks on the received symbols, which involves a small number of arithmetic operations over $\ZZ$; (3)~\emph{evaluation check}: the verifier combines the queried symbols with the evaluation claim via a linear combination. In our current implementation, Merkle path verification dominates the verifier time, accounting for approximately $85\%$ of the total ($\approx 1.95$\,ms), while IOPP consistency checks contribute roughly $10\%$ ($\approx 0.23$\,ms) and the evaluation check accounts for the remaining $\approx 5\%$ ($\approx 0.12$\,ms). The dominance of Merkle verification is due to the $147$ queries (dictated by our use of the unique decoding proximity parameter), each requiring logarithmically many hash evaluations. If IPRS codes were shown to have Mutual Correlated Agreement up to the Johnson bound (\cref{subsec:iprs-open-questions}), the query count would drop to $100$, yielding a proportional decrease in verifier time ($\approx 1.6$\,ms estimated). Additional verifier costs from the Zinc+ PIOP (not included in the $2.30$\,ms figure) consist of the finite-field sumcheck verification and lookup verification, which are lightweight (a few hundred $\FF_q$-operations each).
+%\parhead{Verifier cost decomposition}
+%\albert{Review} The reported Zip+ verifier time of $2.30$\,ms for the SHA-256 ($\times 8$) + ECDSA trace (\cref{tab:sha256_ecdsa_intro_bench}) is itself the sum of the verifier times from \cref{tab:sha256_intro_bench,tab:ecdsa_intro_bench}. The verifier's work decomposes into the following components: (1)~\emph{Merkle path verification}: the verifier checks $147$ query paths (one per query) against the Merkle tree commitment, each involving logarithmically many hash evaluations; (2)~\emph{IOPP verification}: for each query, the verifier evaluates the IOPP's consistency checks on the received symbols, which involves a small number of arithmetic operations over $\ZZ$; (3)~\emph{evaluation check}: the verifier combines the queried symbols with the evaluation claim via a linear combination. In our current implementation, Merkle path verification dominates the verifier time, accounting for approximately $85\%$ of the total ($\approx 1.95$\,ms), while IOPP consistency checks contribute roughly $10\%$ ($\approx 0.23$\,ms) and the evaluation check accounts for the remaining $\approx 5\%$ ($\approx 0.12$\,ms). The dominance of Merkle verification is due to the $147$ queries (dictated by our use of the unique decoding proximity parameter), each requiring logarithmically many hash evaluations. If IPRS codes were shown to have Mutual Correlated Agreement up to the Johnson bound, the query count would drop to $100$, yielding a proportional decrease in verifier time ($\approx 1.6$\,ms estimated). Additional verifier costs from the Zinc+ PIOP (not included in the $2.30$\,ms figure) consist of the finite-field sumcheck verification and lookup verification, which are lightweight (a few hundred $\FF_q$-operations each).
 
 \subsubsection{Summary of SHA-256 and ECDSA arithmetizations.} 
 
-\cref{tab:sha256_intro_summary} and \cref{tab:ecdsa_intro_summary} summarize the trace layout and  constraint structure of our SHA-256 and ECDSA arithmetizations in UAIR${}^+$ form, respectively. UAIR${}^+$ is an AIR-like subclass of our general UCS relation $\ucs$. Its description is in \cref{s:uair}. The main idea of UAIR${}^+$ is that witness vectors are organized into tables, called \emph{traces}, and polynomial constraints apply to pairs of consecutive rows (sometimes one allows constraints accessing non-adjacent rows). 
+\cref{tab:sha256_intro_summary} and \cref{tab:ecdsa_intro_summary} summarize the trace layout and  constraint structure of our SHA-256 and ECDSA arithmetizations in UAIR${}^+$ form, respectively. UAIR${}^+$ is an AIR-like subclass of our general UCS relation $\ucs$. The main idea of UAIR${}^+$ is that witness vectors are organized into tables, called \emph{traces}, and polynomial constraints apply to pairs of consecutive rows (sometimes one allows constraints accessing non-adjacent rows). 
 
-A full arithmetization for SHA-256 can be found in \cref{ss:sha256_64_rounds}, and \cref{ss:ecdsa} sketches the arithmetization of ECDSA.  
+Full arithmetizations for SHA-256 and ECDSA can be found in the Zinc paper~\cite{Zinc}.
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \begin{tabular}{rl@{\;}c@{\;}l|rl@{\;}c@{\;}l}
 \toprule
@@ -262,11 +262,11 @@ $4$ & $\FF_2^{<w}[X]$ & $\subseteq$ & $\FF_2^{<w}[X]$
 & $27$ & $(X{-}2)$ & $\subseteq$ & $\QQ[X]$ \\
 \bottomrule
 \end{tabular}
-\caption{SHA-256 (1 compression) UAIR${}^+$ summary ($64$ rows, $19$ witness columns, $53$ monomials total), where $w=32$. The ``\#Mon.''\ column counts the total number of monomials across constraint polynomials sharing the same ideal and ring. All constraint polynomials are linear in the witness variables (the degree may increase when multiplied by selector polynomials; see \cref{rem:uair_boundary}). Of the $5$ rational-integer columns, $3$ have entries in $\range{0}{6}$; the remaining $2$ have arbitrary entries in $\range{0}{2^w{-}1}$.\newline In our proxy benchmarks, we tighten the trace to have size $2^7 \times 8$ cells in $\BitPolyset{32}$ and $2^7 \times 3$ in $\range{0}{2^{32}-1}$, i.e.\ we make it have $2$x more rows and $2$x less columns. This favors proof size at the expense of slightly extra PIOP work over the random projected finite field.\newline Due to an incomplete implementation, the $\FF_2^{<w}[X]$ columns are treated as being typed in $\BitPolyset{w}$ (which is a detrimental choice for us).}
+\caption{SHA-256 (1 compression) UAIR${}^+$ summary ($64$ rows, $19$ witness columns, $53$ monomials total), where $w=32$. The ``\#Mon.''\ column counts the total number of monomials across constraint polynomials sharing the same ideal and ring. All constraint polynomials are linear in the witness variables (the degree may increase when multiplied by selector polynomials). Of the $5$ rational-integer columns, $3$ have entries in $\range{0}{6}$; the remaining $2$ have arbitrary entries in $\range{0}{2^w{-}1}$.\newline In our proxy benchmarks, we tighten the trace to have size $2^7 \times 8$ cells in $\BitPolyset{32}$ and $2^7 \times 3$ in $\range{0}{2^{32}-1}$, i.e.\ we make it have $2$x more rows and $2$x less columns. This favors proof size at the expense of slightly extra PIOP work over the random projected finite field.\newline Due to an incomplete implementation, the $\FF_2^{<w}[X]$ columns are treated as being typed in $\BitPolyset{w}$ (which is a detrimental choice for us).}
 \label{tab:sha256_intro_summary}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \begin{tabular}{rl@{\;}c@{\;}l|rl@{\;}c@{\;}l}
 \toprule
@@ -288,7 +288,7 @@ $2$ & $\FF_n$ & $\subseteq$ & $\FF_n$
 
 
 
-\subsubsection{Efficiency and opportunities of our framework}\label{ss:efficiency-discussion}
+\subsubsection{Efficiency and opportunities of our framework}\label{ss:zinc-efficiency-discussion}
 The techniques used in Zinc+ in the context of SNARKs are relatively different from standard techniques that revolve around finite field arithmetic and polynomials with coefficients in said fields. We consider the problem of understanding how our framework compares to standard techniques an open problem. We provide an informal discussion of our observations around this question.
 
 In terms of efficiency, we view Zinc+ as a framework that bootstraps the vast majority of SNARK costs to the single task of committing to multilinear polynomials with coefficients in $\QQ[X]$, $\ZZ[X]$, $\FF_q[X]$, etc.---in particular, for the applications we discussed, to polynomials with coefficients in $\BitPolyset{w}$. Indeed, in many ways, working in $\BitPolyset{w}$ creates $w$ copies of a problem to be solved. For example, our commitments to vectors with entries in $\BitPolyset{w}$ are effectively $w$ parallel commitments to binary vectors (optimizations apply, see below).  But on the other hand, the random projection technique onto finite fields compresses these $w$ copies into a single one, by introducing a small soundness error. Putting together this compression saving and the smaller initial arithmetizations that our UCS constraints produce, we observe in our implementation that the costs once in the finite field are tiny compared to the commitment costs and the projection costs. 
@@ -300,7 +300,7 @@ We remark that committing to polynomials with coefficients in $\BitPolyset{w}$, 
 \subparagraph{Zip+, proof sizes, and future work} Zip+ is a Ligero/Brakedown-like IOPP (in modern instantiation) for $\QQ[X]$ and $\FF_q[X]$-valued multilinear polynomials.  Ligero/Brakedown on finite fields are known for having large proof sizes. And indeed our benchmarks show significant proof sizes relative to prover and verifier time (which on the other hand are very small). Besides being based on large-proof IOPPs, Zip+ experiments show a further proof size increase due to the fact that encodings of vectors in $\BitPolyset{w}$ scale linearly on $w$ in bit-size, being, from a purely size perspective, the same as $w$ commitments to binary vectors. Note that these commitments are over $\ZZ[X]$ and not over $\FF_2[X]$, hence there is no modular reduction that would help keep encoding sizes small. 
 
 
-Ongoing work of ours is focused on designing a WHIR, Ligerito, Blaze, FICS/FACS, etc.\ \cite{whir, Ligerito, Blaze, FICS-FACS}---IOPPs known for their small proofs among others---variant for our framework. 
+Ongoing work of ours is focused on designing a WHIR, Ligerito, Blaze, FICS/FACS, etc.\ \cite{whir, Ligerito, blaze, FICS-FACS}---IOPPs known for their small proofs among others---variant for our framework. 
 
 
 

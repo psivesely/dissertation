@@ -12,10 +12,15 @@ Let
 and let $\extend(q) = q^k$ pick $k$ such that $q^k \geq 2^{2\xi} \cdot (8(\xi+1))^2$. Then $\Pi_{\ucsm}$ (\cref{prot:zincplus-ucs-pior}) is complete (\cref{def:ior-completeness}) with error $\completenesserror < (\numprimes+2)/2^{\xi}$.
 \end{theorem}
 \begin{proof}
-First we show that unless the protocol halts in step 3 or 6 that $(\idx',\inp',\wit') \in \wedge_{\primeindex \in [0,\numprimes]} \ucsalg(\tilde{q}_\primeindex)$. Then we bound the probability of this happening. We begin with $(\idx,\inp,\wit) \in \ucs$, where
+First we show that unless the protocol halts in step~3 or~6,
+\[
+(\idx',\inp',\wit') \in \textstyle\bigwedge_{\primeindex \in [0,\numprimes]} \ucsalg(\tilde{q}_\primeindex).
+\]
+Then we bound the probability of this happening. We begin with $(\idx,\inp,\wit) \in \ucs$, where
 \begin{align*}
-\idx&=(\witlen,\inplen,\numrows=2^\mu,\primetuple,\bitbound,\degbounds,\constraints = [(Q_{\primeindex\constraintindex}, \langle j_{\primeindex\constraintindex} \rangle)]_{\primeindex \in [0,\numprimes], \constraintindex \in [\numconstraints]}),\enspace
-\inp=(\yy)\in(\mainpolyring{\local{\qq}}{\bitbound}{\degreebound_0})^{\inplen} \\
+\idx&=(\witlen,\inplen,\numrows=2^\mu,\primetuple,\bitbound,\degbounds, \\
+&\qquad \constraints = [(Q_{\primeindex\constraintindex}, \langle j_{\primeindex\constraintindex} \rangle)]_{\primeindex \in [0,\numprimes], \constraintindex \in [\numconstraints]}), \\
+\inp&=(\yy)\in(\mainpolyring{\local{\qq}}{\bitbound}{\degreebound_0})^{\inplen}, \\
 \wit &= (\ff_0,\ff_1,\ldots,\ff_{\numprimes}), \ \ff_0 \in \mainpolyring{\QQ}{\bitbound}{\degreebound_0}^{\witlen},\ \ff_i \in \FF_{q_i}^{<\degreebound_i}[X]^{\witlen}\text{ for } i\in[\numprimes].
 \end{align*}
 In step~1, the prover sends the oracles for $\tilde{f}_0 \in (\QQ^{<\degreebound_0,\bitbound}[X])[\WWW]$ and $\tilde{f}_{1},\dotsc,\tilde{f}_{\numprimes} \in (\FF^{<\degreebound_i}_{q_i}[X])[\WWW]$, which are the MLEs of the corresponding witness vectors. In step~4, the prover sends
@@ -109,7 +114,12 @@ and assume $\idx$ is well-formed.
     \end{equation}
     Recall that since the index is well-formed this also implies $\ff_0 \in (\ZZ_{(q_1,\dotsc,q_{\numprimes})}[X])^{\witlen}$.
 
-    \item \textbf{Field projection randomness:} At this stage the transcript $\tr$ has the form $\mathrm{tr} = (\oracle{\tilde{f}_0}\|\dotsm\|\oracle{\tilde{f}_{\numprimes}},\allowbreak q_0\|\rr,[e_{\primeindex\constraintindex}]_{\primeindex \in [0,\numprimes],\constraintindex \in [\numconstraints]})$. The verifier samples random field elements $a_i \getsr \FF_{\tilde q_i}$, for $i\in[0,\numprimes]$. We set $\kstate(\idx,\inp,\tr\|q_0\|\rr) = 1$ if and only if running the extractor returns $(\ff_{0},\ff_1,\dotsc,\ff_{\numprimes})$ such that $\ff_0 \in (\ZZ_{(q_0)}[X])^{\witlen}$ and for $\primeindex \in [\numprimes], \constraintindex \in [\numconstraints]$:
+    \item \textbf{Field projection randomness:} At this stage the transcript $\tr$ has the form
+    \[
+    \mathrm{tr} = \bigl(\oracle{\tilde{f}_0}\|\dotsm\|\oracle{\tilde{f}_{\numprimes}},\; q_0\|\rr,\;[e_{\primeindex\constraintindex}]_{\primeindex \in [0,\numprimes],\,\constraintindex \in [\numconstraints]}\bigr).
+    \]
+    For $i\in[0,\numprimes]$ the verifier samples random field elements $a_i \getsr \FF_{\tilde q_i}$.
+    We set $\kstate(\idx,\inp,\tr\|q_0\|\rr)$ $= 1$ if and only if running the extractor returns $(\ff_{0},\ff_1,\dotsc,\ff_{\numprimes})$ such that $\ff_0 \in (\ZZ_{(q_0)}[X])^{\witlen}$ and for $\primeindex \in [\numprimes]$, $\constraintindex \in [\numconstraints]$:
     \begin{equation}
         \label{eq:kstate-projection}
     \begin{array}{ll}
@@ -148,7 +158,11 @@ and assume $\idx$ is well-formed.
     
     We now turn to the second source of randomness, namely the field-projection points~$\evalpoints$, and bound the probability that the knowledge state transitions from~$0$ to~$1$ in this round.
     
-    \item \textbf{Field projection randomness:} We show that for all transcripts of the form $\tr = (\oracle{f_i})_{i =0}^{\numprimes}\|(q_0,\rr)\|[e_{\primeindex\constraintindex}]_{\primeindex\constraintindex}$ that
+    \item \textbf{Field projection randomness:} We show that for all transcripts of the form
+    \[
+    \tr = (\oracle{f_i})_{i =0}^{\numprimes}\|(q_0,\rr)\|[e_{\primeindex\constraintindex}]_{\primeindex\constraintindex}
+    \]
+    that
     \[
     \Pr_{\evalpoints}\left[
     \begin{array}{l}

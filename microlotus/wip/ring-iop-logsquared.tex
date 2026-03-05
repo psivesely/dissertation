@@ -16,11 +16,11 @@ The recurrence $h^{(r)}(k) = h^{(r-1)}(k) \cdot f_{\nu-r}(k)$ relates consecutiv
     \tilde{C}(\alpha', \gamma) \;=\; \sum_{k \in \bits^\nu} \meq(\alpha', k) \cdot h^{(\nu)}(k).
 \end{equation}
 
-\paragraph{Protocol modification.} In~\cref{prot:ringmul}, Step~7 is replaced as follows.
+\parhead{Protocol modification} In~\cref{prot:ringmul}, Step~7 is replaced as follows.
 The prover sends $e_C$ claimed to equal $\tilde{C}(\alpha', \gamma)$, and the verifier checks $\sigma'' = e_C \cdot (e'_t + \xi \cdot e'_A + \xi^2 \cdot e'_s)$ using the oracle queries.
 It remains to verify the claim $e_C = \tilde{C}(\alpha', \gamma)$, which is done by the following sequence of sumchecks that ``unwind'' the partial products~\eqref{eq:partial-product-butterfly}.
 
-\paragraph{Layer-$r$ reduction (for $r = \nu, \nu-1, \ldots, 1$).} At the start of layer~$r$, the verifier holds a claim
+\parhead{Layer-$r$ reduction (for $r = \nu, \nu-1, \ldots, 1$)} At the start of layer~$r$, the verifier holds a claim
 \[
     e^{(r)} \;=\; \sum_{k \in \bits^r} \meq(v^{(r)}, k) \cdot h^{(r)}(k)
 \]
@@ -50,7 +50,7 @@ The next layer begins with the claim $e^{(r-1)} = \sum_{k \in \bits^{r-1}} \meq(
 
 At the base case $r = 0$, we have $h^{(0)} = 1$ and the claim $e^{(0)} = 1$ is checked directly.
 
-\paragraph{Complexity.} The total transcript for the butterfly delegation is $\sum_{r=1}^{\nu} (3r + 1) = \frac{3\nu(\nu+1)}{2} + \nu = O(\nu^2)$ extension field elements (the $+1$ per layer accounts for the prover's claim $e^{(r-1)}$).
+\parhead{Complexity} The total transcript for the butterfly delegation is $\sum_{r=1}^{\nu} (3r + 1) = \frac{3\nu(\nu+1)}{2} + \nu = O(\nu^2)$ extension field elements (the $+1$ per layer accounts for the prover's claim $e^{(r-1)}$).
 Combined with the main protocol's $3\mu + 3\nu + 2$ elements (from the two sumchecks and the claims $e_t, e_A$) plus the additional claim $e_C$, the total proof size is $3\mu + 3\nu + 3 + O(\nu^2) = O(\mu + \nu^2)$.
 The verifier's cost is $\sum_{r=1}^{\nu} O(r) = O(\nu^2)$ for the butterfly checks plus $O(\tau + \mu)$ for the main sumchecks, giving $O(\nu^2 + \tau + \mu) = O(\log^2 n + \log NM)$.
 The prover's asymptotic cost is unchanged at $O(NMn)$: the sumcheck tables $[h^{(r)}(k)]_{k \in \bits^r}$ for $r = 1, \ldots, \nu$ are byproducts of the iterative algorithm in~\cref{lem:m-eval} and require no additional work to produce.

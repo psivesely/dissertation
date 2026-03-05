@@ -69,7 +69,7 @@ Q_{\primeindex\constraintindex}\bigl(\rowindex,\phi_{q_\primeindex}(\yy),\phi_{q
 \]
 
 \item \textbf{Well-definedness of $\phi_{q_\primeindex}$.}
-The homomorphisms $\phi_{q_\primeindex}$ from \cref{sec:local-rings} are defined only on the
+The homomorphisms $\phi_{q_\primeindex}$ from \cref{sec:zinc-local-rings} are defined only on the
 intersection localization ring $\local{q_1\cdots q_{\numprimes}}$. Since the previous item applies
 $\phi_{q_\primeindex}$ to $\ff_0$, we require the following well-definedness condition:
 \begin{equation}\label{eq:ucs_welldefinedness}
@@ -96,7 +96,7 @@ We remark that, in particular, the well-definedness condition~\eqref{eq:ucs_well
 \begin{remark}[The well-definedness condition]
   We show in \cref{ss:ucs_lookup} that the well-definedness condition~\eqref{eq:ucs_welldefinedness} can be written as a $\QQ[X]$-constraint. Hence, \eqref{eq:ucs_welldefinedness} does not require its own separate syntax, as long as one of the $\QQ[X]$-constraints in the UCS instance enforces it.  
 
-In practice, the computations we are interested in proving already require constraining $\ff_0$ in a way that guarantees the well-definedness condition automatically. For example, in all examples from \cref{s:examples}, the witness $\ff_0$ is constrained to belong to some subset of $\ZZ^{<\degreebound}[X]^\witlen$ (via a $\QQ[X]$-constraint). This constraint implies the well-definedness condition for any choice of primes $q_1,\ldots,q_{\numprimes}$.
+In practice, the computations we are interested in proving already require constraining $\ff_0$ in a way that guarantees the well-definedness condition automatically. For example, in our applications the witness $\ff_0$ is constrained to belong to some subset of $\ZZ^{<\degreebound}[X]^\witlen$ (via a $\QQ[X]$-constraint). This constraint implies the well-definedness condition for any choice of primes $q_1,\ldots,q_{\numprimes}$.
 \end{remark}
 
 For ease of reference, we restate the definition of $\ucs$ below.
@@ -129,7 +129,7 @@ For ease of reference, we restate the definition of $\ucs$ below.
 \end{aligned}
 \end{equation*}
 
-\paragraph{Design choices.} We discuss some of the design choices behind the definition of UCS.
+\parhead{Design choices} We discuss some of the design choices behind the definition of UCS.
 
 \medskip
 \noindent \underline{\emph{Why are witness and input entries typed in polynomial rings~$R^{<w}[X]$ (e.g.\ $R=\ZZ, \FF_q$) rather}} \\ \noindent \underline{\emph{than in~$R$ (or some other rings)?}}
@@ -155,13 +155,13 @@ First, by the same reasoning as the second point above, staying in~$\ZZ$ or~$\ZZ
 
 Second, the third point above also applies: in applications such as verifiable FHE (e.g.\ the CKKS scheme) or RSA cryptography, one would require working with a very large prime $q$ (i.e.\ the computation norm in such applications is large). The random-projection technique may provide significant compression benefits in these cases.
 
-Third, when~$q$ is large, one faces the familiar overhead of field arithmetic in~$\FF_q$ or~$\FF_q[X]$ throughout the proof. For instance, Reed--Solomon encoding becomes expensive over large fields. Our Integer Pseudo Reed--Solomon (IPRS) codes operate over~$\ZZ$ or $\QQ$ and show promising practical performance (\cref{ss:iprs_performance}). We think that specifically designed IPRS codes can be set up with good distance over~$\FF_q$ for a fixed large~$q$, but we lack theoretical guarantees for this; we pose this as an open question in \cref{subsec:iprs-open-questions}.
+Third, when~$q$ is large, one faces the familiar overhead of field arithmetic in~$\FF_q$ or~$\FF_q[X]$ throughout the proof. For instance, Reed--Solomon encoding becomes expensive over large fields. Our Integer Pseudo Reed--Solomon (IPRS) codes operate over~$\ZZ$ or $\QQ$ and show promising practical performance. We think that specifically designed IPRS codes can be set up with good distance over~$\FF_q$ for a fixed large~$q$, but we lack theoretical guarantees for this; we pose this as an open question.
   
 When the computation norm $q$ is small, say of $32$ bits, then working over $\FF_q[X]$ would be a better option. But in most applications it is not the case that $32$ bits suffices to capture all integer values without overflowing the modulus. (Unless one pays arithmetization overheads by decomposing into limbs, etc.\ which is what we want to avoid in the first place.)
 
-\paragraph{Technical observations.} We make some technical observations about the definition of UCS.
+\parhead{Technical observations} We make some technical observations about the definition of UCS.
 \medskip 
-\noindent\emph{\underline{Lookup constraints.}} In our examples \cref{s:crypto_ucs,ss:sha256_64_rounds} we extensively rely on constraining witness elements in certain sets, e.g.\ $\BitPolyset{w}$ and $\Wordset{w}$. Our definition of UCS is expressive enough to subsume such constraints. See \cref{ss:ucs_lookup} for an explanation of how to express lookup constraints in a UCS instance.
+\noindent\emph{\underline{Lookup constraints.}} In our examples (\cref{s:crypto_ucs} and the SHA-256 arithmetization) we extensively rely on constraining witness elements in certain sets, e.g.\ $\BitPolyset{w}$ and $\Wordset{w}$. Our definition of UCS is expressive enough to subsume such constraints. See \cref{ss:ucs_lookup} for an explanation of how to express lookup constraints in a UCS instance.
 
 \noindent\emph{\underline{Rationals and Integers.}} In our examples, our witness vectors were either typed in $\ZZ^{<d}[X]$ or in $\FF_q^{<d}[X]$. On the other hand, in our definition of UCS we used $\QQ^{<d}[X]$ rather than $\ZZ^{<d}[X]$ as typing choice. Besides the possible independent interest of typing witnesses in $\QQ^{<d}[X]$, this choice is motivated by technical reasons related to the proof system.  
 
@@ -173,4 +173,4 @@ We note that combining an IOPP (or PCS) for $\mainpolyring{\QQ}{\bitbound}{\degr
 \medskip
 
 \noindent\emph{\underline{Modular reductions of rationals}}
-Observe that the $\FF_{q_\primeindex}[X]$-constraints involve the reduction of the vector $\ff_{0}$ modulo $q_\primeindex$ (via the map $\phi_q$). However, the entries of $\ff_0$ are polynomials with rational coefficients. The reduction of a rational $a/b$ modulo a prime $q$ is only well-defined when $b$ is not zero modulo $q$, and in that case it is defined as $a\cdot b^{-1} \mod q$ where $b^{-1}$ is the modular inverse of $b$ \cref{sec:preliminaries}.  We understand the triple $(\idx,\inp;\wit)$ to be invalid if some modular reduction is not well-defined.  This is not a problem for our proof system, as the reduction can be performed by the prover and the verifier can check that the reduction was done correctly by checking that the difference between the reduced and non-reduced polynomials belongs to the ideal generated by $q_\primeindex$ in $\QQ[X]$.
+Observe that the $\FF_{q_\primeindex}[X]$-constraints involve the reduction of the vector $\ff_{0}$ modulo $q_\primeindex$ (via the map $\phi_q$). However, the entries of $\ff_0$ are polynomials with rational coefficients. The reduction of a rational $a/b$ modulo a prime $q$ is only well-defined when $b$ is not zero modulo $q$, and in that case it is defined as $a\cdot b^{-1} \mod q$ where $b^{-1}$ is the modular inverse of $b$ \cref{sec:zinc-preliminaries}.  We understand the triple $(\idx,\inp;\wit)$ to be invalid if some modular reduction is not well-defined.  This is not a problem for our proof system, as the reduction can be performed by the prover and the verifier can check that the reduction was done correctly by checking that the difference between the reduced and non-reduced polynomials belongs to the ideal generated by $q_\primeindex$ in $\QQ[X]$.

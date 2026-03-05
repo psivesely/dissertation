@@ -1,9 +1,45 @@
-\section{Motivation}
-\label{sec:intro-motivation}
+Succinct Non-interactive ARguments of Knowledge (SNARKs) let a prover convince a verifier that a computation was executed correctly, using proofs that are small and fast to check. Since their first large-scale deployments in the mid-2010s, SNARKs have moved from a theoretical ideal to a practical tool for privacy-preserving and integrity-preserving systems, including private payments, anonymous credentials, and proofs about authenticated network sessions. As deployments have broadened, so have the computations we would like to prove.
 
+A recurring friction point is that the computations that matter in practice are rarely ``naturally'' computations over a single large finite field. Real systems mix bit operations, modular arithmetic at different moduli, integer and rational arithmetic, and increasingly arithmetic in structured rings used by lattice-based cryptography. The standard SNARK pipeline resolves this mismatch by compiling everything into constraints over one chosen field. This works, but it introduces a gap between the computation we mean and the computation we actually prove: non-native encodings inflate the constraint system, complicate implementation, and can obscure auditing.
 
-\section*{Note on Authorship, Scope of Included Material, and Use of AI Tools}
+This dissertation argues that the right response is not to search for a single universal field that happens to be convenient for the prover, but to build proof systems that more directly reflect the algebra of the computation being proved.
 
-Each chapter of this dissertation is adapted from joint work with co-authors, in which both the writing and the technical development were collaborative. In preparing this dissertation, I have therefore distinguished between expository material and core technical development. The core technical sections included here are limited to material of which I was the sole author or principal author, so that the dissertation's principal technical content reflects my primary research and writing contributions. By contrast, although I contributed to all of the introduction and technical overview sections included here, I was not the principal author of all of them. I have included this expository material to preserve the motivation, structure, and overall technical narrative of the underlying joint works, so that each chapter remains intelligible in context even where the detailed technical presentation is limited to portions that principally reflect my own authorship.
+\section{Central hypothesis and design principle}
 
-In preparing this manuscript, I used an AI-based tool (Claude) for limited purposes such as grammar review, editing assistance, and latex code-generation assistance. I bear full responsibility for the accuracy, originality, and proper attribution of all content in this dissertation.
+The central hypothesis of this dissertation is that a large fraction of the arithmetization overhead in modern proof systems is avoidable: it stems from forcing mixed-domain computations into a single-field representation, rather than from any inherent cost of succinct verification. Accordingly, we can advance the state-of-the-art by pursuing two goals in tandem:
+
+\begin{enumerate}
+  \item \textbf{Mixed- and small-domain arithmetization with native proof protocols.}
+  Design constraint systems and polynomial IOP/IOR-style protocols that let constraints be written over their \emph{natural} domains (integers, rationals, finite fields, and polynomial rings; and, for lattice applications, cyclotomic rings), so that the prover spends work on the intended computation rather than on emulation.
+
+  \item \textbf{Post-quantum polynomial commitments matched to those domains.}
+  Design post-quantum-secure polynomial commitment schemes for algebraic domains aligned with the above arithmetizations.
+\end{enumerate}
+
+The technical through-line is that both parts of the SNARK stack, namely the \emph{arithmetization/PIOP layer} and the \emph{commitment layer}, must agree on the algebra they operate over. When they do, three things improve together: efficiency (less non-native overhead), auditability (constraints more closely match the intended computation), and extensibility (the proof machinery can be upgraded without re-arithmetizing the circuit, and existing machinery supports new domains with minimal change).
+
+\section{Overview of contributions}
+
+The dissertation develops this thesis through three chapters, each focusing on a different aspect of ``mixed algebras'' and the corresponding commitment technology.
+
+\subsection*{Chapter 2: Zinc+ and Universal Constraint Systems}
+
+Chapter~2 introduces \emph{Universal Constraint Systems (UCS)}, an arithmetization framework that treats mixed algebra as a first-class object. UCS supports constraints simultaneously over domains such as $\mathbb{Z}$, $\mathbb{Q}$, finite fields, and polynomial rings, and it includes ideal-membership predicates that naturally express operations like rotations, modular reductions, and domain-linking constraints. This makes it possible to express common proof workloads---hashing, signature verification, VM-style instruction traces, and hybrid cryptographic checks---without paying the full cost of foreign arithmetic.
+
+On top of UCS, Chapter~2 presents \emph{Zinc+}, a compiler that lifts existing finite-field polynomial protocols into protocols for UCS instances.
+At a high level, ideal-membership checks are reduced to strict equalities by evaluating appropriate multilinear extensions at verifier-chosen random points, then projecting those equalities into a verifier-chosen finite field where one can reuse any suitable finite-field PIOP. To compile the resulting interactive-oracle protocol into a SNARK, the chapter develops \emph{Zip+}, a hash-based polynomial commitment scheme for multilinear polynomials whose coefficients live in the mixed domains relevant to UCS (including polynomial-ring coefficients), together with \emph{Integer Pseudo Reed--Solomon (IPRS)} codes that give RS-like distance properties without catastrophic coefficient growth. The chapter includes an implementation-focused evaluation on SHA-256 and ECDSA verification, reporting partial benchmarks for the Zip+ layer (which we expect to dominate end-to-end costs).
+
+\subsection*{Chapter 3: Small field proofs for cyclotomic rings}
+
+Chapter~3 focuses on proofs for the power-of-two cyclotomic rings $\mathbb{Z}_p[X]/(X^{n}+1)$ that underlie much of lattice-based cryptography. The core strategy is to \emph{prove ring relations over the base field} $\mathbb{Z}_p$ while avoiding the main sources of overhead in prior approaches. In particular, we do not encode FFT butterfly networks directly into the circuit, nor do we reduce the problem by projecting into a less compatible algebraic representation. Instead, the protocol works over $\mathbb{Z}_p$ (and suitable extension fields) and proves multiplication \emph{slot-wise} via sumcheck-style reductions. The construction is composable: we prove round-by-round knowledge soundness, so the protocol can be used as a subroutine inside larger proof systems and compiled via Fiat--Shamir.
+
+The chapter then introduces and implements \emph{Microlotus}, a PCS tailored to this setting. A key ingredient is an \emph{odd-prime tower} construction that lets us pack small-field coefficients into the tower-basis coordinates of polynomials over the extension field needed for security, with essentially no embedding overhead. The chapter reports benchmarks indicating that, in its target regime, Microlotus attains prover performance competitive with leading schemes specialized to highly structured fields, while preserving the flexibility required for ring-centric workloads. Finally, it sketches how working in the CRT domain enables aggressive claim reduction and oracle merging in a Plonkish-style SNARK for ring arithmetic, outlining a concrete route from the standalone ring protocol to a full SNARK architecture.
+
+\subsection*{Chapter 4: Orbweaver and lattice-based functional commitments}
+
+Chapter~4 is the dissertation's lattice-based component. It introduces \emph{Orbweaver}, a functional commitment scheme for linear maps over power-of-two cyclotomic rings, with commitments and openings that remain efficient even when the coefficient domain is inherently ring-like. We show it also yields polynomial commitments. The main construction gives quasilinear prover time together with logarithmic-size openings and polylogarithmic verification for linear functional openings, and it supports public aggregation of openings. Beyond these asymptotics in the input length, the chapter also develops a refinement in which proof and commitment sizes become \emph{sublogarithmic in the input norm}, via ternary decomposition combined with aggregation.
+
+The values inside lattice-based commitments naturally live over cyclotomic rings (or over the integers, depending on how they are viewed) rather than being representatives of a mod $p$ equivalence class. As a result, Orbweaver can serve to instantiate a $\mathbb{Z}[X]$ polynomial oracle for Zinc. Via a separate reduction from $\mathbb{F}_{p^k}$ to $\mathbb{Z}_p[X]/(X^n+1)$, it can also instantiate the Microlotus PIOP for appropriate parameter regimes.
+
+\section{Reading guide and scope}
+Each chapter begins with background and a high-level technical overview. Some chapters include complete technical developments, while others include only selected sections from a paper; in those cases the overview may summarize additional results or variants that are not included in full here. The exact scope of included material is specified in the note below.

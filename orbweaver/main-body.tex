@@ -1,5 +1,5 @@
 \section{Preliminaries}
-\label{sec:preliminaries}
+\label{sec:ow-preliminaries}
 
 Let $\integerball{b} \defeq (-b,b) \cap \integers$ and $[a] \defeq [1,a] \cap \integers$. For a ring $\ring$ of degree $\ringdegree$, let $\vec{r} \in \integers^\ringdegree$ denote the coefficient vector of $r \in \ring$ in the integral basis.
 
@@ -252,12 +252,11 @@ For simplicity, we set $\vart$ in  \cite[Def 23]{C:ACLMT22} to be fixed to $1$ a
 
 \begin{assumption}[\krisis meta assumption]
 \label{def:meta}
-For any $\krisis$ admissible $(\monomialset, g^*)$, $\krisis_{\krisisparameters}$ is hard if $\risis_{\fring, \numcols, \normboundasterisk}$ is hard
-and if $\rsis_{\fring, k, \normboundasterisk}$ is hard.
+For any $\krisis$ admissible $(\monomialset, g^*)$, the problem $\krisis_{\krisisparameters}$ is hard if $\risis_{\fring, \numcols, \normboundasterisk}$ is hard and if $\rsis_{\fring, k, \normboundasterisk}$ is hard.
 \end{assumption}
 
 \noindent To achieve extractability we also require an additional knowledge assumption,
-because by \cite{GW11}, we need an unfalsifiable assumption to prove the extractability,
+because by \cite{STOC:GenWic11}, we need an unfalsifiable assumption to prove the extractability,
 as follows:
 
 \begin{definition}[Knowledge \krisis]
@@ -412,7 +411,7 @@ We present \sys, a vector commitment (VC) for linear functions that is non-inter
 
 Let $\preimagepowers \defeq \integerball{\secretinputdim} \setminus\set{0}$. We use the monomial set $\monomialset_0 \defeq [\monomial_i(\varX) = \varX^i]_{i \in \preimagepowers}$ to generate our opening proof $[\preimage_{0,i}]_{i\in\preimagepowers}$, the monomial set $\monomialset_1 \defeq [\monomial_i(\varX) = \varX^i]_{i \in [w]}$ to generate our knowledge proof SRS $[\preimage_{1,i}]_{i \in [w]}$, the target monomial $\targetmonomial(\varX) \defeq 1$, and the distribution $\tdist$ satisfying the requirements of \cref{def:knowledge-kprisis}.
 
-\begin{table}[h]
+\begin{table}[H]
         \centering
         \caption{A list of parameters used in \sys.}
         \label{tab:parameter-list}
@@ -436,7 +435,7 @@ Let $\preimagepowers \defeq \integerball{\secretinputdim} \setminus\set{0}$. We 
 \end{table}
 
 \vspace{1em}
-\begin{singlespace}
+\begin{singlespace}\raggedright
 \noindent
 % $\underline{\setup(1^{\secparam}, 1^{\publicinputdim}, 1^{\secretinputdim}) \to \commitmentkey}$ \\
 \underline{$\setup(1^{\secparam}, 1^{\secretinputdim}) \to \commitmentkey$} \\
@@ -479,24 +478,19 @@ $\innerproduct{\publicsisvector_0}{\proofopening} \equiv \vkf \cdot \commitment 
 We begin by proving the norm bound checks hold. $\output = \function(\secretinputvector) = \sum_{i=1}^\secretinputdim \function_i \cdot \secretinput{i}\modq$, where $\norm{\function_i \cdot \secretinput{i}} \leq \normboundinput^2 \cdot \expansionfactor$ for all $i$. Therefore, $\norm{\output} \leq \secretinputdim \cdot \normboundinput^2 \cdot \expansionfactor = \normboundoutput$. Next, $\proofknowledge = \sum_{i=1}^\secretinputdim \secretinput{i} \cdot \preimage_{1,i} \modq$, where $\norm{\secretinput{i} \cdot \preimage_{1,i}} \leq \normboundinput\cdot\normboundpublicpreimages_1\cdot\expansionfactor$ for all $i$. It follows $\norm{\proofknowledge} \leq \secretinputdim \cdot \normboundinput \cdot \normboundpublicpreimages_1 \cdot \expansionfactor = \normboundproofknowledge$. Last, $\proofopening = \sum_{i \in P} a_i \cdot \preimage_{0,i} \modq$, where $a_{-\secretinputdim+1}, ..., a_{\secretinputdim-1}$ denote the $2\secretinputdim-2$ coefficients of $\secretinputvector(\varv) \function(\varv) = \left(\sum_{i=1}^{\secretinputdim} \secretinput{i} \varv^i \right) \left(\sum_{i=1}^{\secretinputdim} \function_{i} \varv^{-i} \right)$. Since $\norm{\preimage_{0,i}} \leq \normboundpublicpreimages_0$ for all $i$, $\norm{\proofopening} \leq \normboundpublicpreimages_0 \cdot \expansionfactor \cdot \sum_{i \in P} a_i$. Then  $\norm{a_{\vert i \vert}} \leq (\secretinputdim - i) \cdot \alpha^2 \cdot \expansionfactor$ for $i \in [\secretinputdim-1]$. Thus, $\norm{\proofopening} \leq \secretinputdim^2 \cdot \normboundinput^2 \cdot \normboundpublicpreimages_0 \cdot \expansionfactor^2 = \normboundproof$.
 
 \noindent Next, we show the verification equations hold:
-\[
-\begin{array}{ll}
-\begin{array}{ll}
+\begin{align*}
 \innerproduct{\publicsisvector_1}{\proofknowledge} &\equiv \innerproduct{\publicsisvector_1}{\sum_{i=1}^\secretinputdim \secretinput{i} \cdot \preimage_{1,i}} \modq \\
-&\equiv \sum_{i=1}^\secretinputdim \secretinput{i} \cdot \innerproduct{\publicsisvector_0}{\preimage_{1,i}} \modq \\
-&\equiv \sum_{i=1}^\secretinputdim \secretinput{i} \cdot \varv^i \cdot \vart \modq \\
-&\equiv \commitment \cdot \vart \modq
-\end{array}
-&
-\begin{array}{ll}
+&\equiv \sum_{i=1}^\secretinputdim \secretinput{i} \cdot \innerproduct{\publicsisvector_0}{\preimage_{1,i}} \modq
+\equiv \sum_{i=1}^\secretinputdim \secretinput{i} \cdot \varv^i \cdot \vart
+\equiv \commitment \cdot \vart \modq
+\end{align*}
+\begin{align*}
 \innerproduct{\publicsisvector_0}{\proofopening}
-& \equiv \innerproduct{\publicsisvector_0}{\sum_{i \in P} a_i \cdot \preimage_i} \modq \\
-& \equiv \sum_{i \in P} a_i \cdot v^i \modq \\
+& \equiv \innerproduct{\publicsisvector_0}{\sum_{i \in P} a_i \cdot \preimage_i} \modq
+\equiv \sum_{i \in P} a_i \cdot v^i \modq \\
 & \equiv \left(\sum_{i=1}^{\secretinputdim} \secretinput{i} \varv^i \right) \left(\sum_{i=1}^{\secretinputdim} \function_{i} \varv^{-i} \right) - a_0 \cdot v^0 \modq \\
 & \equiv \vkf \cdot \commitment - \sum_{i=1}^\secretinputdim \function_i \cdot \secretinput{i} \equiv\vkf \cdot \commitment - \output \modq \enspace.
-\end{array}
-\end{array}
-\]
+\end{align*}
 \end{proof}
 
 \begin{theorem} \label{thm:extractability}
@@ -544,7 +538,8 @@ where $\gadgetbase_0 = O(\normboundpublicpreimages_0), \gadgetbase_1 = O(\normbo
 \begin{array}{l|l}
         (\publicsisvector_1,\vart_i,[\preimage_{1,\monomial}]_{\monomial \in \monomialset_1},\varv)
         & \publicsisvector_1 \randpick \fring^{\ell_{1}};\enspace \vart \randpick \tdist;\enspace \varv \randpick \fringinvertiblesubset \\
-        & \preimage_{1,\monomial} \randpick \sampd(1^{\ell_{1}}, \fring, \normboundpublicpreimages_{1}) : \innerproduct{\publicsisvector_1}{\preimage_{1,\monomial}} \equiv \varv^i \cdot \vart \modq,\enspace \forall i \in [\secretinputdim]
+        & \preimage_{1,\monomial} \randpick \sampd(1^{\ell_{1}}, \fring, \normboundpublicpreimages_{1}) : {} \\
+        & \qquad \innerproduct{\publicsisvector_1}{\preimage_{1,\monomial}} \equiv \varv^i \cdot \vart \modq,\enspace \forall i \in [\secretinputdim]
 \end{array}
 \right\}\enspace.
 \end{array}
@@ -580,7 +575,7 @@ $, and $\vert \proofknowledge\vert = \ringdegree\numcols_1\ceil{\log\normboundpr
 
  As implicated by our extractability theorem (\cref{thm:extractability}) together with our assumptions relating the hardness of plain and knowledge \kprisis to \rsis (\cref{def:kprisis,def:knowledge-kprisis}), we must have that $\rsis_{\fring,\ell,\normboundasterisk_0}$ and $\rsis_{\fring,\ell,\normboundproofknowledge}$ are hard. Recall $\normboundasterisk_0 = 2 \secretinputdim^2 \normboundinput \normboundextractedinput \normboundpublicpreimages_0 \expansionfactor^2$. Using $\normboundextractedinput = \normboundproofknowledge = \secretinputdim \normboundinput \normboundpublicpreimages_1 \expansionfactor$, we can write $\normboundasterisk_0 = 2 \secretinputdim^3 \normboundinput^2 \normboundpublicpreimages_0 \normboundpublicpreimages_1 \expansionfactor^3$. Since $\normboundproofknowledge < \normboundasterisk_0$, we can just pick \modulus s.t. $\rsis_{\fring,\ell,\normboundasterisk_0}$ is hard.
 
-In particular, we let $\modulus \approx \normboundasterisk_0 \ringdegree \log(\ringdegree)$ such that $\log(\modulus) = O(\log\normboundasterisk_0) = O(\log(\secretinputdim) + \log(\normboundinput) + \log(\normboundpublicpreimages_0) + \log(\normboundpublicpreimages_1))$ since for power-of-two  cyclotomic rings $\expansionfactor \leq n$ (\cref{thm:expansion-factor}). Setting $\normboundpublicpreimages_0 := \max\set{\secretinputdim,\normboundinput}$ and $\normboundpublicpreimages_1 := \max\set{\secretinputdim,\normboundinput}$, we obtain logarithmic commitment and proof sizes: \\
+In particular, we let $\modulus \approx \normboundasterisk_0 \ringdegree \log(\ringdegree)$ such that $\log(\modulus) = O(\log\normboundasterisk_0) = O(\log(\secretinputdim) + \log(\normboundinput) + \log(\normboundpublicpreimages_0) + \log(\normboundpublicpreimages_1))$ since for power-of-two  cyclotomic rings $\expansionfactor \leq n$ (\cref{thm:expansion-factor}). Setting $\normboundpublicpreimages_0 := \max\set{\secretinputdim,\normboundinput}$ and $\normboundpublicpreimages_1 := \max\set{\secretinputdim,\normboundinput}$, we obtain logarithmic commitment and proof sizes:
 \[
 \begin{array}{ll}
 \begin{array}{ll}
@@ -931,7 +926,7 @@ For sake of better comparison with \cite{C:ACLMT22}, in~\cref{fig:proof-sizes} w
 
 In order to make the comparison as fair as possible, we also modified the code of~\cite{C:ACLMT22} to remove the overhead induced by their scheme's support for batching and higher degree polynomial maps. While our unoptimized proof sizes are about $2-3\times$ smaller, perhaps even more important practically was our reduction of the CRS size and prover time from quadratic to quasilinear in $\secretinputdim$ and $\normboundinput$. The \sys CRS size is calculated as $3 \secretinputdim \numcols \ringdegree \log\normboundpublicpreimages$ bits, as it consists of $3\secretinputdim$ vectors of ring elements, each of which with bit length bounded by by $\log(\normboundpublicpreimages)$. In contrast, \cite{C:ACLMT22} requires about $\secretinputdim^2 \ell \ringdegree \log\normboundpublicpreimages$ bits for the SRS.
 
-\begin{figure}[h!]
+\begin{figure}[H]
         \begin{center}
         \includegraphics[width=\textwidth]{orbweaver/proofsizes}
         \end{center}
@@ -943,6 +938,6 @@ In order to make the comparison as fair as possible, we also modified the code o
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Acknowledgments}
-\label{sec:acknowledgments}
+\label{sec:ow-acknowledgments}
 
-We would like to thank Martin Albrecht and Russell W.F. Lai for answering questions about~\cite{C:ACLMT22}. We would also like to thank Nicholas Genise for answering our questions about lattice trapdoors.
+We would like to thank Martin Albrecht and Russell~W.F.~Lai for answering questions about \cite{C:ACLMT22}, and Nicholas Genise for answering our questions about lattice trapdoors.

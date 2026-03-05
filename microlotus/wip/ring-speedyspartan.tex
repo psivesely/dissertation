@@ -38,7 +38,7 @@ The constraint system is satisfied by $z$ if, for every row $i \in [m]$,
 where all products are in $\ring_p$.
 \end{definition}
 
-\paragraph{CRT decomposition.}
+\parhead{CRT decomposition}
 Since $p \equiv 1 \pmod{2n}$, the cyclotomic polynomial $\Phi_{2n}(X) = X^n + 1$ splits completely over $\field_p$, and the CRT isomorphism $\ring_p \cong \field_p^n$ maps each ring element to its $n$ evaluations at the primitive $2n$-th roots of unity.
 Every $n$-tuple of field elements corresponds to a valid ring element, so no CRT-consistency check is needed beyond the structural one already embedded in our sumcheck.
 
@@ -48,7 +48,7 @@ Under CRT, the ring constraint~\eqref{eq:ring-plonkish} decomposes into $n$ para
 \end{equation}
 Crucially, the wiring structure $(a, b, c)$ is \emph{CRT-independent}: the same indices select the same witness entries at every slot. Only the selectors and witness values vary across slots.
 
-\paragraph{MLE encoding.}
+\parhead{MLE encoding}
 We encode the witness in coefficient form as $\tilde{w} \in \field_p^{\multilin}[\bm{X}, \bm{\Lambda}]$ with $\bm{X} \in \{0,1\}^{s'}$ indexing witness entries and $\bm{\Lambda} \in \{0,1\}^\nu$ indexing coefficients:
 \[
     \tilde{w}(x, \lambda) = \coeff_\lambda(z_x), \qquad x \in \bits^{s'},\; \lambda \in \bits^\nu.
@@ -100,11 +100,11 @@ Ring-R1CS corresponds to $q = 2$, $S_0 = \{0,1\}$, $S_1 = \{2\}$, $c_0 = 1$, $c_
 
 We now present the main construction: a PIOP for Ring-Plonkish that combines the CRT decomposition of~\cref{sec:matrix-vector-piop} with the SpeedySpartan approach~\cite{twist-and-shout}. The key insight is that circuit wiring reduces to \emph{lookups into the witness table}, which the Shout protocol~\cite{twist-and-shout} handles at cost $O(m + n_w)$, independent of the number of CRT slots.
 
-\paragraph{Parameters.}
+\parhead{Parameters}
 Let $s = \log m$ (rows), $s' = \log n_w$ (witness entries), $\nu = \log n$ (CRT slots).
 Fix a one-hot decomposition parameter $d \geq 1$ such that $n_w^{1/d}$ is integral; the wiring index $a(i) \in [n_w]$ is encoded as a $d$-tuple $(a_1(i), \ldots, a_d(i))$ with each $a_h(i) \in [K]$ where $K = n_w^{1/d}$, via the mixed-radix decomposition $a(i) = \sum_{h=1}^d a_h(i) \cdot K^{h-1}$.
 
-\paragraph{Preprocessing.}
+\parhead{Preprocessing}
 An indexer commits to:
 \begin{enumerate}
     \item \emph{Address polynomials.} For each wire $W \in \{A, B, C\}$ and dimension $h \in [d]$, define the one-hot indicator
@@ -215,7 +215,7 @@ An indexer commits to:
 \subsubsection{Cost analysis}
 \label{sec:ring-ss-costs}
 
-\paragraph{Prover costs.}
+\parhead{Prover costs}
 The prover's computational cost decomposes as:
 
 \begin{enumerate}
@@ -241,10 +241,10 @@ Overall prover cost:
 \]
 The $mn$ term dominates when $n \gg d^2$, which is typical (e.g., $n = 64$, $d = 2$ gives $n/d^2 = 16$).
 
-\paragraph{Comparison with the matrix-vector approach.}
+\parhead{Comparison with the matrix-vector approach}
 A na\"ive extension of~\cref{prot:ringmul} to R1CS would encode the constraint matrices $L, R, O \in \ring_p^{m \times n_w}$ and run three matrix-vector sumchecks. Each Phase~1 costs $O(mn)$ (matching the Spartan sumcheck), but each Phase~2 column sumcheck costs $O(m \cdot n_w)$, giving total $O(mn + m \cdot n_w)$. For typical parameters where $n_w \approx m$ (witness size comparable to constraint count), this is $O(mn + m^2)$, whereas Ring-SpeedySpartan achieves $O(mn + d^2 m + m)$ --- saving a factor of $\approx m/d^2$ on the wiring cost.
 
-\paragraph{Proof size.}
+\parhead{Proof size}
 The Spartan sumcheck produces $3(s + \nu)$ field elements ($3$ per round for a degree-3 polynomial).
 Each Shout instance produces $O(d \cdot s + s')$ field elements.
 Including selector and witness openings:
@@ -252,7 +252,7 @@ Including selector and witness openings:
     \text{Proof size} = O\bigl(s + \nu + d \cdot s + s'\bigr) = O\bigl((d+1)\log m + \log n + \log n_w\bigr) \;\text{ field elements.}
 \]
 
-\paragraph{Verifier costs.}
+\parhead{Verifier costs}
 The verifier's work is dominated by:
 \begin{itemize}
     \item Checking the sumcheck messages: $O(s + \nu + d \cdot s + s')$ field operations.
@@ -261,7 +261,7 @@ The verifier's work is dominated by:
 \end{itemize}
 Total: $O(n + (d+1)\log m + \log n_w)$ field operations, plus PCS costs.
 
-\paragraph{Commitments.}
+\parhead{Commitments}
 \begin{itemize}
     \item \emph{Online (prover):} The witness oracle $\oracle{\tilde{w}}$ of size $n_w \cdot n$ field elements.
     \item \emph{Preprocessing (indexer):} Address oracles of total size $3d \cdot m \cdot n_w^{1/d}$, plus selector oracles of total size $5mn$.
@@ -299,7 +299,7 @@ The selector values at the sumcheck evaluation point are obtained either from in
 \subsubsection{Optimizations}
 \label{sec:ring-ss-optimizations}
 
-\paragraph{Degree reduction via intermediate commitments.}
+\parhead{Degree reduction via intermediate commitments}
 The degree-3 term $q_\mathsf{M} \cdot z_A \cdot z_B$ in the gate polynomial forces 4 field elements per sumcheck round (coefficients of a degree-3 univariate).
 An alternative is to have the prover commit to the intermediate product $h(i) := z_{a(i)} \cdot z_{b(i)} \in \ring_p$ and replace the gate polynomial with a degree-2 version:
 \[
@@ -308,13 +308,13 @@ An alternative is to have the prover commit to the intermediate product $h(i) :=
 along with a separate multiplicative consistency check $h_C(i,\lambda) = \tilde{z}_A(i,\lambda) \cdot \tilde{z}_B(i,\lambda)$.
 This trades an extra commitment of $mn$ field elements for reducing the per-round sumcheck cost from 4 to 3 field elements. Whether this is worthwhile depends on the relative cost of commitment vs.\ sumcheck in the instantiation.
 
-\paragraph{Batching the CRT transform.}
+\parhead{Batching the CRT transform}
 When the verifier needs CRT-domain selector values, the five selectors can be batched with a single random challenge $\xi$ and verified via one invocation of the Phase~2 CRT sumcheck from~\cref{prot:ringmul}, at cost $\nu$ additional proof elements.
 
-\paragraph{Public selectors.}
+\parhead{Public selectors}
 In typical applications, the selectors are part of the circuit description and thus public/indexed. The verifier can evaluate $\tilde{q}_\bullet(r, \gamma')$ directly from the indexed oracle, avoiding any additional sumcheck for selector consistency. This is the common case and is assumed in our cost analysis.
 
-\paragraph{Custom gates.}
+\parhead{Custom gates}
 The framework extends to higher-degree custom gates by increasing the degree of the gate polynomial $f$. A degree-$D$ gate polynomial increases the per-round sumcheck cost to $D+1$ field elements and the total prover cost for the Spartan sumcheck to $O(D \cdot mn)$. The Shout wiring cost is unaffected.
 
 
@@ -323,19 +323,19 @@ The framework extends to higher-degree custom gates by increasing the degree of 
 
 For the general Ring-CCS (\cref{def:ring-ccs}) with $t$ dense matrices, we adapt the Spartan++ protocol of~\cite[Section 5]{twist-and-shout}, which uses the Spark++ sparse polynomial commitment to handle matrix sparsity.
 
-\paragraph{Approach.}
+\parhead{Approach}
 The Ring-CCS constraint~\eqref{eq:ring-ccs} under CRT becomes, for each slot $\sigma$ and row $i$:
 \[
     \sum_{j=0}^{q-1} c_j \prod_{\ell \in S_j} \underbrace{\left(\sum_{x} M_\ell^{(\sigma)}(i, x) \cdot z_x^{(\sigma)}\right)}_{=:\, v_{\ell}^{(\sigma)}(i)} = 0.
 \]
 The Spartan approach batches this over rows and slots via eq-polynomials, producing a degree-$d$ sumcheck (where $d = \max_j |S_j|$). The matrix-vector products $v_\ell(i)$ are then checked via Spark++ sparse commitments.
 
-\paragraph{Spark++ for ring matrices.}
+\parhead{Spark++ for ring matrices}
 Each matrix $M_\ell \in \ring_p^{m \times n_w}$ has its CRT-slot matrices $M_\ell^{(\sigma)} \in \field_p^{m \times n_w}$. If $M_\ell$ has $T_\ell$ nonzero \emph{ring} entries, each slot matrix has at most $T_\ell$ nonzeros (with the same sparsity pattern). The Spark++ protocol commits to the nonzero entries and uses Shout to verify correct placement, at cost $O(d^2 T_\ell + T_\ell)$ per matrix per wire.
 
 However, the CRT dimension introduces a factor: the commitment to $M_\ell$'s nonzeros is of size $T_\ell \cdot n$ (each nonzero ring element has $n$ CRT components). The Spark++ inner sumcheck cost becomes $O(T_\ell \cdot n)$ for the CRT-batched version.
 
-\paragraph{Total cost.}
+\parhead{Total cost}
 Let $T = \sum_\ell T_\ell$ be the total nonzero ring entries across all matrices.
 \begin{itemize}
     \item Spartan sumcheck: $O(d \cdot mn)$ (degree $d$ over $s + \nu$ variables).
@@ -349,21 +349,21 @@ For sparse systems ($T \ll m \cdot n_w$), this is significantly better than the 
 \subsection{Discussion}
 \label{sec:ring-np-discussion}
 
-\paragraph{When to use which protocol.}
+\parhead{When to use which protocol}
 \begin{itemize}
     \item \emph{Ring-SpeedySpartan} (\cref{sec:ring-speedyspartan-protocol}): Best for Plonkish circuits with structured wiring. The Shout lookup cost is independent of CRT slots, giving prover cost $O(mn + d^2 m)$. This is the recommended default for most applications.
     \item \emph{Ring-Spartan++} (\cref{sec:ring-spartan-pp}): Needed for general CCS with dense constraint matrices. More expensive (factor of $n$ on the Spark++ cost) but handles arbitrary linear constraints.
     \item \emph{Ring matrix-vector PIOP} (\cref{prot:ringmul}): Optimal when the relation \emph{is} a matrix-vector product (e.g., MSIS verification, lattice decryption). No wiring overhead; the Phase~1 + Phase~2 structure is tailored to this case.
 \end{itemize}
 
-\paragraph{Compatibility with folding.}
+\parhead{Compatibility with folding}
 The Spartan sumcheck structure of Ring-SpeedySpartan is compatible with folding/accumulation schemes (e.g., Nova, NeutronNova~\cite{neutron-nova}). In particular, the relaxed Ring-CCS instance
 \[
     \sum_j c_j \cdot \bigcirc_{\ell \in S_j} (M_\ell z) = u \cdot \mathbf{e}
 \]
 (with slack variable $u \in \ring_p$ and error vector $\mathbf{e} \in \ring_p^m$) decomposes under CRT into $n$ parallel relaxed CCS instances, and the IVC folding step operates slot-by-slot. A full treatment of Ring-Nova is deferred to future work.
 
-\paragraph{Extension to non-fully-split cyclotomics.}
+\parhead{Extension to non-fully-split cyclotomics}
 When $p \not\equiv 1 \pmod{2n}$, the cyclotomic $\Phi_{2n}$ does not split completely over $\field_p$, and the CRT slots are extension-field elements in $\field_{p^f}$ for $f > 1$.
 In this setting, not every tuple of slot values corresponds to a valid ring element---the Galois group $\mathrm{Gal}(\field_{p^f}/\field_p)$ imposes conjugacy constraints between slots.
 The Ring-SpeedySpartan framework still applies, but the selector and witness polynomials must be lifted to $\field_{p^f}$, and an additional Galois-consistency check is required. We leave the details to future work.

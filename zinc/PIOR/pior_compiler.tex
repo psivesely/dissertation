@@ -1,13 +1,13 @@
-\subsection{Zinc$+$ Compiler}
+\subsection{Zinc+ Compiler}
 \label{sec:zincplus-ucs-pior}
 
 In this section, we present the Zinc$+$ PIOR, which together with a field-agnostic PIOP for $\ucsalg$ gives us a PIOP for $\ucs$. We then prove its completeness and round-by-round knowledge soundness. Below we sometimes write $\tilde{q}_0$ to mean $q_0$ for the sake of compactness.
 
-\paragraph{The well-defined condition in $\ucs$ as a $\QQ[X]$-constraint}
+\parhead{The well-defined condition in $\ucs$ as a $\QQ[X]$-constraint}
 \label{rem:zincplus_welldefinedness_in_qpart}
 Recall that $\ucs$ specifies a well-defined constraint, which states that one of the witness vectors, namely $\ff_0$, lies in the intersection of certain localization rings (\cref{def:ucs}, specifically~\cref{eq:ucs_welldefinedness}). As demonstrated in \cref{sss:well_defined_condition}, this condition can be written in the form of an algebraic constraint over $\QQ[X]$. When such a constraint is included in the index, we call it a \emph{well-formed} index, and only specify Zinc$+$ to work with well-formed $\ucs$ instances.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 \caption{Protocol $\Pi^{\mathsf{UCS}}=(\prover_\ucsm, \verifier_\ucsm)$: Zinc$+$ PIOR from $\ucs$ to $\wedge_{i \in [0,\numprimes]} \ucsalg(\tilde{q}_i)$}
 \label{prot:zincplus-ucs-pior}
 \begin{algorithm}[H]

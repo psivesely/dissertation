@@ -1,6 +1,6 @@
 \subsection{Lookup and permutation constraints as UCS constraints}\label{ss:ucs_lookup}
 
-In this section and in \cref{ss:ucs_r1cs}, we show how several common relations and constraints---namely lookups, permutations, R1CS, CCS, and AIR---can be written as UCS constraints. For clarity, we present these reductions in isolation; however, in practice one can combine multiple constraint types within a single UCS instance. See our UAIR$^+$ relation in \cref{s:uair} for an example.
+In this section and in \cref{ss:ucs_r1cs}, we show how several common relations and constraints---namely lookups, permutations, R1CS, CCS, and AIR---can be written as UCS constraints. For clarity, we present these reductions in isolation; however, in practice one can combine multiple constraint types within a single UCS instance.
 
 
 We begin with lookup relations.
@@ -100,7 +100,7 @@ The extension to this setting is straightforward: one replaces the selector poly
   P\Bigl(\sum_{i\in[\witlen]} \ZZZ_i \cdot \lagrange_{[\witlen],i}(\rowvar)\Bigr),
 \]
 and defines $Q'_{\mathsf{Look}}$ analogously.
-This generalization is needed in our definition of the relation UAIR$^+$ (\cref{def:uairplus}) and in some of our applications in \cref{s:examples}, notably in the SHA-256 arithmetization (\cref{ss:sha256_64_rounds}); see \cref{rem:uair_lookup_combinations} for further discussion.
+This generalization is needed in the definition of the relation UAIR$^+$ and in some applications, notably in the SHA-256 arithmetization.
 \end{remark}
 
 \begin{remark}[Well-definedness as a lookup constraint]
@@ -113,7 +113,7 @@ This is simply a lookup constraint: the table is $\tab\defeq\mainpolyring{\local
 A UCS index $\idx$ is \emph{well-formed} if it includes a $\QQ[X]$-constraint that enforces the well-definedness condition~\eqref{eq:ucs_welldefinedness}.
 \end{definition}
 
-In many applications, other lookup constraints placed on $\ff_0$ already subsume the well-definedness condition (see \cref{s:examples}), so it does not need to be explicitly included.
+In many applications, other lookup constraints placed on $\ff_0$ already subsume the well-definedness condition, so it does not need to be explicitly included.
 Note that while $\tab$ may be very large (or even infinite in the limit), in practice the table size is bounded by the constraint parameters.
 \end{remark}
 
@@ -154,7 +154,7 @@ Since the rings $\mainpolyring{\QQ}{\bitbound}{\degreebound}$ and $\FF_q^{<\degr
 
 All transformations below work in a \emph{strictly algebraic regime}: for every constraint we set $\primeideal_{i\constraintindex}=(0)$, so that a constraint $Q_{i\constraintindex}(\cdots)\in\primeideal_{i\constraintindex}$ reduces to the polynomial identity $Q_{i\constraintindex}(\cdots)=0$.
 
-\paragraph{R1CS.}
+\parhead{R1CS}
 Recall that the R1CS relation over a ring $R$ requires $(M_A\cdot\zz)\circ(M_B\cdot\zz)-(M_C\cdot\zz)=\mathbf{0}$, where $M_A,M_B,M_C\in R^{\numrows\times(\inplen+\witlen)}$ are constraint matrices and $\zz=(\yy||\ww)$ concatenates the public input and witness.
 The transformation to UCS proceeds as follows: first, use bivariate Lagrange interpolation to encode each matrix $M\in\{M_A,M_B,M_C\}$ as a polynomial $\hat M(\rowvar,Z)$; then define a linear selector $L_M(\rowvar;\inpvar,\ZZZ_1)$ that evaluates to the $\rowindex$-th entry of $M\cdot\zz$ when $\rowvar=\rowindex$; finally, set the UCS constraint polynomial to
 \[
@@ -166,8 +166,8 @@ For R1CS over $\mainpolyring{\QQ}{\bitbound}{\degreebound}$, the UCS index has $
 For R1CS over $\FF_q^{<\degreebound}[X]$, one instead uses an $\FF_q[X]$-constraint with a trivial $\QQ[X]$-part.
 The equivalence $(\idx_{\mathsf{R1CS}},\inp;\wit)\in\relronecs \Leftrightarrow (\idx_{\mathsf{UCS}},\inp;\wit')\in\ucs$ follows from the defining property of Lagrange interpolation; see~\cite[Section~4.4]{Zinc} for the full proof.
 
-\paragraph{CCS and AIR.}
+\parhead{CCS and AIR}
 CCS relations~\cite{ccs} admit an analogous transformation as R1CS relations. Further, 
 since AIR relations~\cite{ethstark} can be written as CCS relations~\cite{ccs}, they too can be instantiated as UCS instances.
-For an AIR-like instantiation tailored to the UCS framework, see~\cref{s:uair}.
+An AIR-like instantiation tailored to the UCS framework, called UAIR$^+$, is described in the Zinc paper~\cite{Zinc}.
 

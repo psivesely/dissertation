@@ -5,7 +5,7 @@ We prove RBR-KS compositionally using the claim-flow DAG in \cref{fig:ringmul-pi
 \begin{figure}[H]
 \centering
 % Requires: \usepackage{tikz} \; \usetikzlibrary{arrows.meta}
-\begin{tikzpicture}[
+\begin{tikzpicture}[scale=0.9, every node/.append style={transform shape},
   >=Latex,
   font=\small,
   box/.style={draw, rounded corners, align=center, inner sep=4pt, minimum width=24mm},
@@ -26,15 +26,15 @@ We prove RBR-KS compositionally using the claim-flow DAG in \cref{fig:ringmul-pi
   {$e_t=t_C(\alpha,\alpha')$};
 
 \draw[->] (paa) -- (psc1);
-\node[claim, fill=white, inner sep=1pt, text width=4.7cm] at (4.35,-2.15)
+\node[claim, fill=white, inner sep=1pt] at (4.35,-2.15)
   {$e_t=\sum_{(j,k)\in\bits^{\mu+\nu}} A_C(\alpha,j,k)\,s_C(j,k)\,\meq(k,\alpha')$};
 
 \draw[->] (psc1) -- (pxi);
-\node[claim, fill=white, inner sep=1pt, text width=4.0cm] at (3.95,-4.55)
+\node[claim, fill=white, inner sep=1pt] at (3.95,-4.55)
   {$\sigma' = A_C(\alpha,\beta,\gamma)\,s_C(\beta,\gamma)\,\meq(\gamma,\alpha')$};
 
 \draw[->] (pxi) -- (psc2)
-  node[pos=.50, right=7pt, claim, fill=white, inner sep=1pt, text width=5.35cm]
+  node[pos=.50, right=7pt, claim, fill=white, inner sep=1pt]
   {$e_A+\xi e_s+\xi^2 e_t = \sum_{\ell\in\bits^\nu}\!\Big[\tilde C(\gamma,\ell)\big(\tilde A(\alpha,\beta,\ell)+\xi\tilde s(\beta,\ell)\big)+\xi^2\tilde C(\alpha',\ell)\tilde t(\alpha,\ell)\Big]$};
 
 \draw[->] (psc2) -- (reval)
@@ -45,7 +45,7 @@ We prove RBR-KS compositionally using the claim-flow DAG in \cref{fig:ringmul-pi
 \label{fig:ringmul-pior-dag}
 \end{figure}
 
-\parhead{Round-by-round knowledge soundness.}
+\parhead{Round-by-round knowledge soundness}
 
 \begin{theorem}[RBR knowledge soundness of $\Pi_{\mathsf{RingMul}}$]
 \label{thm:rbr}

@@ -1,4 +1,4 @@
-\section{Zinc$+$ Compiler: from finite field PIOPs to PIOPs for UCS}
+\section{Zinc+ Compiler: from finite field PIOPs to PIOPs for UCS}
 \label{sec:zincplus-pior}
 
 In this section we present the Zinc$+$ compiler, which can be seen as a Polynomial Interactive Oracle Reduction (PIOR) from the UCS relation (\cref{def:ucs}) to a family of polynomial satisfiability relations over finite fields. In particular, given PIOPs for specific subclasses of finite-field relations (e.g., AIR-like constraints, R1CS, or CCS), one obtains a PIOP for the corresponding subclass of $\ucs$ via the PIOR. Before getting to the Zinc$+$ PIOR in \cref{sec:zincplus-ucs-pior} we introduce a slight generalization of polynomial oracles called (possibly) incomplete polynomial oracles in \cref{sec:incomplete-oracles}, introduce our techniques for batching ideal membership constraints and projecting the constraints onto finite fields in \cref{sec:zincplus-ideal-batching}, and introduce the strictly algebraic UCS relation we reduce to in~\cref{sec:zincplus-ucs-alg}.

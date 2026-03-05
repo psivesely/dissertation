@@ -1,5 +1,5 @@
 \section{Preliminaries}
-\label{sec:preliminaries}
+\label{sec:ml-preliminaries}
 
 \parhead{Notation}
 We write $[n]$ for the set $\{1,\dotsc,n\}$ and $\bits$ for $\{0,1\}$. We denote by $\lambda$ the security parameter, by $\negl(\lambda)$ a function negligible in $\lambda$, and by $\poly(\lambda)$ an unspecified polynomial in $\lambda$. For a finite set $S$, we write $x \sample S$ to denote sampling $x$ uniformly at random from $S$. We let $\field$ denote a finite field and $\extensionfield$ an extension field of $\field$. For a positive integer $q$, we write $\integers_q$ for the ring $\integers/q\integers$. 
@@ -205,11 +205,11 @@ The composition theorem of~\cite{BCFW25} shows that if $\Pi_1$ is a PIOR from $\
 \end{remark}
 
 \begin{remark}[Implied RBR and generalized special soundness]
-RBR knowledge soundness implies \emph{round-by-round soundness} (the weaker notion where only false statements start doomed, and no extractor is required) with the same errors~\cite[Remark~4.4]{BGTZ24}. It also implies $(k_1, \ldots, k_\mu)$-special soundness~\cite[Theorem~1.2]{BGTZ24}.
+RBR knowledge soundness implies \emph{round-by-round soundness} (the weaker notion where only false statements start doomed, and no extractor is required) with the same errors~\cite[Remark~4.4]{JC:BGTZ25}. It also implies $(k_1, \ldots, k_\mu)$-special soundness~\cite[Theorem~1.2]{JC:BGTZ25}.
 \end{remark}
 
 \begin{remark}[Compilation to non-interactive arguments]
-Any PIOR with RBR (knowledge) soundness can be compiled into a non-interactive argument via the Fiat-Shamir transformation~\cite{BCS16} that is adaptively (knowledge) sound in both the random oracle model~\cite{BCS16} and the quantum random oracle model~\cite{CMS19}.
+Any PIOR with RBR (knowledge) soundness can be compiled into a non-interactive argument via the Fiat-Shamir transformation~\cite{TCC:BenChiSpo16} that is adaptively (knowledge) sound in both the random oracle model~\cite{TCC:BenChiSpo16} and the quantum random oracle model~\cite{TCC:ChiManSpo19}.
 \end{remark}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -49,6 +49,13 @@
 \newc{\ZZ}{\mathbb{Z}}
 \DeclareSymbolFont{bbold}{U}{bbold}{m}{n}
 \DeclareSymbolFontAlphabet{\mathbbold}{bbold}
+% Force-load bbold font definition, then redeclare with size ranges
+% to fix "size <5.475> not available" warning
+\input{Ubbold.fd}
+\DeclareFontShape{U}{bbold}{m}{n}{
+  <-5.5>bbold5 <5.5-6.5>bbold6 <6.5-7.5>bbold7 <7.5-8.5>bbold8
+  <8.5-9.5>bbold9 <9.5-11>bbold10 <11-15>bbold12 <15->bbold17
+}{}
 \newc{\One}{\mathbbold{1}}
 
 \newc{\ba}{\bm a}

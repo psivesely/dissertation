@@ -116,7 +116,7 @@ After $\mu + \nu$ rounds with challenges $(\beta, \gamma) \randpick \extensionfi
 \[
     \sigma \;=\; A_C(\alpha, \beta, \alpha') \cdot \tilde{C}(\alpha', \gamma) \cdot \tilde{s}(\beta, \gamma)
 \]
-by querying $A_C(\alpha, \beta, \alpha')$ from the indexer oracle, evaluating $\tilde{C}(\alpha', \gamma)$ in $O(n)$ operations (\cref{lem:m-eval}), and querying $e'_s \gets \oracle{\tilde{s}(\beta, \gamma)}$. The output is a single evaluation claim $\tilde{s}(\beta, \gamma) = e'_s$ on the committed oracle. No $\meq$ kernel, evaluation claims $e_A$ or $e_s$, multiplication check, batching challenge, or second sumcheck is needed.
+by querying $A_C(\alpha, \beta, \alpha')$ from the indexer oracle, evaluating $\tilde{C}(\alpha', \gamma)$ using $O(n)$ operations (\cref{lem:m-eval}), and querying $e'_s \gets \oracle{\tilde{s}(\beta, \gamma)}$. The output is a single evaluation claim $\tilde{s}(\beta, \gamma) = e'_s$ on the committed oracle. No $\meq$ kernel, evaluation claims $e_A$ or $e_s$, multiplication check, batching challenge, or second sumcheck is needed.
 
 \begin{remark}[Analogy with R1CS second sumcheck]\label{rem:r1cs-analogy}
     The merged sumcheck~\eqref{eq:merged-sumcheck} is the cyclotomic-ring analogue of the ``memory-checking'' or ``oracle-evaluation'' sumcheck that appears in holographic proof systems for R1CS (e.g., Spartan~\cite{spartan}). In a Spartan-style R1CS proof, the witness is $z$ with committed oracle $\oracle{\tilde{z}}$, and the constraint matrices $M \in \{A, B, C\}$ are public with indexed oracles $\oracle{\tilde{M}}$. The first sumcheck verifies $0 = \sum_x \meq(\tau, x) \cdot [z_A(x) \cdot z_B(x) - z_C(x)]$ where $z_M(x) := \sum_y \tilde{M}(x, y) \cdot \tilde{z}(y)$ are virtual polynomials, producing challenges $r$ and claimed evaluations $e_A = z_A(r)$, $e_B = z_B(r)$, $e_C = z_C(r)$. The second sumcheck then verifies these claims via the batched sum
@@ -156,7 +156,7 @@ by querying $A_C(\alpha, \beta, \alpha')$ from the indexer oracle, evaluating $\
 
 % The key simplification relative to the general case is that the evaluation claim on $\tilde{t}$ is on a $\nu$-dimensional polynomial (no $\bm{I}$-block). For small $n$ (e.g., $n \leq 32$), it may be cheaper for the prover to send $t$ in the clear ($n$ field elements) rather than committing to $\tilde{t}$ and running the PCS; see \cref{sec:reducing-commitments}.
 
-% \paragraph{Holographic inner products.}
+% \parhead{Holographic inner products}
 % The holographic variant of \cref{sec:holographic-piop} applies to the inner product case with $\tau = 0$. When $A$ is public (the indexer supplies $\oracle{A_C} \in \extensionfield^{\multilin}[\bm{J}, \bm{K}]$) and $e_t$ is trusted or verifier-computable, the merged single-sumcheck~\eqref{eq:merged-sumcheck} takes the form
 % \[
 %     e_t \;=\; \sum_{(j,\, \ell) \in \bits^{\mu + \nu}} A_C(j, \alpha') \cdot \tilde{C}(\alpha', \ell) \cdot \tilde{s}(j, \ell),
@@ -170,23 +170,27 @@ by querying $A_C(\alpha, \beta, \alpha')$ from the indexer oracle, evaluating $\
 
 After sumchecks, the verifier holds evaluation claims on committed (prover) and indexed (preprocessed) oracles. Each oracle naively requires its own Merkle tree and PCS opening. We describe two standard PIOR optimizations---selector-polynomial merging and multi-point reduction---that consolidate these claims, and illustrate them with a concrete example. We then describe two ways to shorten the proofs of these consolidated claims: the ring-switch packing from~\cite{EC:DiaPos25}, and technique of sumcheck challenge sharing with interleaved Merkle paths from Basefold~\cite{basefold}.
 
-\paragraph{Running example: SpeedySpartan for Ring Arithmetic.}
+\parhead{Running example: SpeedySpartan for Ring Arithmetic}
 \label{sec:speedyspartan}
-Consider a SpeedySpartan-style protocol~\cite{speedyspartan} proving arithmetic circuit satisfiability over $\ring_p$. The indexed (preprocessed) oracles are three wiring matrices $\tilde{W}_a, \tilde{W}_b, \tilde{W}_c \in \extensionfield^{\multilin}[\bm{X}, \bm{J}, \bm{L}]$ of dimension $m + \mu + \nu$, and a gate-type selector $\tilde{q}_M \in \extensionfield^{\multilin}[\bm{X}]$ of dimension $m$. The witness oracle $\oracle{\tilde{s}} \in \extensionfield^{\multilin}[\bm{J}, \bm{L}]$ of dimension $\mu + \nu$ is committed by the prover. After an outer (constraint) sumcheck and an inner (memory-checking) sumcheck with challenges $r \in \extensionfield^m$ and $(\beta, \gamma) \in \extensionfield^{\mu + \nu}$---where the inner sumcheck uses the CRT-inlining of \cref{sec:holographic-piop}---the verifier holds five evaluation claims:
+Consider a SpeedySpartan-style protocol~\cite{EPRINT:SetTha25} proving arithmetic circuit satisfiability over $\ring_p$. The indexed (preprocessed) oracles are three wiring matrices $\tilde{W}_a, \tilde{W}_b, \tilde{W}_c \in \extensionfield^{\multilin}[\bm{X}, \bm{J}, \bm{L}]$ of dimension $m + \mu + \nu$, and a gate-type selector $\tilde{q}_M \in \extensionfield^{\multilin}[\bm{X}]$ of dimension $m$. The witness oracle $\oracle{\tilde{s}} \in \extensionfield^{\multilin}[\bm{J}, \bm{L}]$ of dimension $\mu + \nu$ is committed by the prover. After an outer (constraint) sumcheck and an inner (memory-checking) sumcheck with challenges $r \in \extensionfield^m$ and $(\beta, \gamma) \in \extensionfield^{\mu + \nu}$---where the inner sumcheck uses the CRT-inlining of \cref{sec:holographic-piop}---the verifier holds five evaluation claims:
 \begin{alignat*}{2}
     &\tilde{W}_w(r, \beta, \gamma) = e'_w \;\text{ for } w \in \{a,b,c\}, \qquad &&\tilde{q}_M(r) = e'_q, \\
     &\tilde{s}(\beta, \gamma) = e'_s. &&
 \end{alignat*}
 The first four oracles are output by the indexer, while $\tilde{s}$ is prover-committed.
 
-\paragraph{SelectorMerge.}
-The indexer merges the four indexed oracles into a single oracle $h \in \extensionfield^{\multilin}[B_1, B_2, \bm{X}, \bm{J}, \bm{L}]$ of dimension $2 + m + \mu + \nu$ using two selector bits: $h(0,0,\cdot) = \tilde{W}_a$, $h(0,1,\cdot) = \tilde{W}_b$, $h(1,0,\cdot) = \tilde{W}_c$, and $h(1,1,x,j,\ell) = \tilde{q}_{M,\mathrm{pad}}(x)$, padded to be constant in $(\bm{J}, \bm{L})$. Setting the padded coordinates of $\tilde{q}_M$'s evaluation point to $(\beta, \gamma)$ aligns all four claims to a common data point $(r, \beta, \gamma)$, with evaluation points differing only in the two selector bits:
+\parhead{SelectorMerge}
+The indexer merges the four indexed oracles into a single oracle~$h$, of dimension $2 + m + \mu + \nu$, in the multilinear polynomial space $\extensionfield^{\multilin}[B_1, B_2, \bm{X}, \bm{J}, \bm{L}]$, using two selector bits:
+\[
+h(0,0,\cdot) = \tilde{W}_a,\quad h(0,1,\cdot) = \tilde{W}_b,\quad h(1,0,\cdot) = \tilde{W}_c,\quad h(1,1,x,j,\ell) = \tilde{q}_{M,\mathrm{pad}}(x),
+\]
+where the last entry is padded to be constant in $(\bm{J}, \bm{L})$. Setting the padded coordinates of $\tilde{q}_M$'s evaluation point to $(\beta, \gamma)$ aligns all four claims to a common data point $(r, \beta, \gamma)$, with evaluation points differing only in the two selector bits:
 \begin{alignat*}{2}
     &h(0, 0, r, \beta, \gamma) = e'_a, \quad &&h(0, 1, r, \beta, \gamma) = e'_b, \\
     &h(1, 0, r, \beta, \gamma) = e'_c, \quad &&h(1, 1, r, \beta, \gamma) = e'_q.
 \end{alignat*}
 
-\paragraph{MultiPoint.}
+\parhead{MultiPoint}
 The multi-point-to-single-point PIOR~\cite{BCHO22} reduces multiple evaluation claims on one polynomial to a single claim. Given $\ell$ claims $f(z_1) = v_1, \ldots, f(z_\ell) = v_\ell$, the key observation is that whenever the claims cover the full Boolean hypercube $\bits^c$ of a set of $c$ shared coordinates---with all other coordinates identical---the multilinear extension in those $c$ variables is completely determined by the $2^c$ known values, and no prover messages are needed. 
 
 In our setting, $c = 2$ and the four claims cover all of $\bits^2$. The verifier computes
@@ -197,7 +201,7 @@ samples $(r_1, r_2) \randpick \extensionfield^2$, and reduces to the single clai
 
 At this point, the $5$ evaluation claims on $5$ oracles have been consolidated into $2$ claims: $h(z_h) = v_h$ (indexed, dimension $2 + m + \mu + \nu$) and $\tilde{s}(\beta, \gamma) = e'_s$ (committed, dimension $\mu + \nu$).
 
-\paragraph{Ring-switch packing.}
+\parhead{Ring-switch packing}
 Each of the two evaluation claims are fed independently into the ring-switch packing PIOR of~\cite{EC:DiaPos25}, which exploits the tower $\field_p \subset \field_{p^2} \subset \cdots \subset \extensionfield$ (with $s = \log_2[\extensionfield:\field_p]$) to produce a claim on a packed polynomial of dimension $R - s$, where $R$ is the original dimension. The reduction is an $s$-round degree-$1$ sumcheck with round-$i$ challenges in $\field_{p^{2^i}}$; the prover sends $s$ field elements per polynomial. Applied to our two claims, packing produces $\hat{h}$ of dimension $R_h - s$ (where $R_h = 2 + m + \mu + \nu$) and $\hat{s}$ of dimension $R_s - s$ (where $R_s = \mu + \nu$). We use the tower construction for odd primes given in \cref{sec:odd-prime-tower}.
 
 \parhead{Interleaved BaseFold opening}
